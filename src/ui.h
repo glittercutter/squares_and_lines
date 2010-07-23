@@ -51,6 +51,7 @@ struct Text {
 	char score[ STRING_LENGTH ];
 	char player[ STRING_LENGTH ];
 	char win[ STRING_LENGTH ];
+	char no_win[ STRING_LENGTH ];
 
 };
 Text text;

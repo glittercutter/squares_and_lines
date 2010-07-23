@@ -212,7 +212,7 @@ int ed_init()
 }
 
 
-#define RAND 1000
+#define RAND 200
 
 void ed_gen_random()
 {

@@ -43,6 +43,7 @@ int g_init();
 // variable
 int player_turn;
 int score[2];
+int winning_player;
 int squares_remaining;
 int g_min_x, g_max_x;
 int g_min_y, g_max_y;

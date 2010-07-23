@@ -9,4 +9,5 @@ random = random
 score = score
 player = player
 win = win
+no_win = tied
 

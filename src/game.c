@@ -43,7 +43,17 @@ void g_change_state()
 void g_end()
 {
 	char string[ STRING_LENGTH ];
-	snprintf(string, STRING_LENGTH - 1, "%s %d %s !", text.player, player_turn, text.win);
+
+	if (score[0] == score[1]) {
+		snprintf(string, STRING_LENGTH - 1, "%s !", text.no_win);
+		winning_player = 0;
+	} else {
+		if (score[0] > score[1]) {
+			winning_player = 1;
+		} else winning_player = 2;
+		snprintf(string, STRING_LENGTH - 1, "%s %d %s !", text.player, 
+				winning_player, text.win);
+	}
 	ui_new_message(string);
 }
 
@@ -143,7 +153,7 @@ void g_add_segment()
 	}
 
 	g_check_complete_square(&squares[pos_y][pos_x]);
-	// check neighbour suqares
+	// check neighbour sqares
 	if (pos_y != 0) g_check_complete_square(&squares[pos_y - 1][pos_x]);
 	if (pos_x != ed_grid_w) g_check_complete_square(&squares[pos_y][pos_x + 1]);
 	if (pos_x != ed_grid_h) g_check_complete_square(&squares[pos_y + 1][pos_x]);
@@ -152,8 +162,16 @@ void g_add_segment()
 	input.mouse_button_left = FALSE;
 	
 	// game ended
-	if (!squares_remaining) return;
-	
+	if (!squares_remaining) {
+		if (player_turn == 0) return; // no winner
+		// move current player moving square to winning player
+		if (player_turn != winning_player) {
+			player_turn = winning_player;
+			fx_new_transition(NULL, 5, FX_PLAYER_CHANGE);
+		}
+		return;
+	}
+
 	if (player_turn == PLAYER_0) {
 		player_turn = PLAYER_1;
 	} else {
@@ -259,6 +277,8 @@ int g_init()
 {
 	player_turn = PLAYER_0;	
 	
+	score[0] = 0; score[1] = 0;
+
 	squares_remaining = 0;
 	
 	if (g_init_tile()) return 1;

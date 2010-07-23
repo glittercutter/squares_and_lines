@@ -109,7 +109,7 @@ static const char* lang_random_str[]			= {"random", NULL};
 static const char* lang_score_str[]				= {"score", NULL};
 static const char* lang_player_str[]			= {"player", NULL};
 static const char* lang_win_str[]				= {"win", NULL};
-
+static const char* lang_no_win_str[]			= {"no_win", NULL};
 
 static struct Var_info lang_info[] = {
 	
@@ -125,6 +125,7 @@ static struct Var_info lang_info[] = {
 	{	lang_score_str,				&text.score,				STRING_T		},
 	{	lang_player_str,			&text.player,				STRING_T		},
 	{	lang_win_str,				&text.win,					STRING_T		},
+	{	lang_no_win_str,			&text.no_win,				STRING_T		},
 
 };
 
