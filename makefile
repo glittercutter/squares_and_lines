@@ -1,5 +1,5 @@
-O_DIR = ./o
-SRC_DIR = ./src
+OBJDIR = ./o
+SRCDIR = ./src
 
 EXEBASE = c_square 
 EXE = $(EXEBASE)
@@ -23,7 +23,10 @@ CC = gcc -MD
 DO_CC=$(CC) $(CFLAGS) -o $@ -c $<
 
 # top-level rules
-all : $(EXE)
+all : create_dir $(EXE)
+
+create_dir :
+	@test -d $(OBJDIR) || mkdir $(OBJDIR)
 
 #############################################################################
 # FILES
@@ -31,38 +34,37 @@ all : $(EXE)
 
 #############################################################################
 GAME_OBJ = \
-	$(O_DIR)/editor.o \
-	$(O_DIR)/draw.o \
-	$(O_DIR)/fx.o \
-	$(O_DIR)/game.o \
-	$(O_DIR)/input.o \
-	$(O_DIR)/init.o \
-	$(O_DIR)/main.o \
-	$(O_DIR)/menu.o \
-	$(O_DIR)/parse.o \
-	$(O_DIR)/ui.o \
+	$(OBJDIR)/editor.o \
+	$(OBJDIR)/draw.o \
+	$(OBJDIR)/fx.o \
+	$(OBJDIR)/game.o \
+	$(OBJDIR)/input.o \
+	$(OBJDIR)/init.o \
+	$(OBJDIR)/main.o \
+	$(OBJDIR)/menu.o \
+	$(OBJDIR)/parse.o \
+	$(OBJDIR)/ui.o \
 
-$(O_DIR)/editor.o : $(SRC_DIR)/editor.c; $(DO_CC)
-$(O_DIR)/draw.o : $(SRC_DIR)/draw.c; $(DO_CC)
-$(O_DIR)/fx.o : $(SRC_DIR)/fx.c; $(DO_CC)
-$(O_DIR)/game.o : $(SRC_DIR)/game.c; $(DO_CC)
-$(O_DIR)/input.o : $(SRC_DIR)/input.c; $(DO_CC)
-$(O_DIR)/init.o : $(SRC_DIR)/init.c; $(DO_CC)
-$(O_DIR)/main.o : $(SRC_DIR)/main.c; $(DO_CC)
-$(O_DIR)/menu.o : $(SRC_DIR)/menu.c; $(DO_CC)
-$(O_DIR)/parse.o : $(SRC_DIR)/parse.c; $(DO_CC)
-$(O_DIR)/ui.o : $(SRC_DIR)/ui.c; $(DO_CC)
+$(OBJDIR)/editor.o : $(SRCDIR)/editor.c; $(DO_CC)
+$(OBJDIR)/draw.o : $(SRCDIR)/draw.c; $(DO_CC)
+$(OBJDIR)/fx.o : $(SRCDIR)/fx.c; $(DO_CC)
+$(OBJDIR)/game.o : $(SRCDIR)/game.c; $(DO_CC)
+$(OBJDIR)/input.o : $(SRCDIR)/input.c; $(DO_CC)
+$(OBJDIR)/init.o : $(SRCDIR)/init.c; $(DO_CC)
+$(OBJDIR)/main.o : $(SRCDIR)/main.c; $(DO_CC)
+$(OBJDIR)/menu.o : $(SRCDIR)/menu.c; $(DO_CC)
+$(OBJDIR)/parse.o : $(SRCDIR)/parse.c; $(DO_CC)
+$(OBJDIR)/ui.o : $(SRCDIR)/ui.c; $(DO_CC)
 
 
 #############################################################################
 
 OBJ = $(GAME_OBJ)
 
-# linking
 $(EXE) : $(OBJ)
 	$(CC) $(OBJ) -o $(EXE) $(LFLAGS)
 	$(DEBUG_INFO)
 
 clean:
-	rm $(O_DIR)*.o
+	rm $(OBJDIR)*.o
 # DO NOT DELETE
