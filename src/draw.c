@@ -445,12 +445,18 @@ void sdl_draw_button(Button *button)
 		if (button == ui_pressed_button) {
 			sdl_draw_surface(button->surface, 0, 0, button->w, button->h, screen,
 					button->x1, button->y1, 255);
-			boxRGBA(screen, button->x1, button->y1, button->x2, button->y2, DARK_GREY, 100);
+			boxRGBA(screen, button->x1, button->y1, button->x2, button->y2, 
+					color.button_highlight.r, 
+					color.button_highlight.g, 
+					color.button_highlight.b, 100);
 
 		} else if (button == ui_highlight_button) {
 			sdl_draw_surface(button->surface, 0, 0, button->w, button->h, screen,
 					button->x1, button->y1, 255);
-			boxRGBA(screen, button->x1, button->y1, button->x2, button->y2, MED_DARK_GREY, 100);
+			boxRGBA(screen, button->x1, button->y1, button->x2, button->y2,
+					color.button_highlight.r, 
+					color.button_highlight.g, 
+					color.button_highlight.b, 100);
 
 		} else {
 			sdl_draw_surface(button->surface, 0, 0, button->w, button->h, screen,
@@ -465,7 +471,7 @@ void sdl_draw_button(Button *button)
 static void sdl_draw_topbar()
 {
 	int ui_bar_height = button_font.size + UI_BAR_PADDING;
-	sdl_draw_box(0, 0, display_width, ui_bar_height, MED_DARK_GREY);
+	sdl_draw_box2(0, 0, display_width, ui_bar_height, color.topbar);
 }
 
 

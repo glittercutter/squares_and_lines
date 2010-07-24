@@ -66,6 +66,7 @@ static const char* color_ed_outline_str[]		= {"color_ed_outline", "200, 200, 200
 static const char* color_ed_grid_str[]			= {"color_ed_grid", "90, 101, 115"};
 static const char* color_text_str[]				= {"color_text", "200, 200, 200"};
 static const char* color_topbar_str[]			= {"color_topbar", "90, 101, 115"};
+static const char* color_button_highlight_str[]	= {"color_button_highlight", "33, 40, 41"};
 
 
 static struct Var_info global_config_info[] = {
@@ -89,6 +90,7 @@ static struct Var_info global_config_info[] = {
 	{	color_ed_grid_str,			&color.ed_grid,						COLOR_T		},
 	{	color_text_str,				&color.text,						COLOR_T		},
 	{	color_topbar_str,			&color.topbar,						COLOR_T		},
+	{	color_button_highlight_str,	&color.button_highlight,			COLOR_T		},
 
 
 };

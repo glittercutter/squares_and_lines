@@ -57,7 +57,8 @@ Button* ui_new_button(int x, int y, int w, int h, int min_w, int max_w, int alig
 	
 	// surface
 	button->surface = sdl_create_surface(nor_w, h);
-	boxRGBA(button->surface, 0, 0, nor_w, h, MED_DARK_GREY, alfa);
+	boxRGBA(button->surface, 0, 0, nor_w, h, color.topbar.r, 
+			color.topbar.g, color.topbar.b, alfa);
 
 	// text
 	switch (align) {

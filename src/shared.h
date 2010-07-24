@@ -35,20 +35,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define TRUE 1
 #define FALSE 0
 
-#define WINDOW_TITLE "paper_to_screen"
+#define WINDOW_TITLE "crucially square"
 
 #define MAX_FPS 40 //milliseconds
 #define LIMIT_FPS 1
-
-#define WHITE 255, 255, 255
-#define BLACK 0, 0, 0
-#define LIGHT_GREY 160, 160, 180
-#define GREY 90, 101, 115
-#define MED_DARK_GREY 33, 40, 41
-#define DARK_GREY 16, 19, 20
-#define RED 200, 20, 20
-#define PINK 197, 117, 247
-#define GREEN 74, 210, 107
 
 #define CONFIG_FILENAME "game.conf"
 
@@ -99,6 +89,7 @@ struct Color {
 	ColorRGB ed_grid;
 	ColorRGB text;
 	ColorRGB topbar;
+	ColorRGB button_highlight;
 };
 Color color;
 
@@ -127,8 +118,6 @@ struct Square {
 };
 
 Square **squares;
-Square **game_squares;
-#define DEFAULT_SQUARE_SIZE 20
 
 // variables
 SDL_Surface *screen;

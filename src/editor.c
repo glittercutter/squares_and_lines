@@ -143,7 +143,7 @@ void ed_set_square_pos()
 	}
 }
 
-
+#define DEFAULT_SQUARE_SIZE 20
 int ed_init()
 {
 	// playable area
