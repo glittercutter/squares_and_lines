@@ -216,7 +216,7 @@ static void sdl_draw_game_info()
 
 	sprintf(string, "%s 2 : %d", text.player, score[1]);
 	offset -= button_font.w * (strlen(string));
-	sdl_draw_text_solid2(offset, 0, string, button_font.data, tmp_color);
+	sdl_draw_text_solid2(offset, -1, string, button_font.data, tmp_color);
 	player[1].score_text_pos_x = offset;
 
 	if (player_turn == PLAYER_0) {
@@ -231,13 +231,13 @@ static void sdl_draw_game_info()
 
 	sprintf(string, "%s 1 : %d", text.player, score[0]);
 	offset -= button_font.w * (strlen(string)) + TEXT_MARGIN + TEXT_MARGIN;
-	sdl_draw_text_solid2(offset, 0, string, button_font.data, tmp_color);
+	sdl_draw_text_solid2(offset, -1, string, button_font.data, tmp_color);
 	player[0].score_text_pos_x = offset;
 
 
 	sprintf(string, "%s -", text.score);
 	offset -= button_font.w * (strlen(string)) + TEXT_MARGIN + TEXT_MARGIN;
-	sdl_draw_text_solid2(offset, 0, string, button_font.data, color.text);
+	sdl_draw_text_solid2(offset, -1, string, button_font.data, color.text);
 }
 
 

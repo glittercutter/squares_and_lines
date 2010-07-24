@@ -45,7 +45,7 @@ void m_open_option()
 {
 	char string[ LONG_STRING_LENGTH ];
 	snprintf(string, LONG_STRING_LENGTH - 1, 
-			"edit out the file %s with a text editor !", CONFIG_FILENAME);
+			"open the file %s with a text editor !", CONFIG_FILENAME);
 	ui_new_message(string);
 }
 
@@ -65,23 +65,29 @@ void m_init_ui()
 {	
 	// topbar
 	// ================================================================
-	int min_w = 40;
-	int max_w = 100;
+	int min_w = 30;
+	int max_w = 180;
 	int w;
 	int h = button_font.size + UI_BAR_PADDING;
 	int x, y;
+
+	// button position are based upon the previously created button
 	Button *last_button;
 
 	DEBUG(printf("topbar button\n"));
 
-	x = 0; y = 0;
-	w = strlen(text.main_menu) * button_font.w + UI_BAR_PADDING;
+	x = UI_BAR_PADDING; y = 0;
+	w = strlen(text.main_menu) * button_font.w;
 	last_button = ui_new_button(x, y, w, h, min_w, max_w, ALIGN_CENTER, text.main_menu,
 			*m_open_main, &button_topbar);
 
 	// main
 	// ================================================================
-	min_w = 110;
+	
+	// find the longest button string	
+	min_w = longest_string(text.new_game, text.option, text.quit, NULL) * 
+			button_font.w + (UI_BAR_PADDING * 4);
+
 	x = 0; y = last_button->y2;
 	w = strlen(text.new_game) * button_font.w + UI_BAR_PADDING;
 	last_button = ui_new_button(x, y, w, h, min_w, max_w, ALIGN_LEFT, text.new_game,
@@ -96,11 +102,8 @@ void m_init_ui()
 	w = strlen(text.quit) * button_font.w + UI_BAR_PADDING;
 	last_button = ui_new_button(x, y, w, h, min_w, max_w, ALIGN_LEFT, text.quit,
 			*m_button_quit, &button_dropmenu_main);
-
-	// language
-	// ================================================================
-	/* TODO check how many (valid?)file are in the ./lang dir, create button in loop */
-
+	
+	// TODO actual option window
 }
 
 

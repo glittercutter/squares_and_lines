@@ -87,13 +87,13 @@ void ed_do_editor()
 
 void ed_init_ui()
 {	
-	int min_w = 70;
+	int min_w = 40;
 	int max_w = 140;
 	int w;
 	int h = button_font.size + UI_BAR_PADDING;
 	int x, y;
 
-	// align properly with last button
+	// align properly with last topbar button
 	Button *last_button = button_topbar;
 	if (!last_button) return;
 	while (last_button->next) {
@@ -101,11 +101,11 @@ void ed_init_ui()
 	}	
 
 	x = last_button->x2; y = 0;
-	w = strlen(text.play) * button_font.w + UI_BAR_PADDING;
+	w = strlen(text.play) * button_font.w;
 	last_button = ui_new_button(x, y, w, h, min_w, max_w, ALIGN_CENTER, text.play,
 			*ed_button_play, &button_editor);
 	x = last_button->x2; y = 0;
-	w = strlen(text.random) * button_font.w + UI_BAR_PADDING;
+	w = strlen(text.random) * button_font.w;
 	last_button = ui_new_button(x, y, w, h, min_w, max_w, ALIGN_CENTER, text.random,
 			*ed_gen_random, &button_editor);
 }

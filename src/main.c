@@ -167,3 +167,34 @@ int ipow(int base, int exp)
 }
 
 
+/* 
+====================
+longest_string
+
+last argument must be a null pointer
+====================
+*/
+int longest_string(char *str1, ...)
+{
+	va_list ap;
+	char *tmp_str;
+	int longest = 0;
+	int len = 0;;
+
+	va_start(ap, str1);
+	
+	tmp_str = str1;
+	
+	while(tmp_str != NULL) {
+		len = strlen(tmp_str);
+		if (len > longest) longest = len;
+		printf("string: %s\n", tmp_str);
+		tmp_str = va_arg(ap, char*);
+	}
+
+	va_end(ap);
+
+	return longest;
+}
+
+

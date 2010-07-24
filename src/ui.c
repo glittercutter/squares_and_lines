@@ -35,12 +35,16 @@ Button* ui_new_button(int x, int y, int w, int h, int min_w, int max_w, int alig
 	int alfa = 255;
 	int text_x = 0;
 	int nor_w;
+	
+	DEBUG(printf("button: %s\n", text));
 
 	if (w > max_w) {
 		nor_w = max_w;
 	} else if (w < min_w) {
 		nor_w = min_w;
 	} else nor_w = w;
+
+	nor_w += (UI_BAR_PADDING * 2);
 
 	Button *button;
 	button = malloc(sizeof(Button));
@@ -63,7 +67,7 @@ Button* ui_new_button(int x, int y, int w, int h, int min_w, int max_w, int alig
 	// text
 	switch (align) {
 		case ALIGN_LEFT:
-			text_x = UI_BAR_PADDING;
+			text_x = (UI_BAR_PADDING * 2);
 		break;
 
 		case ALIGN_CENTER:
@@ -71,9 +75,10 @@ Button* ui_new_button(int x, int y, int w, int h, int min_w, int max_w, int alig
 		break;
 
 		case ALIGN_RIGHT:
-			text_x = (nor_w - w) - UI_BAR_PADDING;
+			text_x = (nor_w - w) - (UI_BAR_PADDING * 2);
 		break;
 	}
+
 	sdl_draw_text_blended2(button->surface, text_x, -1, text, button_font.data, 
 			color.text);
 	
@@ -179,7 +184,7 @@ void ui_display_message()
 	// TODO find the right position, center text...
 	switch (gamestate) {
 		case GAME:
-			pos_x = 200;
+			pos_x = 100;
 		break;
 
 		case EDITOR:
@@ -187,7 +192,7 @@ void ui_display_message()
 		break;
 	}
 
-	sdl_draw_text_solid2(pos_x, 0, ui_message.text, button_font.data, color.text);
+	sdl_draw_text_solid2(pos_x, -1, ui_message.text, button_font.data, color.text);
 	--ui_message.time; 
 	if (!ui_message.time) ui_message.active = FALSE;
 }
