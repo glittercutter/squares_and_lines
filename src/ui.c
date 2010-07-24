@@ -36,8 +36,6 @@ Button* ui_new_button(int x, int y, int w, int h, int min_w, int max_w, int alig
 	int text_x = 0;
 	int nor_w;
 	
-	DEBUG(printf("button: %s\n", text));
-
 	if (w > max_w) {
 		nor_w = max_w;
 	} else if (w < min_w) {
@@ -86,8 +84,6 @@ Button* ui_new_button(int x, int y, int w, int h, int min_w, int max_w, int alig
 	if (!*node2) {
 		// first node
 		*node2 = button;
-		DEBUG(printf("adding first node, adress: %p\n", (void*)*node));
-		DEBUG(printf("button no.0\n"));
 		return *node2;
 	}
 
@@ -95,12 +91,8 @@ Button* ui_new_button(int x, int y, int w, int h, int min_w, int max_w, int alig
 		DEBUG(++i);
 		node2 = &(*node2)->next;
 	}
-	DEBUG(printf("adding node after, adress: %p\n", (void*)*node));
-	// append in list
+	// append to list
 	*node2 = button;
-
-	DEBUG(printf("new node, adress: %p\n", (void*)(*node)->next));
-	DEBUG(printf("button no.%d\n", i));
 
 	return *node2;
 }

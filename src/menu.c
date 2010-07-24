@@ -74,8 +74,6 @@ void m_init_ui()
 	// button position are based upon the previously created button
 	Button *last_button;
 
-	DEBUG(printf("topbar button\n"));
-
 	x = UI_BAR_PADDING; y = 0;
 	w = strlen(text.main_menu) * button_font.w;
 	last_button = ui_new_button(x, y, w, h, min_w, max_w, ALIGN_CENTER, text.main_menu,
@@ -84,7 +82,7 @@ void m_init_ui()
 	// main
 	// ================================================================
 	
-	// find the longest button string	
+	// find the longest string for the dropmenu buttons
 	min_w = longest_string(text.new_game, text.option, text.quit, NULL) * 
 			button_font.w + (UI_BAR_PADDING * 4);
 
@@ -103,7 +101,7 @@ void m_init_ui()
 	last_button = ui_new_button(x, y, w, h, min_w, max_w, ALIGN_LEFT, text.quit,
 			*m_button_quit, &button_dropmenu_main);
 	
-	// TODO actual option window
+	// TODO actual option window ;)
 }
 
 
@@ -117,8 +115,12 @@ void m_ui()
 		}
 	}
 	if (input.mouse_button_left) {
-		ui_button_check_click(&button_topbar);
+		// check if the mouse is on the topbar before checking buttons
+		if (input.mouse_y <= button_topbar->y2) {
+			ui_button_check_click(&button_topbar);
+		}
 		if (active_dropmenu) {
+			// active_dropmenu is a pointer to button type
 			ui_button_check_click(&active_dropmenu);
 		}
 	}		

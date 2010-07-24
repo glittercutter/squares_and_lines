@@ -28,6 +28,14 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "ui.h"
 
 
+
+/* 
+====================
+sdl_cleanup
+
+Called by SDL at the end of the program.
+====================
+*/
 void 
 sdl_cleanup()
 {

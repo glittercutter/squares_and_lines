@@ -188,7 +188,6 @@ int longest_string(char *str1, ...)
 	while(tmp_str != NULL) {
 		len = strlen(tmp_str);
 		if (len > longest) longest = len;
-		printf("string: %s\n", tmp_str);
 		tmp_str = va_arg(ap, char*);
 	}
 

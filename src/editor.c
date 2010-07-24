@@ -76,8 +76,11 @@ void ed_change_state()
 void ed_do_editor()
 {
 	if (input.mouse_button_left) {
-		if (ui_button_check_click(&button_editor)) return;
-		// TODO hashing
+		// check if the mouse is on the topbar before checking button
+		if (input.mouse_y <= button_topbar->y2) {
+			if (ui_button_check_click(&button_editor)) return;
+		}
+		// TODO hashing ?
 		ed_add_square();
 	}
 	if (input.mouse_button_right) {

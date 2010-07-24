@@ -130,7 +130,6 @@ void parse_read(struct Var_info* var_info, int tab_length, char* filename)
 		*/
 		if (sscanf(readed_line, "%s = %d, %d, %d", readed_var_name, 
 				&r, &g, &b) == 4) {
-			DEBUG(printf("reading color\n"));
 			for (int i = 0; i < tab_length; i++) {
 				if (strncmp(readed_var_name, var_info[i].str[ VAR_NAME_POS ],
 						strlen(readed_var_name)) == 0) {
@@ -184,7 +183,6 @@ void parse_read(struct Var_info* var_info, int tab_length, char* filename)
 		check for "string = string" formatting (spaces are allowed)
 		*/
 		} else if (sscanf(readed_line, "%s = %[^\n]s", readed_var_name, string_value) == 2) {
-			DEBUG(printf("reading string: %s\n", readed_line));
 			for (int i = 0; i < tab_length; i++) {
 				if (strncmp(readed_var_name, var_info[i].str[ VAR_NAME_POS ],
 						strlen(readed_var_name)) == 0) {

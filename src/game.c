@@ -31,6 +31,13 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "ui.h"
 
 
+/* 
+====================
+g_change_state
+
+Start a new game
+====================
+*/
 void g_change_state()
 {
 	gamestate = GAME;
@@ -39,7 +46,13 @@ void g_change_state()
 	if (g_init()) ed_change_state();
 }
 
+/* 
+====================
+g_end
 
+Create end game winner message
+====================
+*/
 void g_end()
 {
 	char string[ STRING_LENGTH ];
@@ -208,7 +221,14 @@ void g_init_ui()
 }
 
 
-int g_init_tile()
+/* 
+====================
+g_init_square
+
+Set square size and position for the new game
+====================
+*/
+int g_init_square()
 {	
 	int tmp_size;
 	int w = display_width - 1;
@@ -270,7 +290,7 @@ int g_init_tile()
 ====================
 g_init
 
-called before every game
+Called before every game
 ====================
 */
 int g_init()
@@ -281,7 +301,7 @@ int g_init()
 
 	squares_remaining = 0;
 	
-	if (g_init_tile()) return 1;
+	if (g_init_square()) return 1;
 
 	for (int i = 0; i < ed_grid_h; i++) {
 		for (int j = 0; j < ed_grid_w; j++) {

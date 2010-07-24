@@ -1,13 +1,13 @@
 edit = edit
 play = Play
-quit = -  quit
-main_menu = | menu |
+quit = -  Quit
+main_menu = | Menu |
 lang_menu = -  language
-option = -  option
-new_game = -  new game
+option = -  Option
+new_game = -  New game
 random = Random
 score = score
 player = player
 win = win
-no_win = tied
+no_win = Draw
 
