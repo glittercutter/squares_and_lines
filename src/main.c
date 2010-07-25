@@ -44,7 +44,6 @@ int main(int argc, char **argv)
 	while (gamestate != QUIT) {
 
 		get_input();
-		get_input();
 
 		m_do_menu();
 		fx_main();
@@ -58,9 +57,6 @@ int main(int argc, char **argv)
 				ed_do_editor();
 			break;
 		}
-		
-		get_input();
-		get_input();
 		
 		// TODO frame skip
 		switch (gamestate) {
