@@ -31,6 +31,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 void ed_clear_squares();
 void ed_gen_random();
+void ed_clear_squares();
+void ed_set_square_pos();
 
 
 void ed_add_square()
@@ -69,7 +71,8 @@ void ed_change_state()
 {
 	gamestate = EDITOR;
 	active_dropmenu = NULL;
-	ed_init();
+	ed_clear_squares();
+	ed_set_square_pos();
 }
 
 
