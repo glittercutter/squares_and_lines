@@ -197,7 +197,7 @@ void g_add_segment()
 
 void g_do_game()
 {
-	if (input.mouse_button_left) {
+	if (input.mouse_button_left || input.mouse_button_right) {
 		if (ui_button_check_click(&button_game)) return;
 		g_add_segment();
 	}
