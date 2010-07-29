@@ -100,16 +100,19 @@ void g_add_segment()
 			(squares[pos_y][pos_x].y2 - squares[pos_y][pos_x].y1) / 2;
 
 	int current_dist;
-	int shortest_dist;
+	int shortest_dist = g_square_size * 2; // higher then max distance
 	int closest_segment;
 	
 	if (!squares[pos_y][pos_x].active) return;
 	
 	// top
-	shortest_dist = sqrt(ipow(input.mouse_y - squares[pos_y][pos_x].y1, 2) + 
+
+	current_dist = sqrt(ipow(input.mouse_y - squares[pos_y][pos_x].y1, 2) + 
 			ipow(input.mouse_x - center_x, 2));
-	
-	closest_segment = UP;
+	if (current_dist < shortest_dist) {
+		shortest_dist = current_dist;
+		losest_segment = UP;
+	}
 	
 	// right
 	current_dist = sqrt(ipow(input.mouse_y - center_y, 2) + 
