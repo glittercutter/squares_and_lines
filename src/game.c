@@ -100,7 +100,7 @@ void g_add_segment()
 			(squares[pos_y][pos_x].y2 - squares[pos_y][pos_x].y1) / 2;
 
 	int current_dist;
-	int shortest_dist = g_square_size * 2; // higher then max distance
+	int shortest_dist = g_square_size * 2; // (set to max distance)
 	int closest_segment;
 	
 	if (!squares[pos_y][pos_x].active) return;
@@ -111,7 +111,7 @@ void g_add_segment()
 			ipow(input.mouse_x - center_x, 2));
 	if (current_dist < shortest_dist) {
 		shortest_dist = current_dist;
-		losest_segment = UP;
+		closest_segment = UP;
 	}
 	
 	// right
@@ -169,14 +169,15 @@ void g_add_segment()
 	}
 
 	g_check_complete_square(&squares[pos_y][pos_x]);
-	// check neighbour sqares
+	// check neighbour squares
 	if (pos_y != 0) g_check_complete_square(&squares[pos_y - 1][pos_x]);
 	if (pos_x != ed_grid_w) g_check_complete_square(&squares[pos_y][pos_x + 1]);
-	if (pos_x != ed_grid_h) g_check_complete_square(&squares[pos_y + 1][pos_x]);
+	if (pos_y != ed_grid_h) g_check_complete_square(&squares[pos_y + 1][pos_x]);
 	if (pos_x != 0) g_check_complete_square(&squares[pos_y][pos_x - 1]);
 
 	input.mouse_button_left = FALSE;
-	
+	input.mouse_button_right = FALSE;
+
 	// game ended
 	if (!squares_remaining) {
 		if (player_turn == 0) return; // no winner
@@ -238,7 +239,7 @@ int g_init_square()
 	int h = display_height - button_topbar->h - 1;
 
 	g_min_x = ed_grid_w;
-	g_max_x = 0;;
+	g_max_x = 0;
 	g_min_y = ed_grid_h;
 	g_max_y = 0;
 
@@ -262,7 +263,6 @@ int g_init_square()
 	g_max_x += 1;
 	g_max_y += 1;
 
-
 	// find new square size
 	tmp_size = w / (g_max_x - g_min_x);
 	g_square_size = h / (g_max_y - g_min_y);
@@ -270,6 +270,16 @@ int g_init_square()
 
 	g_offset_x = (display_width - ((g_max_x - g_min_x) * g_square_size)) / 2 ;
 	g_offset_y = button_topbar->h + (h - ((g_max_y - g_min_y) * g_square_size)) / 2;
+
+	// clear position of all tile
+	for (int i = 0; i < ed_grid_h; i++) {
+		for (int j = 0; j < ed_grid_w; j++) {
+			squares[i][j].x1 = 0;
+			squares[i][j].x2 = 0;
+			squares[i][j].y1 = 0;
+			squares[i][j].y2 = 0;
+		}
+	}
 
 	int x = g_offset_x;
 	int y = g_offset_y;

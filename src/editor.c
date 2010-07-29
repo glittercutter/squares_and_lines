@@ -122,6 +122,7 @@ void ed_clear_squares()
 	for (int i = 0; i < ed_grid_h; i++) {
 		for (int j = 0; j < ed_grid_w; j++) {
 			squares[i][j].active = FALSE;
+			squares[i][j].owner = FALSE;
 			squares[i][j].owner_up = FALSE;
 			squares[i][j].owner_right = FALSE;
 			squares[i][j].owner_down = FALSE;
