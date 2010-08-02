@@ -17,28 +17,36 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 ===========================================================================
 */
-// draw.h -
+// client.h -
 
-#ifndef __DRAW_H__
-#define __DRAW_H__
+#ifndef __CLIENT_H_
+#define __CLIENT_H_
 
 #include "shared.h"
 
 
-void sdl_draw_button();
-SDL_Surface* sdl_create_surface(int, int);
-void sdl_render();
-void sdl_draw_text_solid(int, int, char*, TTF_Font*, int, int, int);
-void sdl_draw_text_solid2(int, int, char*, TTF_Font*, ColorRGB);
-void sdl_draw_text_blended(SDL_Surface*, int, int, char*, TTF_Font*, int, int, int);
-void sdl_draw_text_blended2(SDL_Surface*, int, int, char*, TTF_Font*, ColorRGB);
-void sdl_draw_line3(SDL_Surface*, int, int, int, int, ColorRGB);
-void sdl_draw_box2(int, int, int, int, ColorRGB);
-void sdl_draw_rect2(SDL_Surface*, int, int, int, int, ColorRGB);
-void sdl_draw_editor();
-void sdl_draw_game();
-void sdl_draw_main_fx();
-void sdl_draw_menu();
+#define PACKET_SEND_RATE 2
+
+
+// variable
+char *cl_host;
+IPaddress cl_ip;	/* Server address */
+TCPsocket cl_sd;	/* Socket descriptor */
+int cl_len;
+char cl_buffer[512];
+
+IPaddress sv_ip, *sv_remoteIP;
+TCPsocket sv_sd, sv_csd;	/* Socket descriptor, client socket descriptor */
+char sv_buffer[512];
+
+int serverstate;
+int stop_server_flag;
+
+pthread_t server_thread;
+
+
+// function
+int lanclient_search_host(void);
 
 
 #endif

@@ -93,7 +93,7 @@ void ed_do_editor()
 
 void ed_init_ui()
 {	
-	int min_w = 40;
+	int min_w = 47;
 	int max_w = 140;
 	int w;
 	int h = button_font.size + UI_BAR_PADDING;

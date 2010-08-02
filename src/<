@@ -34,7 +34,8 @@ enum {
 };
 
 
-typedef struct Text {
+typedef struct Text Text;
+struct Text {
 	char play[ STRING_LENGTH ];
 	char random[ STRING_LENGTH ];
 
@@ -52,18 +53,19 @@ typedef struct Text {
 	char win[ STRING_LENGTH ];
 	char no_win[ STRING_LENGTH ];
 
-} Text;
+};
 Text text;
 
 
-typedef struct Button {
+typedef struct Button Button;
+struct Button {
 	SDL_Surface *surface;
 	int selected;
 	int x1, y1, x2, y2, w, h;
 	int textOffsetX, textOffsetY;
 	void (*func)();
 	struct Button *next;
-} Button;
+};
 
 
 typedef struct Font {
@@ -73,32 +75,19 @@ typedef struct Font {
 	char name[ STRING_LENGTH ];
 } Font;
 
-typedef struct Message {
+typedef struct Message Message;
+struct Message {
 	int active;
 	int time;
 	char text[ LONG_STRING_LENGTH ];
-	int x1, y1, x2, y2;
-} Message;
+};
 Message ui_message;
 
-typedef struct window_s {
-	int x1, y1, x2, y2, w, h;
-// 	widget_t *widget;
-	struct window_s *last_window;
-	Button *close_button;
-	Button *button;
-} window_s;
-
-
 // function
-void ui_display_window(void);
-void ui_display_message(void);
+void ui_display_message();
 void ui_new_message(char*);
 void ui_button_function();
 int ui_button_check_click(Button **);
-void ui_button_close_window();
-void ui_button_drag_window();
-
 Button* ui_new_button(int, int, int, int, int, int, int, char*, void func(), Button **);
 Button* ui_button_check_pos(Button **);
 
@@ -118,8 +107,5 @@ Button *button_dropmenu_main;
 Button *button_dropmenu_multiplayer;
 Button *active_dropmenu;
 Button *active_dropmenu_parent;
-
-window_s host_window;
-window_s *active_window;
 
 #endif

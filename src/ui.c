@@ -69,7 +69,7 @@ Button* ui_new_button(int x, int y, int w, int h, int min_w, int max_w, int alig
 		break;
 
 		case ALIGN_CENTER:
-			text_x = ((nor_w - w) / 2);
+			text_x = ((nor_w - w) / 2 + (UI_BAR_PADDING / 2));
 		break;
 
 		case ALIGN_RIGHT:
@@ -79,6 +79,9 @@ Button* ui_new_button(int x, int y, int w, int h, int min_w, int max_w, int alig
 
 	sdl_draw_text_blended2(button->surface, text_x, -1, text, button_font.data, 
 			color.text);
+	sdl_draw_rect2(button->surface, 0, 0, button->w - 1, button->h - 1, color.button_highlight);
+	sdl_draw_line3(button->surface, 1, 0, button->w - 2, 0, color.ed_outline);
+	sdl_draw_line3(button->surface, 0, 0, 0, button->h, color.ed_outline);
 	
 	// adding to button list
 	if (!*node2) {
@@ -158,12 +161,33 @@ void ui_button_function()
 	ui_pressed_button = NULL;
 }
 
+
+void ui_button_close_window()
+{
+	active_window = active_window->last_window;
+}
+
+
+void ui_button_drag_window()
+{
+	
+}
+
+
 #define MESSAGE_TIME 50
 void ui_new_message(char* text)
 {
+	int w;
 	ui_message.active = TRUE;
 	ui_message.time = MESSAGE_TIME;
 	strncpy(ui_message.text, text, LONG_STRING_LENGTH - 1);
+	
+	w = strlen(ui_message.text) * button_font.w + (UI_BAR_PADDING * 2);
+
+	ui_message.x1 = (display_width - w) / 2;
+	ui_message.y1 = (display_height - button_topbar->y2) / 2 + button_topbar->y2;
+	ui_message.x2 = ui_message.x1 + w;
+	ui_message.y2 = ui_message.y1 + button_font.h;
 }
 
 
@@ -171,22 +195,30 @@ void ui_display_message()
 {
 	if (!ui_message.active) return;
 
-	int pos_x = 0;
-
-	// TODO find the right position, center text...
-	switch (gamestate) {
-		case GAME:
-			pos_x = 100;
-		break;
-
-		case EDITOR:
-			pos_x = 250;
-		break;
-	}
-
-	sdl_draw_text_solid2(pos_x, -1, ui_message.text, button_font.data, color.text);
-	--ui_message.time; 
+	sdl_draw_box2(ui_message.x1, ui_message.y1, ui_message.x2, ui_message.y2, color.topbar);
+	sdl_draw_rect2(screen, ui_message.x1, ui_message.y1, ui_message.x2, ui_message.y2, color.button_highlight);
+	sdl_draw_text_solid2(ui_message.x1 + UI_BAR_PADDING, ui_message.y1, ui_message.text, button_font.data, color.text);
+	--ui_message.time;
 	if (!ui_message.time) ui_message.active = FALSE;
 }
+
+
+void ui_display_window()
+{
+	if (!active_window) return;
+	sdl_draw_box2(active_window->x1, active_window->y1, active_window->x2, active_window->y2,
+				color.topbar);
+	// button
+	if (active_window->button) {
+		if (input.mouse_button_left) {
+			if (!ui_button_check_click(&active_window->close_button)) {
+				ui_button_check_click(&active_window->button);
+			}
+		}
+		sdl_draw_button(active_window->button);
+		sdl_draw_button(active_window->close_button);
+	}
+}
+
 
 

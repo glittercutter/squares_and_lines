@@ -4,8 +4,8 @@ SRCDIR = ./src
 EXEBASE = c_square 
 EXE = $(EXEBASE)
 
-CFLAGS = -Wall -pedantic -Werror -std=c99
-LFLAGS = `sdl-config --cflags --libs` -lSDL -lSDL_gfx -lSDL_ttf
+CFLAGS = -Wall -pedantic -Werror -std=c99 -pipe
+LFLAGS = -pipe `sdl-config --cflags --libs` -lSDL -lSDL_gfx -lSDL_ttf -lSDL_net -lpthread
 
 # used to display message
 DEBUG_INFO =
@@ -19,7 +19,7 @@ else
 	DEBUG_INFO += @echo " - Define 'NDEBUG=1' in argument for release build"
 endif
 
-CC = gcc -MD
+CC = gcc
 DO_CC=$(CC) $(CFLAGS) -o $@ -c $<
 
 # top-level rules
@@ -34,6 +34,7 @@ create_dir :
 
 #############################################################################
 GAME_OBJ = \
+	$(OBJDIR)/client.o \
 	$(OBJDIR)/editor.o \
 	$(OBJDIR)/draw.o \
 	$(OBJDIR)/fx.o \
@@ -43,9 +44,11 @@ GAME_OBJ = \
 	$(OBJDIR)/main.o \
 	$(OBJDIR)/menu.o \
 	$(OBJDIR)/parse.o \
+	$(OBJDIR)/server.o \
 	$(OBJDIR)/ui.o \
 
 $(OBJDIR)/editor.o : $(SRCDIR)/editor.c; $(DO_CC)
+$(OBJDIR)/client.o : $(SRCDIR)/client.c; $(DO_CC)
 $(OBJDIR)/draw.o : $(SRCDIR)/draw.c; $(DO_CC)
 $(OBJDIR)/fx.o : $(SRCDIR)/fx.c; $(DO_CC)
 $(OBJDIR)/game.o : $(SRCDIR)/game.c; $(DO_CC)
@@ -54,6 +57,7 @@ $(OBJDIR)/init.o : $(SRCDIR)/init.c; $(DO_CC)
 $(OBJDIR)/main.o : $(SRCDIR)/main.c; $(DO_CC)
 $(OBJDIR)/menu.o : $(SRCDIR)/menu.c; $(DO_CC)
 $(OBJDIR)/parse.o : $(SRCDIR)/parse.c; $(DO_CC)
+$(OBJDIR)/server.o : $(SRCDIR)/server.c; $(DO_CC)
 $(OBJDIR)/ui.o : $(SRCDIR)/ui.c; $(DO_CC)
 
 

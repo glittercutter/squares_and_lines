@@ -136,6 +136,11 @@ void sdl_draw_line2(int x1, int y1, int x2, int y2, ColorRGB color)
 	int a = 255;
 	lineRGBA(screen, x1, y1, x2, y2, color.r, color.g, color.b, a);
 }
+void sdl_draw_line3(SDL_Surface *surface, int x1, int y1, int x2, int y2, ColorRGB color)
+{
+	int a = 200;
+	lineRGBA(surface, x1, y1, x2, y2, color.r, color.g, color.b, a);
+}
 void sdl_draw_glow_line(int x1, int y1, int x2, int y2, ColorRGB color, int level)
 {
 	lineRGBA(screen, x1, y1, x2, y2, color.r, color.g, color.b, level);
@@ -146,6 +151,12 @@ void sdl_draw_rect(int x1, int y1, int x2, int y2, int r, int g, int b)
 	int a = 255;
 	rectangleRGBA(screen, x1, y1, x2, y2, r, g, b, a);
 }
+void sdl_draw_rect2(SDL_Surface *surface, int x1, int y1, int x2, int y2, ColorRGB color)
+{
+	int a = 255;
+	rectangleRGBA(surface, x1, y1, x2, y2, color.r, color.g, color.b, a);
+}
+
 void sdl_draw_filled_circle(int x, int y, int radius, int r, int g, int b)
 {
 	int a = 255;
@@ -472,6 +483,7 @@ static void sdl_draw_topbar()
 {
 	int ui_bar_height = button_font.size + UI_BAR_PADDING;
 	sdl_draw_box2(0, 0, display_width, ui_bar_height, color.topbar);
+	sdl_draw_line2(0, ui_bar_height, display_width, ui_bar_height, color.button_highlight);
 }
 
 

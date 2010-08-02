@@ -47,17 +47,19 @@ int main(int argc, char **argv)
 
 		m_do_menu();
 		fx_main();
-
-		switch (gamestate) {
-			case GAME:
-				g_do_game();
-			break;
-			
-			case EDITOR:
-				ed_do_editor();
-			break;
-		}
 		
+		if (!active_window) {
+			switch (gamestate) {
+				case GAME:
+					g_do_game();
+				break;
+				
+				case EDITOR:
+					ed_do_editor();
+				break;
+			}
+		}
+
 		// TODO frame skip
 		switch (gamestate) {
 			case GAME:
@@ -70,6 +72,7 @@ int main(int argc, char **argv)
 		}	
 		
 		ui_display_message();
+		ui_display_window();
 		sdl_draw_menu();
 		sdl_draw_main_fx();
 

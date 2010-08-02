@@ -1,10 +1,11 @@
-edit = edit
 play = Play
 quit = -  Quit
-main_menu = | Menu |
-lang_menu = -  language
+main_menu = Game
 option = -  Option
 new_game = -  New game
+multiplayer = multiplayer
+host_game = host game
+join_game = join game
 random = Random
 score = score
 player = player

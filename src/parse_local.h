@@ -101,12 +101,15 @@ static struct Var_info global_config_info[] = {
 // =========================================================================
 //
 static const char* lang_play_str[]				= {"play", NULL};
-static const char* lang_edit_str[]				= {"edit", NULL};
 static const char* lang_quit_str[]				= {"quit", NULL};
 static const char* lang_main_menu_str[]			= {"main_menu", NULL};
-static const char* lang_lang_menu_str[]			= {"lang_menu", NULL};
 static const char* lang_option_str[]			= {"option", NULL};
 static const char* lang_new_game_str[]			= {"new_game", NULL};
+
+static const char* lang_multiplayer_str[]		= {"multiplayer", NULL};
+static const char* lang_host_game_str[]			= {"host_game", NULL};
+static const char* lang_join_game_str[]			= {"join_game", NULL};
+
 static const char* lang_random_str[]			= {"random", NULL};
 static const char* lang_score_str[]				= {"score", NULL};
 static const char* lang_player_str[]			= {"player", NULL};
@@ -117,12 +120,15 @@ static struct Var_info lang_info[] = {
 	
 	//	NAME						VAR (ptr)					TYPE
 	{	lang_play_str,				&text.play,					STRING_T		},
-	{	lang_edit_str,				&text.edit,					STRING_T		},
 	{	lang_quit_str,				&text.quit,					STRING_T		},
 	{	lang_main_menu_str,			&text.main_menu,			STRING_T		},
-	{	lang_lang_menu_str,			&text.lang_menu,			STRING_T		},
 	{	lang_option_str,			&text.option,				STRING_T		},
 	{	lang_new_game_str,			&text.new_game,				STRING_T		},
+	
+	{	lang_multiplayer_str,		&text.multiplayer,			STRING_T		},
+	{	lang_host_game_str,			&text.host_game,			STRING_T		},
+	{	lang_join_game_str,			&text.join_game,			STRING_T		},
+	
 	{	lang_random_str,			&text.random,				STRING_T		},
 	{	lang_score_str,				&text.score,				STRING_T		},
 	{	lang_player_str,			&text.player,				STRING_T		},

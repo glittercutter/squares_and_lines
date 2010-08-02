@@ -25,6 +25,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "editor.h"
 #include "game.h"
 #include "menu.h"
+#include "server.h"
 #include "ui.h"
 
 
@@ -93,6 +94,7 @@ void ui_init()
 	m_init_ui(); // other ui are based on this one
 	ed_init_ui();
 	g_init_ui();
+	sv_init_ui();
 }
 
 
@@ -116,6 +118,13 @@ int init()
 
 	sdl_load_font(&button_font);
 
+	/* Initialize SDL_net */
+	if (SDLNet_Init() < 0)
+	{
+		fprintf(stderr, "SDLNet_Init: %s\n", SDLNet_GetError());
+		exit(EXIT_FAILURE);
+	}
+	
 	ui_init();
 	ed_init();
 

@@ -27,14 +27,20 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <stdarg.h>
 #include <string.h>
 #include <math.h>
+#include <pthread.h>
 #include <unistd.h>
 
 #include <SDL/SDL.h>
 #include <SDL/SDL_gfxPrimitives.h>
 #include <SDL/SDL_ttf.h>
+#include <SDL/SDL_net.h>
+
 
 #define TRUE 1
 #define FALSE 0
+#define RUNNING 1
+#define STOPPED 0
+
 
 #define WINDOW_TITLE "crucially square"
 

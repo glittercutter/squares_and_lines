@@ -21,15 +21,17 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "menu.h"
 
+#include "client.h"
 #include "editor.h"
 #include "draw.h"
 #include "fx.h"
 #include "main.h"
 #include "input.h"
+#include "server.h"
 #include "ui.h"
 
 
-
+// game
 void m_open_main()
 {
 	active_dropmenu = button_dropmenu_main;
@@ -49,7 +51,6 @@ void m_open_option()
 	ui_new_message(string);
 }
 
-
 void m_button_new_game()
 {
 	fx_new_transition(*ed_change_state, 3, FX_FADE);
@@ -60,12 +61,30 @@ void m_button_quit()
 	fx_new_transition(*change_state_quit, 3, FX_FADE);
 }
 
+// multiplayer
+void m_open_multiplayer()
+{
+	active_dropmenu = button_dropmenu_multiplayer;
+	active_dropmenu_parent = button_topbar;
+}
+
+void m_button_host_game()
+{
+	lanhost_start_host();
+}
+
+void m_button_join_game()
+{
+	lanclient_search_host();
+}
+
+
 
 void m_init_ui()
 {	
 	// topbar
 	// ================================================================
-	int min_w = 30;
+	int min_w = 47;
 	int max_w = 180;
 	int w;
 	int h = button_font.size + UI_BAR_PADDING;
@@ -73,35 +92,66 @@ void m_init_ui()
 
 	// button position are based upon the previously created button
 	Button *last_button;
+	Button *topbar;
 
-	x = UI_BAR_PADDING; y = 0;
-	w = strlen(text.main_menu) * button_font.w;
-	last_button = ui_new_button(x, y, w, h, min_w, max_w, ALIGN_CENTER, text.main_menu,
-			*m_open_main, &button_topbar);
-
-	// main
+	// game
 	// ================================================================
+
+	x = 0; y = 0;
+	w = strlen(text.main_menu) * button_font.w;
+	last_button = ui_new_button(x, y, w, h, min_w, max_w, ALIGN_CENTER,
+			text.main_menu, *m_open_main, &button_topbar);
+	topbar = last_button;
 	
+	// dropmenu
+
 	// find the longest string for the dropmenu buttons
 	min_w = longest_string(text.new_game, text.option, text.quit, NULL) * 
 			button_font.w + (UI_BAR_PADDING * 4);
 
 	x = 0; y = last_button->y2;
 	w = strlen(text.new_game) * button_font.w + UI_BAR_PADDING;
-	last_button = ui_new_button(x, y, w, h, min_w, max_w, ALIGN_LEFT, text.new_game,
-			*m_button_new_game, &button_dropmenu_main);
+	last_button = ui_new_button(x, y, w, h, min_w, max_w, ALIGN_LEFT,
+			text.new_game, *m_button_new_game, &button_dropmenu_main);
 
 	x = last_button->x1; y = last_button->y2;
 	w = strlen(text.option) * button_font.w + UI_BAR_PADDING;
-	last_button = ui_new_button(x, y, w, h, min_w, max_w, ALIGN_LEFT, text.option,
-			*m_open_option, &button_dropmenu_main);
+	last_button = ui_new_button(x, y, w, h, min_w, max_w, ALIGN_LEFT, 
+			text.option, *m_open_option, &button_dropmenu_main);
 	
 	x = last_button->x1; y = last_button->y2;
 	w = strlen(text.quit) * button_font.w + UI_BAR_PADDING;
-	last_button = ui_new_button(x, y, w, h, min_w, max_w, ALIGN_LEFT, text.quit,
-			*m_button_quit, &button_dropmenu_main);
+	last_button = ui_new_button(x, y, w, h, min_w, max_w, ALIGN_LEFT, 
+			text.quit, *m_button_quit, &button_dropmenu_main);
 	
 	// TODO actual option window ;)
+
+	// multiplayer
+	// ================================================================
+	min_w = 47;
+	x = topbar->x2; y = topbar->y1;
+	w = strlen(text.multiplayer) * button_font.w;
+	last_button = ui_new_button(x, y, w, h, min_w, max_w, ALIGN_CENTER,
+			text.multiplayer, *m_open_multiplayer, &button_topbar);
+	topbar = last_button;
+	
+	// dropmenu
+
+	// find the longest string for the dropmenu buttons
+	min_w = longest_string(text.host_game, text.join_game, NULL) * 
+			button_font.w + (UI_BAR_PADDING * 4);
+
+	x = last_button->x1; y = last_button->y2;
+	w = strlen(text.host_game) * button_font.w + UI_BAR_PADDING;
+	last_button = ui_new_button(x, y, w, h, min_w, max_w, ALIGN_LEFT,
+			text.host_game, *m_button_host_game, &button_dropmenu_multiplayer);
+
+	x = last_button->x1; y = last_button->y2;
+	w = strlen(text.join_game) * button_font.w + UI_BAR_PADDING;
+	last_button = ui_new_button(x, y, w, h, min_w, max_w, ALIGN_LEFT,
+			text.join_game, *m_button_join_game, &button_dropmenu_multiplayer);
+
+
 }
 
 
