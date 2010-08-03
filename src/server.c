@@ -171,8 +171,16 @@ void sv_init_ui()
 	x = host_window.x2 - w - (UI_BAR_PADDING * 2); y = host_window.y1;
 	ui_new_button(x, y, w, h, min_w, max_w, ALIGN_CENTER,
 			"x", *sv_button_close_window, &host_window.close_button);
-
 	
+	x = host_window.x1 + (UI_BAR_PADDING * 2);
+	y = host_window.y1 + (h * 2);
+
+	ui_new_widget_list_box(host_window.x1 + (UI_BAR_PADDING * 2), 
+			host_window.y1 + (h * 2), host_window.x2 - (UI_BAR_PADDING * 2), 
+			host_window.y2 - (UI_BAR_PADDING * 2), &peer_list, 
+			&host_window.widget);
+
+
 
 }
 

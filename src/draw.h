@@ -23,6 +23,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define __DRAW_H__
 
 #include "shared.h"
+#include "ui.h"
 
 
 void sdl_draw_button();
@@ -39,6 +40,7 @@ void sdl_draw_editor();
 void sdl_draw_game();
 void sdl_draw_main_fx();
 void sdl_draw_menu();
+void sdl_draw_widget(widget_t*);
 
 
 #endif

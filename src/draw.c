@@ -477,6 +477,31 @@ void sdl_draw_button(Button *button)
 	}
 }
 
+
+void sdl_draw_widget_list_box(widget_list_box_t *list_box)
+{
+	sdl_draw_box2(list_box->x1, list_box->y1, list_box->x2 - SCROLLBAR_SIZE, 
+			list_box->y2, color.button_highlight);
+
+	
+}
+
+void sdl_draw_widget(widget_t *widget_node)
+{
+	if (widget_node == NULL) {
+// 		DEBUG(printf("no button !\n"));
+		return;
+	}
+	
+	while (widget_node != NULL) {
+		if (widget_node->type == LIST_BOX) {
+			sdl_draw_widget_list_box(widget_node->widget.list_box);
+		}
+		widget_node = widget_node->next;
+	}
+}
+
+
 // ================================
 // UI
 static void sdl_draw_topbar()

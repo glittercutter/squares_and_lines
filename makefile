@@ -1,6 +1,9 @@
 OBJDIR = ./o
 SRCDIR = ./src
 
+# Automatic dependency
+DEPS := $(wildcard $(OBJDIR)/*.d)
+
 EXEBASE = c_square 
 EXE = $(EXEBASE)
 
@@ -20,7 +23,8 @@ else
 endif
 
 CC = gcc
-DO_CC=$(CC) $(CFLAGS) -o $@ -c $<
+DO_CC=$(CC) -MD $(CFLAGS) -o $@ -c $<
+# -MD flag generate dependency
 
 # top-level rules
 all : create_dir $(EXE)
@@ -64,6 +68,9 @@ $(OBJDIR)/ui.o : $(SRCDIR)/ui.c; $(DO_CC)
 #############################################################################
 
 OBJ = $(GAME_OBJ)
+
+# Automatic dependency
+-include $(DEPS)
 
 $(EXE) : $(OBJ)
 	$(CC) $(OBJ) -o $(EXE) $(LFLAGS)

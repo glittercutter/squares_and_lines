@@ -71,8 +71,8 @@ int main(int argc, char **argv)
 			break;
 		}	
 		
-		ui_display_message();
 		ui_display_window();
+		ui_display_message();
 		sdl_draw_menu();
 		sdl_draw_main_fx();
 

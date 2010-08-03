@@ -25,6 +25,15 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "input.h"
 
 
+/* 
+====================
+ui_new_button
+
+Allocate memory, create surface, set position.
+Button is added at the tail of the familly node.
+Return a pointer to the created button.
+====================
+*/
 Button* ui_new_button(int x, int y, int w, int h, int min_w, int max_w, int align,
 			char *text, void func(), Button **node)
 {
@@ -79,6 +88,8 @@ Button* ui_new_button(int x, int y, int w, int h, int min_w, int max_w, int alig
 
 	sdl_draw_text_blended2(button->surface, text_x, -1, text, button_font.data, 
 			color.text);
+	
+	// 3d effect
 	sdl_draw_rect2(button->surface, 0, 0, button->w - 1, button->h - 1, color.button_highlight);
 	sdl_draw_line3(button->surface, 1, 0, button->w - 2, 0, color.ed_outline);
 	sdl_draw_line3(button->surface, 0, 0, 0, button->h, color.ed_outline);
@@ -208,6 +219,11 @@ void ui_display_window()
 	if (!active_window) return;
 	sdl_draw_box2(active_window->x1, active_window->y1, active_window->x2, active_window->y2,
 				color.topbar);
+
+	if (active_window->widget) {
+		sdl_draw_widget(active_window->widget);
+	}
+
 	// button
 	if (active_window->button) {
 		if (input.mouse_button_left) {
@@ -218,6 +234,45 @@ void ui_display_window()
 		sdl_draw_button(active_window->button);
 		sdl_draw_button(active_window->close_button);
 	}
+}
+
+void ui_new_widget_list_box(int x1, int y1, int x2, int y2, list_t *list,
+		widget_t **widget_head_node)
+{
+	widget_t **tmp_node = widget_head_node;
+
+	widget_t *new_widget;
+	new_widget = malloc(sizeof(widget_t));
+
+	widget_list_box_t *list_box;
+	list_box = malloc(sizeof(widget_list_box_t));
+
+	list_box->x1 = x1;
+	list_box->y1 = y1;
+	list_box->x2 = x2;
+	list_box->y2 = y2;
+	list_box->w = x2 - x1;
+	list_box->h = y2 - y1;
+	
+	list_box->list = list;
+	
+	new_widget->type = LIST_BOX;
+	new_widget->widget.list_box = list_box;
+	new_widget->next = NULL;
+
+	// adding to widget list
+	if (!*tmp_node) {
+		// first node
+		*tmp_node = new_widget;
+		return;
+	}
+
+	while (*tmp_node) {
+		tmp_node = &(*tmp_node)->next;
+	}
+	// append to list
+	*tmp_node = new_widget;
+
 }
 
 

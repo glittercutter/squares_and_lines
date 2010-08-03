@@ -25,7 +25,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "shared.h"
 
 #define UI_BAR_PADDING 3
-
+#define SCROLLBAR_SIZE 10
 
 enum {
 	ALIGN_CENTER,
@@ -81,10 +81,36 @@ typedef struct Message {
 } Message;
 Message ui_message;
 
+
+typedef struct widget_list_box_t {
+	int x1, y1, x2, y2, w, h;
+	int no_item;
+	float ratio;
+	list_t *list;
+	int list_offset;
+	float bar_position;
+} widget_list_box_t;
+
+typedef union widget_union {
+	widget_list_box_t *list_box;
+} widget_union;
+
+// widget type
+enum {
+	LIST_BOX
+};
+
+typedef struct widget_t {
+	int type;
+	widget_union widget;
+	struct widget_t *next;
+} widget_t;
+
 typedef struct window_s {
 	int x1, y1, x2, y2, w, h;
 // 	widget_t *widget;
 	struct window_s *last_window;
+	widget_t *widget;
 	Button *close_button;
 	Button *button;
 } window_s;
@@ -94,13 +120,14 @@ typedef struct window_s {
 void ui_display_window(void);
 void ui_display_message(void);
 void ui_new_message(char*);
-void ui_button_function();
+void ui_button_function(void);
 int ui_button_check_click(Button **);
-void ui_button_close_window();
-void ui_button_drag_window();
-
+void ui_button_close_window(void);
+void ui_button_drag_window(void);
+void ui_new_widget_list_box(int, int, int, int, list_t*, widget_t**);
 Button* ui_new_button(int, int, int, int, int, int, int, char*, void func(), Button **);
 Button* ui_button_check_pos(Button **);
+
 
 // variable
 char ui_language[ SMALL_STRING_LENGTH ];
@@ -121,5 +148,6 @@ Button *active_dropmenu_parent;
 
 window_s host_window;
 window_s *active_window;
+
 
 #endif

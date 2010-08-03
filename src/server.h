@@ -23,14 +23,19 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define __SERVER_H_
 
 #include "shared.h"
+#include "ui.h"
 
 
+// variable
 pthread_t server_thread;
 int sv_thread_active;
 int lan_wait_client;
+list_t peer_list;
+
 
 // function
 void lanhost_start_host(void);
 void sv_init_ui(void);
+
 
 #endif

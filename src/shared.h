@@ -82,6 +82,10 @@ enum {
 	LEFT,
 };
 
+typedef struct list_t {
+	int element;
+	char **string;
+} list_t;
 
 typedef struct ColorRGB ColorRGB;
 struct ColorRGB {
@@ -123,8 +127,8 @@ struct Square {
 	int *neighbour_left;
 
 };
-
 Square **squares;
+
 
 // variables
 SDL_Surface *screen;
@@ -133,5 +137,6 @@ int display_width;
 int display_height;
 int display_fullscreen;
 int min_square_size;
+
 
 #endif
