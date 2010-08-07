@@ -22,6 +22,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #ifndef __SHARED_H__
 #define __SHARED_H__
 
+#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
@@ -82,10 +83,11 @@ enum {
 	LEFT,
 };
 
-typedef struct list_t {
-	int element;
-	char **string;
-} list_t;
+#define LS_MAX_STRING 5
+typedef struct string_list_t {
+	char *string[LS_MAX_STRING];
+	struct string_list_t *next;
+} string_list_t;
 
 typedef struct ColorRGB ColorRGB;
 struct ColorRGB {

@@ -174,11 +174,11 @@ void sdl_draw_box2(int x1, int y1, int x2, int y2, ColorRGB color)
 	boxRGBA(screen, x1, y1, x2, y2, color.r, color.g, color.b, a);
 }
 
-void sdl_draw_triangle(int x1, int y1, int x2, int y2,
-	   	int x3, int y3, int r, int g, int b)
+void sdl_draw_triangle(SDL_Surface *surface, int x1, int y1, int x2, int y2,
+	   	int x3, int y3, ColorRGB color)
 {
 	int a = 255;
-	filledTrigonRGBA(screen, x1, y1, x2, y2, x3, y3, r, g, b, a);
+	filledTrigonRGBA(surface, x1, y1, x2, y2, x3, y3, color.r, color.g, color.b, a);
 }
 /*
 ==============
@@ -330,7 +330,7 @@ static void sdl_draw_ed_squares()
 ====================
 sdl_draw_fade_fx
 
-draw black fading transition
+fading transition
 ====================
 */
 static void sdl_draw_fade_fx()
@@ -355,7 +355,10 @@ static void sdl_draw_player_change_fx()
 		if (fx_transition[FX_PLAYER_CHANGE].halfway) {
 			// do only first half the transition cycle
 			fx_transition[FX_PLAYER_CHANGE].active = FALSE;
-			goto no_animation; // draw the static box (prevent flashing between state)
+
+			// draw static box (prevent flashing between state)
+			goto no_animation; 
+		
 		}
 		// animate the box
 		if (player_turn - 1 == 1) {
@@ -366,11 +369,15 @@ static void sdl_draw_player_change_fx()
 					fx_transition[FX_PLAYER_CHANGE].max_step));
 			x2 = x1 + player[0].score_text_pos_x - player[1].score_text_pos_x;
 			
-			boxRGBA(screen, x1, 0, x2,button_topbar->h, color.square_owner[PLAYER_1].r, 
-					color.square_owner[PLAYER_1].g, color.square_owner[PLAYER_1].b, 255);
+			boxRGBA(screen, x1, 0, x2,button_topbar->h, 
+					color.square_owner[PLAYER_1].r, 
+					color.square_owner[PLAYER_1].g, 
+					color.square_owner[PLAYER_1].b, 255);
 			// second box color are fading
-			boxRGBA(screen, x1, 0, x2,button_topbar->h, color.square_owner[PLAYER_0].r, 
-					color.square_owner[PLAYER_0].g, color.square_owner[PLAYER_0].b, 
+			boxRGBA(screen, x1, 0, x2,button_topbar->h, 
+					color.square_owner[PLAYER_0].r, 
+					color.square_owner[PLAYER_0].g, 
+					color.square_owner[PLAYER_0].b, 
 					255 - ((fx_transition[FX_PLAYER_CHANGE].max_step -
 					fx_transition[FX_PLAYER_CHANGE].current_step) * 
 					(255 / fx_transition[FX_PLAYER_CHANGE].max_step)));
@@ -379,33 +386,42 @@ static void sdl_draw_player_change_fx()
 		} else {
 			x1 = player[0].score_text_pos_x - TEXT_MARGIN +
 					(fx_transition[FX_PLAYER_CHANGE].current_step * 
-					((player[1].score_text_pos_x - player[0].score_text_pos_x) / 
+					((player[1].score_text_pos_x - 
+					player[0].score_text_pos_x) / 
 					fx_transition[FX_PLAYER_CHANGE].max_step));
 			x2 = x1 + player[1].score_text_pos_x - player[0].score_text_pos_x;
 
-			boxRGBA(screen, x1, 0, x2, button_topbar->h, color.square_owner[PLAYER_0].r, 
-					color.square_owner[PLAYER_0].g, color.square_owner[PLAYER_0].b, 255);
+			boxRGBA(screen, x1, 0, x2, button_topbar->h, 
+					color.square_owner[PLAYER_0].r, 
+					color.square_owner[PLAYER_0].g, 
+					color.square_owner[PLAYER_0].b, 255);
 			// second box color are fading
-			boxRGBA(screen, x1, 0, x2,button_topbar->h, color.square_owner[PLAYER_1].r, 
-					color.square_owner[PLAYER_1].g, color.square_owner[PLAYER_1].b, 
+			boxRGBA(screen, x1, 0, x2,button_topbar->h, 
+					color.square_owner[PLAYER_1].r, 
+					color.square_owner[PLAYER_1].g, 
+					color.square_owner[PLAYER_1].b, 
 					255 - ((fx_transition[FX_PLAYER_CHANGE].max_step -
 					fx_transition[FX_PLAYER_CHANGE].current_step) * 
 					(255 / fx_transition[FX_PLAYER_CHANGE].max_step)));
-
 		}
 
 	} else {
-no_animation:
-		// static box
+	// static box
+
+no_animation: // prevent flashing between state
+
 		if (player_turn - 1 == 1) {
-			boxRGBA(screen, player[1].score_text_pos_x - TEXT_MARGIN, 0, display_width,
-					button_topbar->h, color.square_owner[PLAYER_1].r, 
-					color.square_owner[PLAYER_1].g, color.square_owner[PLAYER_1].b, 255);
+			boxRGBA(screen, player[1].score_text_pos_x - TEXT_MARGIN, 0,
+					display_width, button_topbar->h, 
+					color.square_owner[PLAYER_1].r, 
+					color.square_owner[PLAYER_1].g, 
+					color.square_owner[PLAYER_1].b, 255);
 		} else {
 			boxRGBA(screen, player[0].score_text_pos_x - TEXT_MARGIN, 0, 
-					player[1].score_text_pos_x -
-					TEXT_MARGIN, button_topbar->h, color.square_owner[PLAYER_0].r, 
-					color.square_owner[PLAYER_0].g, color.square_owner[PLAYER_0].b, 255);
+					player[1].score_text_pos_x - TEXT_MARGIN, button_topbar->h,
+					color.square_owner[PLAYER_0].r, 
+					color.square_owner[PLAYER_0].g, 
+					color.square_owner[PLAYER_0].b, 255);
 		}
 	}
 }
@@ -419,9 +435,10 @@ void sdl_draw_game_fx()
 {
 	for (int i = 0; i < MAX_GLOW; i++) {
 		if (seg_glow[i].square) {
-			sdl_draw_glow_line(seg_glow[i].x1, seg_glow[i].y1, 
-			seg_glow[i].x2, seg_glow[i].y2, color.square_owner[seg_glow[i].player], 
-			seg_glow[i].glow_level);
+				sdl_draw_glow_line(seg_glow[i].x1, seg_glow[i].y1, 
+				seg_glow[i].x2, seg_glow[i].y2, 
+				color.square_owner[seg_glow[i].player], 
+				seg_glow[i].glow_level);
 		}
 	}
 }
@@ -454,16 +471,16 @@ void sdl_draw_button(Button *button)
 	
 	while (button != NULL) {
 		if (button == ui_pressed_button) {
-			sdl_draw_surface(button->surface, 0, 0, button->w, button->h, screen,
-					button->x1, button->y1, 255);
+			sdl_draw_surface(button->surface, 0, 0, button->w, button->h,
+					screen, button->x1, button->y1, 255);
 			boxRGBA(screen, button->x1, button->y1, button->x2, button->y2, 
 					color.button_highlight.r, 
 					color.button_highlight.g, 
 					color.button_highlight.b, 100);
 
 		} else if (button == ui_highlight_button) {
-			sdl_draw_surface(button->surface, 0, 0, button->w, button->h, screen,
-					button->x1, button->y1, 255);
+			sdl_draw_surface(button->surface, 0, 0, button->w, button->h,
+					screen, button->x1, button->y1, 255);
 			boxRGBA(screen, button->x1, button->y1, button->x2, button->y2,
 					color.button_highlight.r, 
 					color.button_highlight.g, 
@@ -478,27 +495,99 @@ void sdl_draw_button(Button *button)
 }
 
 
+void sdl_draw_widget_scrollbar(scrollbar_t *scrollbar)
+{
+	int handle_center_x = scrollbar->handle.x1 + (scrollbar->handle.w / 2);
+	int handle_center_y = scrollbar->handle.y1 + (scrollbar->handle.h / 2);
+	
+	if (scrollbar->orientation == HORIZONTAL) {
+		sdl_draw_box2(scrollbar->x1 + SCROLLBAR_SIZE, scrollbar->y1, 
+				scrollbar->x2 - SCROLLBAR_SIZE, scrollbar->y2, color.text);
+	} else {
+		sdl_draw_box2(scrollbar->x1, scrollbar->y1 + SCROLLBAR_SIZE, 
+				scrollbar->x2, scrollbar->y2 - SCROLLBAR_SIZE, color.text);
+	}
+
+	sdl_draw_button(&scrollbar->arrow1);
+	sdl_draw_button(&scrollbar->arrow2);
+
+	sdl_draw_box2(scrollbar->handle.x1, scrollbar->handle.y1, 
+			scrollbar->handle.x2, scrollbar->handle.y2, 
+			color.topbar);
+	
+	// center lines
+	lineRGBA(screen, handle_center_x - 2, handle_center_y, handle_center_x + 2,
+			handle_center_y, 50, 50, 50, 255);
+	lineRGBA(screen, handle_center_x - 2, handle_center_y - 3,
+			handle_center_x + 2, handle_center_y - 3, 50, 50, 50, 255);
+	lineRGBA(screen, handle_center_x - 2, handle_center_y + 3,
+			handle_center_x + 2, handle_center_y + 3, 50, 50, 50, 255);
+	
+	// 3d effect
+	lineRGBA(screen, scrollbar->handle.x2, scrollbar->handle.y1 + 1, 
+			scrollbar->handle.x2, scrollbar->handle.y2, 50, 50, 50, 255);
+	lineRGBA(screen, scrollbar->handle.x1, scrollbar->handle.y2, 
+			scrollbar->handle.x2, scrollbar->handle.y2, 50, 50, 50, 255);
+	lineRGBA(screen, scrollbar->handle.x1, scrollbar->handle.y1, 
+			scrollbar->handle.x1, scrollbar->handle.y2 - 1, 130, 130, 130, 255);
+	lineRGBA(screen, scrollbar->handle.x1, scrollbar->handle.y1, 
+			scrollbar->handle.x2 - 1, scrollbar->handle.y1, 130, 130, 130, 255);
+
+}
+
+
 void sdl_draw_widget_list_box(widget_list_box_t *list_box)
 {
 	sdl_draw_box2(list_box->x1, list_box->y1, list_box->x2 - SCROLLBAR_SIZE, 
 			list_box->y2, color.button_highlight);
 
+	sdl_draw_widget_scrollbar(&list_box->scrollbar);
+
+	
 	
 }
 
-void sdl_draw_widget(widget_t *widget_node)
+
+
+void sdl_create_button_3d_effect(SDL_Surface *surface)
 {
-	if (widget_node == NULL) {
-// 		DEBUG(printf("no button !\n"));
-		return;
-	}
-	
-	while (widget_node != NULL) {
-		if (widget_node->type == LIST_BOX) {
-			sdl_draw_widget_list_box(widget_node->widget.list_box);
-		}
-		widget_node = widget_node->next;
-	}
+	lineRGBA(surface, 0, 0, surface->w - 1, 0, 
+			200, 200, 200, 200);
+	lineRGBA(surface, 0, 0, 0, surface->h - 1, 
+			200, 200, 200, 200);
+	lineRGBA(surface, surface->w - 1, 0, surface->w - 1, surface->h, 
+			0, 0, 0, 200);
+	lineRGBA(surface, 0, surface->h - 1, surface->w - 1, surface->h - 1, 
+			0, 0, 0, 200);
+
+}
+
+
+void sdl_create_gui_graphic(void)
+{
+	gui_surface.arrow_up = sdl_create_surface(SCROLLBAR_SIZE + 1,
+			SCROLLBAR_SIZE + 1);
+	boxRGBA(gui_surface.arrow_up, 0, 0, gui_surface.arrow_up->w, 
+			gui_surface.arrow_up->w, color.topbar.r, color.topbar.g, 
+			color.topbar.b, 255);
+	sdl_draw_triangle(gui_surface.arrow_up, 
+			gui_surface.arrow_up->w / 2, gui_surface.arrow_up->w * 0.3f, 
+			gui_surface.arrow_up->w * 0.3f, gui_surface.arrow_up->w * 0.7f,
+			gui_surface.arrow_up->w * 0.7f, gui_surface.arrow_up->w * 0.7f,
+			color.button_highlight);
+	sdl_create_button_3d_effect(gui_surface.arrow_up);
+
+	gui_surface.arrow_down = sdl_create_surface(SCROLLBAR_SIZE + 1,
+			SCROLLBAR_SIZE + 1);
+	boxRGBA(gui_surface.arrow_down, 0, 0, gui_surface.arrow_up->w, 
+			gui_surface.arrow_up->w, color.topbar.r, color.topbar.g, 
+			color.topbar.b, 255);
+	sdl_draw_triangle(gui_surface.arrow_down, 
+			gui_surface.arrow_up->w * 0.3f, gui_surface.arrow_up->w * 0.3f,
+			gui_surface.arrow_up->w * 0.7f, gui_surface.arrow_up->w * 0.3f,
+			gui_surface.arrow_up->w / 2, gui_surface.arrow_up->w * 0.7f, 
+			color.button_highlight);
+	sdl_create_button_3d_effect(gui_surface.arrow_down);
 }
 
 

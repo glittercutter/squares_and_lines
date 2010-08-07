@@ -30,7 +30,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 pthread_t server_thread;
 int sv_thread_active;
 int lan_wait_client;
-list_t peer_list;
+string_list_t peer_list;
 
 
 // function

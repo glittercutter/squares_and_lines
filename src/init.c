@@ -21,10 +21,12 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "init.h"
 
-#include "parse_public.h"
+#include "client.h"
+#include "draw.h"
 #include "editor.h"
 #include "game.h"
 #include "menu.h"
+#include "parse_public.h"
 #include "server.h"
 #include "ui.h"
 
@@ -90,11 +92,12 @@ static void sdl_load_font(Font *font)
 
 void ui_init()
 {
-
+	sdl_create_gui_graphic();
 	m_init_ui(); // other ui are based on this one
 	ed_init_ui();
 	g_init_ui();
 	sv_init_ui();
+	cl_init_ui();
 }
 
 

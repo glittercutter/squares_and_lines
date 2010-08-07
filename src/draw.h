@@ -33,6 +33,7 @@ void sdl_draw_text_solid(int, int, char*, TTF_Font*, int, int, int);
 void sdl_draw_text_solid2(int, int, char*, TTF_Font*, ColorRGB);
 void sdl_draw_text_blended(SDL_Surface*, int, int, char*, TTF_Font*, int, int, int);
 void sdl_draw_text_blended2(SDL_Surface*, int, int, char*, TTF_Font*, ColorRGB);
+void sdl_draw_line2(int, int, int, int, ColorRGB);
 void sdl_draw_line3(SDL_Surface*, int, int, int, int, ColorRGB);
 void sdl_draw_box2(int, int, int, int, ColorRGB);
 void sdl_draw_rect2(SDL_Surface*, int, int, int, int, ColorRGB);
@@ -40,7 +41,7 @@ void sdl_draw_editor();
 void sdl_draw_game();
 void sdl_draw_main_fx();
 void sdl_draw_menu();
-void sdl_draw_widget(widget_t*);
-
+void sdl_draw_widget_list_box(widget_list_box_t*);
+void sdl_create_gui_graphic(void);
 
 #endif

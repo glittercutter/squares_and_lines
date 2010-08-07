@@ -29,24 +29,13 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 
 // variable
-char *cl_host;
-IPaddress cl_ip;	/* Server address */
-TCPsocket cl_sd;	/* Socket descriptor */
-int cl_len;
-char cl_buffer[512];
-
-IPaddress sv_ip, *sv_remoteIP;
-TCPsocket sv_sd, sv_csd;	/* Socket descriptor, client socket descriptor */
-char sv_buffer[512];
-
-int serverstate;
-int stop_server_flag;
-
-pthread_t server_thread;
-
+pthread_t client_thread;
+int cl_thread_active;
+int lan_search_host;
+string_list_t host_list;
 
 // function
-int lanclient_search_host(void);
-
+void lanclient_start_client(void);
+void cl_init_ui(void);
 
 #endif

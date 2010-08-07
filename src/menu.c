@@ -75,7 +75,7 @@ void m_button_host_game()
 
 void m_button_join_game()
 {
-	lanclient_search_host();
+	lanclient_start_client();
 }
 
 

@@ -25,6 +25,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "input.h"
 
 
+int ui_scrollbar_check(scrollbar_t*);
+
+
 /* 
 ====================
 ui_new_button
@@ -34,8 +37,8 @@ Button is added at the tail of the familly node.
 Return a pointer to the created button.
 ====================
 */
-Button* ui_new_button(int x, int y, int w, int h, int min_w, int max_w, int align,
-			char *text, void func(), Button **node)
+Button* ui_new_button(int x, int y, int w, int h, int min_w, int max_w, 
+		int align, char *text, void func(), Button **node)
 {
 	Button **node2 = node;
 
@@ -129,6 +132,15 @@ int ui_button_check_click(Button **button_type)
 	return 0;
 }
 
+int ui_singlebutton_check_click(Button *button)
+{
+	if ((input.mouse_y < button->y2) && (input.mouse_x < button->x2) && 
+					(input.mouse_y > button->y1) && (input.mouse_x > button->x1)) {
+		ui_pressed_button = button;
+		return 1;
+	}
+	return 0;
+}
 
 Button* ui_button_check_pos(Button **button_type)
 {
@@ -217,11 +229,24 @@ void ui_display_message()
 void ui_display_window()
 {
 	if (!active_window) return;
-	sdl_draw_box2(active_window->x1, active_window->y1, active_window->x2, active_window->y2,
-				color.topbar);
+
+	widget_t *widget_node = active_window->widget;
+	
+	sdl_draw_box2(active_window->x1, active_window->y1, active_window->x2,
+			active_window->y2, color.topbar);
 
 	if (active_window->widget) {
-		sdl_draw_widget(active_window->widget);
+		while (widget_node != NULL) {
+			if (widget_node->type == LIST_BOX) {
+				sdl_draw_widget_list_box(widget_node->widget.list_box);
+				if (input.mouse_button_left || 
+						widget_node->widget.list_box->scrollbar.dragging_handle) {
+					ui_scrollbar_check(&widget_node->widget.list_box->scrollbar);
+				}
+			}
+			widget_node = widget_node->next;
+		}
+
 	}
 
 	// button
@@ -229,6 +254,7 @@ void ui_display_window()
 		if (input.mouse_button_left) {
 			if (!ui_button_check_click(&active_window->close_button)) {
 				ui_button_check_click(&active_window->button);
+
 			}
 		}
 		sdl_draw_button(active_window->button);
@@ -236,7 +262,110 @@ void ui_display_window()
 	}
 }
 
-void ui_new_widget_list_box(int x1, int y1, int x2, int y2, list_t *list,
+void ui_scrollbar_update_size(int no_of_element, int max_element, 
+		scrollbar_t *scrollbar)
+{	
+	if(scrollbar->orientation == HORIZONTAL) {
+		if((no_of_element == 0) || (no_of_element <= max_element)) {
+			scrollbar->handle.w = scrollbar->handle_max_w;
+			return;
+		}
+		scrollbar->ratio = max_element / (float)no_of_element;
+		scrollbar->handle.w = scrollbar->handle_max_w * scrollbar->ratio;
+	} else {
+		if((no_of_element == 0) || (no_of_element <= max_element)) {
+			scrollbar->handle.h = scrollbar->handle_max_h;
+			return;
+		}
+		scrollbar->ratio = max_element / (float)no_of_element;
+		scrollbar->handle.h = scrollbar->handle_max_h * scrollbar->ratio;
+	}
+}
+
+
+int ui_scrollbar_check(scrollbar_t *scrollbar)
+{
+	static int click_pos = 0;
+	int mouse_pos;
+	
+	if (!input.mouse_button_left) {
+		scrollbar->dragging_handle = FALSE;
+		ui_dragged_scrollbar = NULL;
+		return 0;
+	}
+
+	if(scrollbar->dragging_handle) {
+		if(scrollbar->orientation == HORIZONTAL) {
+			mouse_pos = (input.mouse_x - scrollbar->x1 - SCROLLBAR_SIZE -
+				  	click_pos);
+			if(mouse_pos == 0 || scrollbar->handle_max_w - 
+					scrollbar->handle.w <= 0) {
+				scrollbar->handle_pos = 0;
+			} else {
+				scrollbar->handle_pos = (mouse_pos / 
+						(float)(scrollbar->handle_max_w - 
+						scrollbar->handle.w)) * 100.0f;
+			}
+
+		} else {
+			// scrollbar is vertical
+			mouse_pos = input.mouse_y - scrollbar->y1 - SCROLLBAR_SIZE -
+			   		click_pos;	
+			if(mouse_pos == 0 || scrollbar->handle_max_h - 
+						scrollbar->handle.h <= 0) {
+				scrollbar->handle_pos = 0;
+			} else {
+				scrollbar->handle_pos = (mouse_pos / 
+						(float)(scrollbar->handle_max_h - 
+						scrollbar->handle.h)) * 100.0f;
+			}
+			
+		}
+
+	} else if(ui_singlebutton_check_click(&scrollbar->handle)) {
+		// scrollbar is now dragged
+		scrollbar->dragging_handle = TRUE;
+		ui_dragged_scrollbar = scrollbar;
+		// keep click position
+		if(scrollbar->orientation ==HORIZONTAL) {
+			click_pos = input.mouse_x - scrollbar->handle.x1;
+		} else {
+			click_pos = input.mouse_y - scrollbar->handle.y1;
+		}
+
+	// check arrows button
+	} else if(ui_singlebutton_check_click(&scrollbar->arrow1)) {
+		scrollbar->handle_pos -= 1; // TODO increment one element height
+	} else if(ui_singlebutton_check_click(&scrollbar->arrow2)) {	
+		scrollbar->handle_pos += 1;
+
+	} else return 0;
+	
+	if(scrollbar->handle_pos < 0) {
+		scrollbar->handle_pos = 0;
+	}
+	if(scrollbar->handle_pos > 100) {
+		scrollbar->handle_pos = 100;
+	}
+
+	if(scrollbar->orientation == HORIZONTAL) {
+		scrollbar->handle.x1 = ((scrollbar->handle_pos / 100.0f) *
+				(float)(scrollbar->handle_max_w - scrollbar->handle.w)) +
+				scrollbar->x1 + SCROLLBAR_SIZE;
+	} else { // scrollbar is vertical
+		scrollbar->handle.y1 = ((scrollbar->handle_pos / 100.0f) * 
+				(float)(scrollbar->handle_max_h - scrollbar->handle.h)) +
+				scrollbar->y1 + SCROLLBAR_SIZE;
+	}
+	
+	// set handle dimension for drawing and position check
+	scrollbar->handle.x2 = scrollbar->handle.x1 + scrollbar->handle.w;
+	scrollbar->handle.y2 = scrollbar->handle.y1 + scrollbar->handle.h;
+
+	return 1;
+}
+
+void ui_new_widget_list_box(int x1, int y1, int x2, int y2, string_list_t *list,
 		widget_t **widget_head_node)
 {
 	widget_t **tmp_node = widget_head_node;
@@ -253,14 +382,82 @@ void ui_new_widget_list_box(int x1, int y1, int x2, int y2, list_t *list,
 	list_box->y2 = y2;
 	list_box->w = x2 - x1;
 	list_box->h = y2 - y1;
+
+	list_box->scrollbar.x1 = x2 - SCROLLBAR_SIZE;
+	list_box->scrollbar.y1 = y1;
+	list_box->scrollbar.x2 = x2;
+	list_box->scrollbar.y2 = y2;
+
+	list_box->scrollbar.orientation = VERTICAL;
+	list_box->scrollbar.handle_max_w = SCROLLBAR_SIZE - 1;
+	list_box->scrollbar.handle_max_h = (y2 - SCROLLBAR_SIZE) - 
+			(y1 + SCROLLBAR_SIZE);
 	
+	list_box->scrollbar.dragging_handle = FALSE;
+
+	// arrows button
+	list_box->scrollbar.arrow1.surface = gui_surface.arrow_up;
+	list_box->scrollbar.arrow1.next = NULL;
+	list_box->scrollbar.arrow1.func = NULL;
+	
+	list_box->scrollbar.arrow2.surface = gui_surface.arrow_down;
+	list_box->scrollbar.arrow2.next = NULL;
+	list_box->scrollbar.arrow2.func = NULL;
+	
+	list_box->scrollbar.arrow1.x1 = list_box->scrollbar.x1;
+	list_box->scrollbar.arrow1.y1 = list_box->scrollbar.y1;
+	list_box->scrollbar.arrow1.x2 = list_box->scrollbar.x2;
+	list_box->scrollbar.arrow1.y2 = list_box->scrollbar.y1 + SCROLLBAR_SIZE;
+
+	list_box->scrollbar.arrow2.x1 = list_box->scrollbar.x1;
+	list_box->scrollbar.arrow2.y1 = list_box->scrollbar.y2 - SCROLLBAR_SIZE;
+	list_box->scrollbar.arrow2.x2 = list_box->scrollbar.x2;
+	list_box->scrollbar.arrow2.y2 = list_box->scrollbar.y2;
+
+
+	list_box->viewable_element = list_box->h / button_font.h;
+
 	list_box->list = list;
 	
+	ui_scrollbar_update_size(0, list_box->viewable_element, 
+			&list_box->scrollbar);
+	
+	if(list_box->scrollbar.orientation == HORIZONTAL) {
+		list_box->scrollbar.handle.h = SCROLLBAR_SIZE;
+		
+		list_box->scrollbar.handle.x1 = ((list_box->scrollbar.handle_pos / 
+				100.0f) * (float)(list_box->scrollbar.handle_max_w - 
+				list_box->scrollbar.handle.w)) + list_box->scrollbar.x1 +
+				SCROLLBAR_SIZE + 1;
+		list_box->scrollbar.handle.x2 = list_box->scrollbar.handle.x1 + 
+				list_box->scrollbar.handle.w;
+		
+		list_box->scrollbar.handle.y1 = list_box->scrollbar.y2;
+		list_box->scrollbar.handle.y2 = list_box->scrollbar.handle.y1 + 
+				list_box->scrollbar.handle.h;
+
+	} else { // scrollbar is vertical
+		list_box->scrollbar.handle.w = SCROLLBAR_SIZE;
+		
+		list_box->scrollbar.handle.y1 = ((list_box->scrollbar.handle_pos / 
+				100.0f) * (float)(list_box->scrollbar.handle_max_h - 
+				list_box->scrollbar.handle.h)) + list_box->scrollbar.y1 +
+				SCROLLBAR_SIZE + 1;
+		list_box->scrollbar.handle.y2 = list_box->scrollbar.handle.y1 + 
+				list_box->scrollbar.handle.h;
+		
+		list_box->scrollbar.handle.x1 = list_box->scrollbar.x1;
+		list_box->scrollbar.handle.x2 = list_box->scrollbar.handle.x1 + 
+				list_box->scrollbar.handle.w;
+	}
+	
+	list_box->scrollbar.handle.func = NULL;
+
 	new_widget->type = LIST_BOX;
 	new_widget->widget.list_box = list_box;
 	new_widget->next = NULL;
 
-	// adding to widget list
+	// adding to window widget list
 	if (!*tmp_node) {
 		// first node
 		*tmp_node = new_widget;

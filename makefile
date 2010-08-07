@@ -38,6 +38,7 @@ create_dir :
 
 #############################################################################
 GAME_OBJ = \
+	$(OBJDIR)/common.o \
 	$(OBJDIR)/client.o \
 	$(OBJDIR)/editor.o \
 	$(OBJDIR)/draw.o \
@@ -51,8 +52,9 @@ GAME_OBJ = \
 	$(OBJDIR)/server.o \
 	$(OBJDIR)/ui.o \
 
-$(OBJDIR)/editor.o : $(SRCDIR)/editor.c; $(DO_CC)
+$(OBJDIR)/common.o : $(SRCDIR)/common.c; $(DO_CC)
 $(OBJDIR)/client.o : $(SRCDIR)/client.c; $(DO_CC)
+$(OBJDIR)/editor.o : $(SRCDIR)/editor.c; $(DO_CC)
 $(OBJDIR)/draw.o : $(SRCDIR)/draw.c; $(DO_CC)
 $(OBJDIR)/fx.o : $(SRCDIR)/fx.c; $(DO_CC)
 $(OBJDIR)/game.o : $(SRCDIR)/game.c; $(DO_CC)

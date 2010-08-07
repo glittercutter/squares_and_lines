@@ -81,14 +81,27 @@ typedef struct Message {
 } Message;
 Message ui_message;
 
+enum {
+	HORIZONTAL,
+	VERTICAL,
+};
+
+typedef struct scrollbar_t {
+	int orientation; // HORIZONTAL/VERTICAL 
+	int x1, y1, x2, y2;
+	int handle_max_w, handle_max_h;
+	int dragging_handle;
+	Button handle, arrow1, arrow2;
+	float handle_pos;
+	float ratio;
+} scrollbar_t;
 
 typedef struct widget_list_box_t {
 	int x1, y1, x2, y2, w, h;
-	int no_item;
-	float ratio;
-	list_t *list;
+	int viewable_element;
+	string_list_t *list;
 	int list_offset;
-	float bar_position;
+	scrollbar_t scrollbar;
 } widget_list_box_t;
 
 typedef union widget_union {
@@ -115,6 +128,11 @@ typedef struct window_s {
 	Button *button;
 } window_s;
 
+typedef struct gui_surface_s {
+	SDL_Surface *arrow_up, *arrow_down, *arrow_left, *arrow_right;
+} gui_surface_s;
+gui_surface_s gui_surface;
+
 
 // function
 void ui_display_window(void);
@@ -124,7 +142,7 @@ void ui_button_function(void);
 int ui_button_check_click(Button **);
 void ui_button_close_window(void);
 void ui_button_drag_window(void);
-void ui_new_widget_list_box(int, int, int, int, list_t*, widget_t**);
+void ui_new_widget_list_box(int, int, int, int, string_list_t*, widget_t**);
 Button* ui_new_button(int, int, int, int, int, int, int, char*, void func(), Button **);
 Button* ui_button_check_pos(Button **);
 
@@ -147,7 +165,10 @@ Button *active_dropmenu;
 Button *active_dropmenu_parent;
 
 window_s host_window;
+window_s client_window;
 window_s *active_window;
+
+scrollbar_t *ui_dragged_scrollbar;
 
 
 #endif

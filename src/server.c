@@ -185,3 +185,19 @@ void sv_init_ui()
 }
 
 
+// void sv_add_client(client_s *client)
+// {
+// 	if (!client) return;
+// 
+// 	client_t new_client*
+// 	new_client = malloc(sizeof(client_t));
+// 	
+// 	
+// 
+// 	if (!*list_node) {
+// 		*client_node = client
+// 	while (!*client_node)
+// }
+
+
+

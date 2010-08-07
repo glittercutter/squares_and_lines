@@ -21,14 +21,19 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "client.h"
 
+#include "common.h"
 #include "ui.h"
 
+
+void CL_add_lan_host(UDPpacket*);
 
 int lanclient_wait_host_response()
 {
 	UDPsocket sd;       /* Socket descriptor */
 	UDPpacket *p;       /* Pointer to packet memory */
- 
+	
+	lan_search_host = TRUE;
+
 	/* Open a socket */
 	if (!(sd = SDLNet_UDP_Open(7788)))
 	{
@@ -44,11 +49,9 @@ int lanclient_wait_host_response()
 		exit(EXIT_FAILURE);
 	}
  
-	for (int i = 0; i < 100; i++)
-	{	
+	while (lan_search_host) {
 		/* Wait a packet. UDP_Recv returns != 0 if a packet is coming */
-		if (SDLNet_UDP_Recv(sd, p))
-		{
+		if (SDLNet_UDP_Recv(sd, p)) {
 			printf("UDP Packet incoming\n");
 			printf("\tChan:    %d\n", p->channel);
 			printf("\tData:    %s\n", (char *)p->data);
@@ -63,6 +66,7 @@ int lanclient_wait_host_response()
 			if (strcmp((char *)p->data, "54321/c_square/lan") == 0) {
 				printf("host responded!\n");
 				ui_new_message("host responded");
+				CL_add_lan_host(p);
 				break;
 			}
 		}	
@@ -76,7 +80,7 @@ int lanclient_wait_host_response()
 }
 
 
-int lanclient_search_host()
+void* lanclient_search_host(void *is_a_thread)
 {
 	int net_port = 2000;
 	UDPpacket *out_p;
@@ -110,7 +114,7 @@ int lanclient_search_host()
 	{
 		fprintf(stderr, "SDLNet_ResolveHost(%s %d): %s\n", out_tmp_adressip,
 				net_port, SDLNet_GetError());
-		return 1;
+// 		return;
 	}
 	
 	out_p->address.host = out_ip.host;	/* Set the destination host */
@@ -126,7 +130,92 @@ int lanclient_search_host()
 	SDLNet_FreePacket(out_p);
 	SDLNet_UDP_Close(out_udpsd);
 
-	return 0;
+	cl_thread_active = FALSE;
+
+	pthread_exit(NULL);
+
+}
+
+
+void lanclient_start_client()
+{
+	int rc = 0;
+	
+	if (lan_search_host) {
+		lan_search_host = FALSE;
+		while (42) {
+			if (cl_thread_active) {
+				SDL_Delay(5);
+			} else break;
+		}
+	}
+	active_window = &client_window;
+
+	rc = pthread_create(&client_thread, NULL, lanclient_search_host, (void*)rc);
+	if (rc) {
+		fprintf(stderr, "ERROR; return code from pthread_create() is %d\n", rc);
+		exit(-1);
+	}
+
+}
+
+
+void cl_button_close_window() 
+{
+	lan_search_host = FALSE;
+	ui_button_close_window();
+}
+
+
+void cl_init_ui()
+{
+	int x, y;
+	int min_w, max_w;
+	int h = button_font.size + UI_BAR_PADDING;
+	int w;
+	
+	client_window.w = display_width * 0.7f;
+	client_window.h = display_height * 0.7f;
+	client_window.x1 = (display_width - client_window.w) / 2;
+	client_window.y1 = ((display_height - button_topbar->h) - client_window.h) / 2 + button_topbar->h;
+	client_window.x2 = client_window.x1 + client_window.w;
+	client_window.y2 = client_window.y1 + client_window.h;
+	
+	// window title
+	x = client_window.x1; y = client_window.y1;
+	min_w = client_window.w - (UI_BAR_PADDING * 2); max_w = min_w;
+	w = strlen(text.join_game) * button_font.w;
+	ui_new_button(x, y, w, h, min_w, max_w, ALIGN_LEFT,
+			text.join_game, *ui_button_drag_window, &client_window.button);
+	// close window
+	min_w = 1;
+	w = strlen("x") * button_font.w + UI_BAR_PADDING;
+	x = client_window.x2 - w - (UI_BAR_PADDING * 2); y = client_window.y1;
+	ui_new_button(x, y, w, h, min_w, max_w, ALIGN_CENTER,
+			"x", *cl_button_close_window, &client_window.close_button);
+	
+	x = client_window.x1 + (UI_BAR_PADDING * 2);
+	y = client_window.y1 + (h * 2);
+
+	ui_new_widget_list_box(client_window.x1 + (UI_BAR_PADDING * 2), 
+			client_window.y1 + (h * 2), client_window.x2 - (UI_BAR_PADDING * 2), 
+			client_window.y2 - (UI_BAR_PADDING * 2), &host_list, 
+			&client_window.widget);
+
+
+
+}
+
+
+void CL_add_lan_host(UDPpacket *p)
+{
+// 	char ip[13];
+// 	char host_info[STRING_LENGTH];
+	char ip[] = {"12321"};
+	char host_info[] = {"info"};
+
+	com_add_string_node(&host_list, ip, host_info, NULL);
+	printf("0: %s, 1: %s\n", host_list.string[0], host_list.string[1]);
 }
 
 
