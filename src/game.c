@@ -22,6 +22,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "editor.h"
 
+#include "common.h"
 #include "draw.h"
 #include "fx.h"
 #include "game.h"
@@ -72,7 +73,7 @@ void g_end()
 
 
 void g_check_complete_square(Square *square)
-{	
+{
 	if (square->owner != NONE) return;
 
 	if (square->owner_up == NONE) return;
@@ -172,7 +173,7 @@ void g_add_segment()
 	// check neighbour squares
 	if (pos_y != 0) g_check_complete_square(&squares[pos_y - 1][pos_x]);
 	if (pos_x != ed_grid_w) g_check_complete_square(&squares[pos_y][pos_x + 1]);
-	if (pos_y != ed_grid_h) g_check_complete_square(&squares[pos_y + 1][pos_x]);
+	if (pos_y < ed_grid_h - 1) g_check_complete_square(&squares[pos_y + 1][pos_x]);
 	if (pos_x != 0) g_check_complete_square(&squares[pos_y][pos_x - 1]);
 
 	input.mouse_button_left = FALSE;

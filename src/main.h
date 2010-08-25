@@ -26,8 +26,5 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 
 void change_state_quit();
-int get_random_number(int);
-int ipow(int, int);
-int longest_string(char*, ...);
 
 #endif

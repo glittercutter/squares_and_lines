@@ -116,6 +116,10 @@ static const char* lang_player_str[]			= {"player", NULL};
 static const char* lang_win_str[]				= {"win", NULL};
 static const char* lang_no_win_str[]			= {"no_win", NULL};
 
+static const char* lang_lbox_server_str[]		= {"lbox_server", "Server"};
+static const char* lang_lbox_ping_str[]			= {"lbox_ping", "Ping"};
+static const char* lang_lbox_player_str[]		= {"lbox_player", "Player"};
+
 static struct Var_info lang_info[] = {
 	
 	//	NAME						VAR (ptr)					TYPE
@@ -134,6 +138,10 @@ static struct Var_info lang_info[] = {
 	{	lang_player_str,			&text.player,				STRING_T		},
 	{	lang_win_str,				&text.win,					STRING_T		},
 	{	lang_no_win_str,			&text.no_win,				STRING_T		},
+
+	{	lang_lbox_server_str,		&text.lbox_server,			STRING_T		},
+	{	lang_lbox_ping_str,			&text.lbox_ping,			STRING_T		},
+	{	lang_lbox_player_str,		&text.lbox_player,			STRING_T		},
 
 };
 

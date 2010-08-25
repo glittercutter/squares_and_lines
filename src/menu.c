@@ -21,6 +21,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "menu.h"
 
+#include "common.h"
 #include "client.h"
 #include "editor.h"
 #include "draw.h"
@@ -79,32 +80,31 @@ void m_button_join_game()
 }
 
 
-
 void m_init_ui()
 {	
-	// topbar
-	// ================================================================
 	int min_w = 47;
 	int max_w = 180;
 	int w;
 	int h = button_font.size + UI_BAR_PADDING;
 	int x, y;
 
-	// button position are based upon the previously created button
+	// buttons position are based previously created button
 	Button *last_button;
 	Button *topbar;
 
-	// game
+	// ================================================================
+	// topbar
 	// ================================================================
 
+	// game
+	// ================================================================
 	x = 0; y = 0;
 	w = strlen(text.main_menu) * button_font.w;
 	last_button = ui_new_button(x, y, w, h, min_w, max_w, ALIGN_CENTER,
-			text.main_menu, *m_open_main, &button_topbar);
+			text.main_menu, *m_open_main, 1, 1, &button_topbar);
 	topbar = last_button;
 	
 	// dropmenu
-
 	// find the longest string for the dropmenu buttons
 	min_w = longest_string(text.new_game, text.option, text.quit, NULL) * 
 			button_font.w + (UI_BAR_PADDING * 4);
@@ -112,19 +112,18 @@ void m_init_ui()
 	x = 0; y = last_button->y2;
 	w = strlen(text.new_game) * button_font.w + UI_BAR_PADDING;
 	last_button = ui_new_button(x, y, w, h, min_w, max_w, ALIGN_LEFT,
-			text.new_game, *m_button_new_game, &button_dropmenu_main);
+			text.new_game, *m_button_new_game, 1, 0, &button_dropmenu_main);
 
 	x = last_button->x1; y = last_button->y2;
 	w = strlen(text.option) * button_font.w + UI_BAR_PADDING;
 	last_button = ui_new_button(x, y, w, h, min_w, max_w, ALIGN_LEFT, 
-			text.option, *m_open_option, &button_dropmenu_main);
-	
+			text.option, *m_open_option, 1, 0, &button_dropmenu_main);
+	// TODO actual option window ;)
+
 	x = last_button->x1; y = last_button->y2;
 	w = strlen(text.quit) * button_font.w + UI_BAR_PADDING;
 	last_button = ui_new_button(x, y, w, h, min_w, max_w, ALIGN_LEFT, 
-			text.quit, *m_button_quit, &button_dropmenu_main);
-	
-	// TODO actual option window ;)
+			text.quit, *m_button_quit, 1, 0, &button_dropmenu_main);
 
 	// multiplayer
 	// ================================================================
@@ -132,11 +131,10 @@ void m_init_ui()
 	x = topbar->x2; y = topbar->y1;
 	w = strlen(text.multiplayer) * button_font.w;
 	last_button = ui_new_button(x, y, w, h, min_w, max_w, ALIGN_CENTER,
-			text.multiplayer, *m_open_multiplayer, &button_topbar);
+			text.multiplayer, *m_open_multiplayer, 1, 1, &button_topbar);
 	topbar = last_button;
 	
 	// dropmenu
-
 	// find the longest string for the dropmenu buttons
 	min_w = longest_string(text.host_game, text.join_game, NULL) * 
 			button_font.w + (UI_BAR_PADDING * 4);
@@ -144,13 +142,12 @@ void m_init_ui()
 	x = last_button->x1; y = last_button->y2;
 	w = strlen(text.host_game) * button_font.w + UI_BAR_PADDING;
 	last_button = ui_new_button(x, y, w, h, min_w, max_w, ALIGN_LEFT,
-			text.host_game, *m_button_host_game, &button_dropmenu_multiplayer);
+			text.host_game, *m_button_host_game, 1, 0, &button_dropmenu_multiplayer);
 
 	x = last_button->x1; y = last_button->y2;
 	w = strlen(text.join_game) * button_font.w + UI_BAR_PADDING;
 	last_button = ui_new_button(x, y, w, h, min_w, max_w, ALIGN_LEFT,
-			text.join_game, *m_button_join_game, &button_dropmenu_multiplayer);
-
+			text.join_game, *m_button_join_game, 1, 0, &button_dropmenu_multiplayer);
 
 }
 
@@ -160,19 +157,16 @@ void m_ui()
 	if (active_dropmenu) {
 		ui_highlight_button = ui_button_check_pos(&active_dropmenu);
 		if ((ui_button_check_pos(&active_dropmenu) == NULL) && 
-				(ui_button_check_pos(&active_dropmenu_parent) == NULL)) {
+				(ui_button_check_pos(&active_dropmenu_parent) == NULL))
 			active_dropmenu = NULL;
-		}
 	}
 	if (input.mouse_button_left) {
 		// check if the mouse is on the topbar before checking buttons
-		if (input.mouse_y <= button_topbar->y2) {
+		if (input.mouse_y <= button_topbar->y2)
 			ui_button_check_click(&button_topbar);
-		}
-		if (active_dropmenu) {
+		if (active_dropmenu)
 			// active_dropmenu is a pointer to button type
 			ui_button_check_click(&active_dropmenu);
-		}
 	}		
 }
 
@@ -181,7 +175,5 @@ void m_do_menu()
 {
 	m_ui();
 }
-
-
 
 

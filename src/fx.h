@@ -25,7 +25,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "shared.h"
 
 // max no. of glow managed
-#define MAX_GLOW 10
+#define MAX_GLOWING_SEGMENT 10
 
 
 enum {
@@ -59,7 +59,7 @@ struct Seg_glow {
 	int x1, y1, x2, y2;
 };
 
-Seg_glow seg_glow[MAX_GLOW];
+Seg_glow seg_glow[MAX_GLOWING_SEGMENT];
 
 Seg_glow seg_glow_current;
 

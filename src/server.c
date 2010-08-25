@@ -34,7 +34,8 @@ int lanhost_answer_client(IPaddress *client_ip)
 	{
 		fprintf(stderr, "SDLNet_UDP_Open: %s\n", SDLNet_GetError());
 		printf("lanhost_answer_client()\n");
-		exit(EXIT_FAILURE);
+		SDLNet_UDP_Close(out_udpsd);
+		return 1;
 	}
 	
 	/* Allocate memory for the packet */
@@ -74,7 +75,9 @@ void* lanhost_wait_client(void *is_a_thread)
 	if (!(sd = SDLNet_UDP_Open(2000)))
 	{
 		fprintf(stderr, "SDLNet_UDP_Open: %s\n", SDLNet_GetError());
-		exit(EXIT_FAILURE);
+		SDLNet_UDP_Close(sd);
+		sv_thread_active = FALSE;
+		pthread_exit(NULL);
 	}
  
 	/* Make space for the packet */
@@ -130,6 +133,7 @@ void lanhost_start_host()
 	active_window = &host_window;
 
 	rc = pthread_create(&server_thread, NULL, lanhost_wait_client, (void*)rc);
+	pthread_detach(server_thread);
 	if (rc) {
 		fprintf(stderr, "ERROR; return code from pthread_create() is %d\n", rc);
 		exit(-1);
@@ -164,22 +168,23 @@ void sv_init_ui()
 	min_w = host_window.w - (UI_BAR_PADDING * 2); max_w = min_w;
 	w = strlen(text.host_game) * button_font.w;
 	ui_new_button(x, y, w, h, min_w, max_w, ALIGN_LEFT,
-			text.host_game, *ui_button_drag_window, &host_window.button);
+			text.host_game, *ui_button_drag_window, 1, 1, &host_window.button);
 	// close window
 	min_w = 1;
 	w = strlen("x") * button_font.w + UI_BAR_PADDING;
 	x = host_window.x2 - w - (UI_BAR_PADDING * 2); y = host_window.y1;
 	ui_new_button(x, y, w, h, min_w, max_w, ALIGN_CENTER,
-			"x", *sv_button_close_window, &host_window.close_button);
+			"x", *sv_button_close_window, 1, 1, &host_window.close_button);
 	
 	x = host_window.x1 + (UI_BAR_PADDING * 2);
 	y = host_window.y1 + (h * 2);
 
 	ui_new_widget_list_box(host_window.x1 + (UI_BAR_PADDING * 2), 
-			host_window.y1 + (h * 2), host_window.x2 - (UI_BAR_PADDING * 2), 
+			host_window.y1 + (h * 2) + (UI_BAR_PADDING * 2), host_window.x2 - (UI_BAR_PADDING * 2), 
 			host_window.y2 - (UI_BAR_PADDING * 2), &peer_list, 
 			&host_window.widget);
-
+	
+	peer_list.list = NULL;
 
 
 }

@@ -39,6 +39,7 @@ int lanclient_wait_host_response()
 	{
 		fprintf(stderr, "SDLNet_UDP_Open: %s\n", SDLNet_GetError());
 		printf("lanclient_wait_host_response()\n");
+		SDLNet_UDP_Close(sd);
 		return 1;
 	}
  
@@ -123,7 +124,7 @@ void* lanclient_search_host(void *is_a_thread)
 	out_p->len = strlen((char *)out_p->data) + 1;
 	SDLNet_UDP_Send(out_udpsd, -1, out_p); /* This sets the p->channel */
 
-	printf("send to: %s\n", out_tmp_adressip);
+	printf("request server info at: %s\n", out_tmp_adressip);
 
 	lanclient_wait_host_response();
 
@@ -149,9 +150,11 @@ void lanclient_start_client()
 			} else break;
 		}
 	}
+
 	active_window = &client_window;
 
 	rc = pthread_create(&client_thread, NULL, lanclient_search_host, (void*)rc);
+	pthread_detach(client_thread);
 	if (rc) {
 		fprintf(stderr, "ERROR; return code from pthread_create() is %d\n", rc);
 		exit(-1);
@@ -161,7 +164,7 @@ void lanclient_start_client()
 
 
 void cl_button_close_window() 
-{
+{	
 	lan_search_host = FALSE;
 	ui_button_close_window();
 }
@@ -186,23 +189,46 @@ void cl_init_ui()
 	min_w = client_window.w - (UI_BAR_PADDING * 2); max_w = min_w;
 	w = strlen(text.join_game) * button_font.w;
 	ui_new_button(x, y, w, h, min_w, max_w, ALIGN_LEFT,
-			text.join_game, *ui_button_drag_window, &client_window.button);
+			text.join_game, *ui_button_drag_window, 1, 1, &client_window.button);
 	// close window
 	min_w = 1;
 	w = strlen("x") * button_font.w + UI_BAR_PADDING;
 	x = client_window.x2 - w - (UI_BAR_PADDING * 2); y = client_window.y1;
 	ui_new_button(x, y, w, h, min_w, max_w, ALIGN_CENTER,
-			"x", *cl_button_close_window, &client_window.close_button);
+			"x", *cl_button_close_window, 1, 1, &client_window.close_button);
 	
 	x = client_window.x1 + (UI_BAR_PADDING * 2);
 	y = client_window.y1 + (h * 2);
 
 	ui_new_widget_list_box(client_window.x1 + (UI_BAR_PADDING * 2), 
-			client_window.y1 + (h * 2), client_window.x2 - (UI_BAR_PADDING * 2), 
+			client_window.y1 + (h * 2) + (UI_BAR_PADDING * 2), client_window.x2 - (UI_BAR_PADDING * 2), 
 			client_window.y2 - (UI_BAR_PADDING * 2), &host_list, 
 			&client_window.widget);
 
+	// game name
+	host_list.col_position[0] = 0;
+	// ping
+	host_list.col_position[1] = (host_list.list_box->w - SCROLLBAR_SIZE) * 0.5f;
+	// player
+	host_list.col_position[2] = (host_list.list_box->w - SCROLLBAR_SIZE) * 0.75f;
 
+	// collum name buttons
+	w = strlen(text.lbox_server) * button_font.w + UI_BAR_PADDING;
+	min_w = host_list.col_position[1] - host_list.col_position[0];
+	ui_new_button(host_list.col_position[0] + host_list.list_box->x1, host_list.list_box->y1 - button_font.h, w, h,
+			min_w, max_w, ALIGN_LEFT, text.lbox_server, NULL, 1, 1, &host_list.col_name);
+
+	w = strlen(text.lbox_ping) * button_font.w + UI_BAR_PADDING;
+	min_w = host_list.col_position[2] - host_list.col_position[1];
+	ui_new_button(host_list.col_position[1] + host_list.list_box->x1, host_list.list_box->y1 - button_font.h, w, h,
+			min_w, max_w, ALIGN_LEFT, text.lbox_ping, NULL, 1, 1, &host_list.col_name);
+
+	w = strlen(text.lbox_player) * button_font.w + UI_BAR_PADDING;
+	min_w = host_list.list_box->w - (SCROLLBAR_SIZE * 1.6f) - host_list.col_position[2];
+	ui_new_button(host_list.col_position[2] + host_list.list_box->x1, host_list.list_box->y1 - button_font.h, w, h,
+			min_w, max_w, ALIGN_LEFT, text.lbox_player, NULL, 1, 1, &host_list.col_name);
+
+	host_list.list = NULL;
 
 }
 
@@ -213,9 +239,17 @@ void CL_add_lan_host(UDPpacket *p)
 // 	char host_info[STRING_LENGTH];
 	char ip[] = {"12321"};
 	char host_info[] = {"info"};
+	
+	static int count = 0;
+	count++;
+	char count_str[10];
+	sprintf(count_str, "%d%c", count, '\0');
 
-	com_add_string_node(&host_list, ip, host_info, NULL);
-	printf("0: %s, 1: %s\n", host_list.string[0], host_list.string[1]);
+	com_add_string_node(&host_list, count_str, ip, host_info, NULL);
+	ui_scrollbar_update_size(strlist_len(host_list.list), 
+			host_list.max_element, &host_list.list_box->scrollbar);
+
+// 	printf("element: %d\n", 
 }
 
 

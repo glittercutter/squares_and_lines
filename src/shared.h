@@ -22,6 +22,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #ifndef __SHARED_H__
 #define __SHARED_H__
 
+#include <assert.h>
+#include <errno.h>
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -31,10 +34,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <pthread.h>
 #include <unistd.h>
 
-#include <SDL/SDL.h>
-#include <SDL/SDL_gfxPrimitives.h>
-#include <SDL/SDL_ttf.h>
-#include <SDL/SDL_net.h>
+#include "SDL/SDL.h"
+#include "SDL/SDL_gfxPrimitives.h"
+#include "SDL/SDL_ttf.h"
+#include "SDL/SDL_net.h"
+#include "zlib.h"
 
 
 #define TRUE 1
@@ -42,6 +46,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define RUNNING 1
 #define STOPPED 0
 
+typedef unsigned char byte;
 
 #define WINDOW_TITLE "crucially square"
 
@@ -84,10 +89,19 @@ enum {
 };
 
 #define LS_MAX_STRING 5
-typedef struct string_list_t {
+typedef struct string_list_s {
 	char *string[LS_MAX_STRING];
-	struct string_list_t *next;
+	struct string_list_s *next;
+} string_list_s;
+
+typedef struct string_list_t {
+	string_list_s *list;
+	int element, max_element;
+	int col_position[LS_MAX_STRING];
+	struct Button *col_name;
+	struct widget_list_box_t *list_box;
 } string_list_t;
+
 
 typedef struct ColorRGB ColorRGB;
 struct ColorRGB {

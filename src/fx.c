@@ -21,6 +21,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "fx.h"
 
+#include "common.h"
 #include "editor.h"
 #include "game.h"
 #include "input.h"
@@ -47,12 +48,11 @@ void fx_new_transition(void (*func)(), int step, int type)
 	fx->func = func;
 }
 
-
 /* 
 ====================
 fx_do_transition
 
-step start with max value, decrease to 0; excute the function
+Step start at max value, decrease to 0; excute the function
 then increase to max value; end
 ====================
 */
@@ -81,15 +81,18 @@ static void fx_do_transition()
 			++fx->current_step;
 		} else --fx->current_step;
 	}
-// 	printf("transition, step: %d", fx_transition.current_step);
-
 }
 
+/* 
+====================
+fx_new_glow_segment
 
+Find empty slot to insert new glowing segment
+====================
+*/
 static void fx_new_glow_segment()
 {
-	// find empty slot in the array
-	for (int i = 0; i < MAX_GLOW; i++) {
+	for (int i = 0; i < MAX_GLOWING_SEGMENT; i++) {
 		if (!seg_glow[i].square) {
 			seg_glow[i].square = seg_glow_current.square;
 			seg_glow[i].pos = seg_glow_current.pos;
@@ -124,70 +127,53 @@ static void fx_new_glow_segment()
 					seg_glow[i].y2 = seg_glow_current.square->y2;
 				break;
 			}
-			return;
+			return; // segment added
 		}
 	}
 }
 
-
-void fx_main()
-{
-	fx_do_transition();
-}
-
-
 static void fx_glow_closest_segment()
-{
+{	
+	int current_dist, shortest_dist, closest_seg;
+
+	// Find closest square
 	int pos_x = g_min_x + (input.mouse_x - g_offset_x) / g_square_size;
 	int pos_y = g_min_y + (input.mouse_y - g_offset_y) / g_square_size;
-
+	// Closest square's center position
  	int center_x = squares[pos_y][pos_x].x1 + 
 			(squares[pos_y][pos_x].x2 - squares[pos_y][pos_x].x1) / 2;
  	int center_y = squares[pos_y][pos_x].y1 + 
 			(squares[pos_y][pos_x].y2 - squares[pos_y][pos_x].y1) / 2;
 
-	int current_dist;
-	int shortest_dist;
-	int closest_segment;
-
-	// stop glowing
-	if (!squares[pos_y][pos_x].active) {	
-		seg_glow_current.square = NULL;
-		return;
-	}
-
+	/* Find closest segment */
 	// up
 	shortest_dist = sqrt(ipow(input.mouse_y - squares[pos_y][pos_x].y1, 2) + 
 			ipow(input.mouse_x - center_x, 2));
-	
-	closest_segment = UP;
-	
+	closest_seg = UP;	
 	// right
 	current_dist = sqrt(ipow(input.mouse_y - center_y, 2) + 
 			ipow(input.mouse_x - squares[pos_y][pos_x].x2, 2));
 	if (current_dist < shortest_dist) {
 		shortest_dist = current_dist;
-		closest_segment = RIGHT;
+		closest_seg = RIGHT;
 	}
-
 	// down
 	current_dist = sqrt(ipow(input.mouse_x - center_x, 2) + 
 			ipow(input.mouse_y - squares[pos_y][pos_x].y2, 2));
 	if (current_dist < shortest_dist) {
 		shortest_dist = current_dist;
-		closest_segment = DOWN;
+		closest_seg = DOWN;
 	}
-
 	// left
 	current_dist = sqrt(ipow(input.mouse_x - squares[pos_y][pos_x].x1, 2) + 
 			ipow(input.mouse_y - center_y, 2));
 	if (current_dist < shortest_dist) {
 		shortest_dist = current_dist;
-		closest_segment = LEFT;
+		closest_seg = LEFT;
 	}
 
-	// set currently glowing segment
-	switch (closest_segment) {
+	// segment currently glowing
+	switch (closest_seg) {
 		case UP:
 			if (squares[pos_y][pos_x].owner_up == NONE) {
 				seg_glow_current.square = &squares[pos_y][pos_x];
@@ -220,39 +206,47 @@ static void fx_glow_closest_segment()
 			} else seg_glow_current.square = NULL;
 		break;
 	}
-
 }
 
 
+static const int inc_glow_rate = 85;
+static const int dec_glow_rate = 20;
+
 static void fx_glow_segment()
 {
-	int new_segment = 1;
+	bool new_segment = true;
 
-	for (int i = 0; i < MAX_GLOW; i++) {
+	for (int i = 0; i < MAX_GLOWING_SEGMENT; i++) {
 		if (seg_glow[i].square) {
-			// increase glow level of current segment
+			// increase glow level of closest segment
 			if (seg_glow_current.square == seg_glow[i].square && 
 				seg_glow_current.pos == seg_glow[i].pos) {
 				if (seg_glow[i].glow_level < 255) {
-					seg_glow[i].glow_level += 85;
+					seg_glow[i].glow_level += inc_glow_rate;
 					if (seg_glow[i].glow_level > 255) seg_glow[i].glow_level = 255;
 				} else seg_glow[i].glow_level = 255;
-				new_segment = 0; // existing segment
-			/* 	decrease glow level of other segment and remove from array if 
-				glow level is less than 0 */
+				new_segment = false; // was glowing
+
 			} else {
-				seg_glow[i].glow_level -= 20;
+				/* 	Decrease glow level of other segment and remove from array if 
+				glow level is less than 0 */
+				seg_glow[i].glow_level -= dec_glow_rate;
 				if (seg_glow[i].glow_level <= 0) {
 					seg_glow[i].square = NULL;
 				}
 			}
 		}
 	}
-	if (new_segment && seg_glow_current.square) {	
-		fx_new_glow_segment();
+	/* Closest segment was not glowing already */
+	if (new_segment && seg_glow_current.square) {
+		if (seg_glow_current.square->active) fx_new_glow_segment();
 	}
 }
 
+void fx_main()
+{
+	fx_do_transition();
+}
 
 void fx_game()
 {	

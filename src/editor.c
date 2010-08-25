@@ -21,6 +21,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "editor.h"
 
+#include "common.h"
 #include "draw.h"
 #include "fx.h"
 #include "game.h"
@@ -41,12 +42,10 @@ void ed_add_square()
 	int pos_y = (input.mouse_y - ed_start_y) / min_square_size;
 
 	if ((pos_x < ed_grid_w) && (pos_x >= 0)) {
-		if ((pos_y < ed_grid_h) && (pos_y >= 0)) {
+		if ((pos_y < ed_grid_h) && (pos_y >= 0))
 			squares[pos_y][pos_x].active = TRUE;
-		}
 	}
 }
-
 
 void ed_rmv_square()
 {
@@ -54,12 +53,10 @@ void ed_rmv_square()
 	int pos_y = (input.mouse_y - ed_start_y) / min_square_size;
 
 	if ((pos_x < ed_grid_w) && (pos_x >= 0)) {
-		if ((pos_y < ed_grid_h) && (pos_y >= 0)) {
+		if ((pos_y < ed_grid_h) && (pos_y >= 0))
 			squares[pos_y][pos_x].active = FALSE;
-		}
 	}
 }
-
 
 void ed_button_play()
 {
@@ -79,16 +76,16 @@ void ed_change_state()
 void ed_do_editor()
 {
 	if (input.mouse_button_left) {
-		// check if the mouse is on the topbar before checking button
+		// check button if mouse is on the topbar
 		if (input.mouse_y <= button_topbar->y2) {
-			if (ui_button_check_click(&button_editor)) return;
+			// don't check other element if a button was pressed
+			if (ui_button_check_click(&button_editor))
+				return;
 		}
-		// TODO hashing ?
 		ed_add_square();
 	}
-	if (input.mouse_button_right) {
+	if (input.mouse_button_right)
 		ed_rmv_square();
-	}
 }
 
 void ed_init_ui()
@@ -98,10 +95,12 @@ void ed_init_ui()
 	int w;
 	int h = button_font.size + UI_BAR_PADDING;
 	int x, y;
+	int mirror_x;
 
-	// align properly with last topbar button
+	// align properly with last button created
 	Button *last_button = button_topbar;
-	if (!last_button) return;
+	if (!last_button)
+		return;
 	while (last_button->next) {
 		last_button = last_button->next;
 	}	
@@ -109,11 +108,18 @@ void ed_init_ui()
 	x = last_button->x2; y = 0;
 	w = strlen(text.play) * button_font.w;
 	last_button = ui_new_button(x, y, w, h, min_w, max_w, ALIGN_CENTER, text.play,
-			*ed_button_play, &button_editor);
+			*ed_button_play, 1, 1, &button_editor);
+	last_button->x1 = display_width - last_button->w;
+	last_button->x2 = last_button->x1 + last_button->w;
+	mirror_x = last_button->x1;
+
 	x = last_button->x2; y = 0;
 	w = strlen(text.random) * button_font.w;
 	last_button = ui_new_button(x, y, w, h, min_w, max_w, ALIGN_CENTER, text.random,
-			*ed_gen_random, &button_editor);
+			*ed_gen_random, 1, 1, &button_editor);
+	last_button->x1 = mirror_x - last_button->w;
+	last_button->x2 = mirror_x;
+
 }
 
 
@@ -153,34 +159,34 @@ void ed_set_square_pos()
 #define DEFAULT_SQUARE_SIZE 20
 int ed_init()
 {
-	// playable area
+	// set playable area
 	int w = display_width - 1;
 	int h = display_height - button_topbar->h;
-
+	
+	// are the square size valid ?
 	if (!min_square_size) min_square_size = DEFAULT_SQUARE_SIZE;
 	ed_grid_w = w / min_square_size;
 	ed_grid_h = h / min_square_size;
 
-	// center grid
+	// center the editor grid
 	ed_start_x = (w - (ed_grid_w * min_square_size)) / 2;
 	ed_start_y = button_topbar->h + (h - (ed_grid_h * min_square_size)) / 2;
 
-	// create squares array
-	squares = malloc( ed_grid_h * sizeof(*squares) ); // allocate memory for rows
+	// create 2d array for the squares
+	// allocate memory for rows
+	squares = malloc( ed_grid_h * sizeof(*squares) );
 	if(squares != NULL) {
 		for(int i = 0; i < ed_grid_h; i++) {
-			squares[i] = malloc(ed_grid_w * sizeof(**squares)); // allocate memory for collums
-			if(squares[i] == NULL) {
-				printf("Memory allocation failed. Exiting....");
-				return 1;
-			}
+			// allocate memory for collums
+			squares[i] = malloc(ed_grid_w * sizeof(**squares)); 
+			if(squares[i] == NULL)
+				eprint("Memory allocation failed. Exiting....");
 		}
 	} else {
-		printf("Memory allocation failed. Exiting....");
-		return 1;
+		eprint("Memory allocation failed. Exiting....");
 	}
 	
-	// create connection between neigbours
+	// create connection between neigbour square
 	for (int i = 0; i < ed_grid_h; i++) {
 		for (int j = 0; j < ed_grid_w; j++) {
 
@@ -207,20 +213,15 @@ int ed_init()
 			} else {
 				squares[i][j].neighbour_right = NULL;
 			}
-
 		}
 	}
-
 	ed_clear_squares();
-
 	ed_set_square_pos();
 
 	return 0;
 }
 
-
 #define RAND 200
-
 void ed_gen_random()
 {
 	int rand_w;
@@ -228,7 +229,7 @@ void ed_gen_random()
 	int max_w = ed_grid_w - 1;
 	int max_h = ed_grid_h - 1;
 
-	// activate center squares
+	// activate center squares for starting point
 	squares[ed_grid_h / 2][ed_grid_w / 2].active = TRUE;
 	squares[ed_grid_h / 2 + 1][ed_grid_w / 2].active = TRUE;
 	squares[ed_grid_h / 2 - 1][ed_grid_w / 2].active = TRUE;
@@ -245,10 +246,11 @@ void ed_gen_random()
 		
 		if (rand_w == 0 || rand_h == 0) continue;
 
-		// check if neigbour square are active
-		if (squares[rand_h + 1][rand_w].active || squares[rand_h - 1][rand_w].active ||
-			squares[rand_h][rand_w + 1].active || squares[rand_h][rand_w - 1].active) {
-
+		// activate only if a neigbour square is active
+		if (squares[rand_h + 1][rand_w].active || 
+				squares[rand_h - 1][rand_w].active ||
+				squares[rand_h][rand_w + 1].active || 
+				squares[rand_h][rand_w - 1].active) {
 			squares[rand_h][rand_w].active = TRUE;
 		}
 	}

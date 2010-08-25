@@ -50,12 +50,12 @@ int main(int argc, char **argv)
 		
 		if (!active_window) {
 			switch (gamestate) {
-				case GAME:
-					g_do_game();
+			case GAME:
+				g_do_game();
 				break;
-				
-				case EDITOR:
-					ed_do_editor();
+			
+			case EDITOR:
+				ed_do_editor();
 				break;
 			}
 		}
@@ -82,7 +82,7 @@ int main(int argc, char **argv)
 	}
 
 	save_config();
-
+	
 	return 0;
 }
 
@@ -92,107 +92,5 @@ void change_state_quit()
 	gamestate = QUIT;
 }
 
-
-/*
-==========
-get_fps
-
-fps is updated once per second
-==========
-*/
-int get_fps()
-{
-	static int fps = 0, last_tick = 0, frame_counter = 0;
-	int current_tick = SDL_GetTicks();
-	// Update count every second
-	if(current_tick >= (last_tick + 1000)) {
-		fps = frame_counter;
-		frame_counter = 0;
-		last_tick = current_tick;
-	} else ++frame_counter;
-	
-	return fps;
-}
-
-
-
-/* 
-====================
-get_random_number
-
-result change even if called multiple time for a tick
-====================
-*/
-int get_random_number(int max_number)
-{
-	static int last_tick;
-	static int tick_instance = 0;
-
-	int current_tick = SDL_GetTicks();
-	if(last_tick == current_tick) {
-		++tick_instance;
-		current_tick *= tick_instance; 
-	} else {
-		tick_instance = 0;
-		last_tick = current_tick;
-	}
-		
-	srand(current_tick);
-	int random_number = rand() % max_number;	
-	
-	return random_number;
-}
-
-
-/* 
-====================
-ipow
-
-Exponentiation by squaring (fast)
-====================
-*/
-int ipow(int base, int exp)
-{
-    int result = 1;
-    while (exp)
-    {
-        if (exp & 1)
-            result *= base;
-        exp >>= 1;
-        base *= base;
-    }
-
-    return result;
-}
-
-
-/* 
-====================
-longest_string
-
-last argument must be a null pointer
-====================
-*/
-int longest_string(char *str1, ...)
-{
-	va_list ap;
-	char *tmp_str;
-	int longest = 0;
-	int len = 0;;
-
-	va_start(ap, str1);
-	
-	tmp_str = str1;
-	
-	while(tmp_str != NULL) {
-		len = strlen(tmp_str);
-		if (len > longest) longest = len;
-		tmp_str = va_arg(ap, char*);
-	}
-
-	va_end(ap);
-
-	return longest;
-}
 
 

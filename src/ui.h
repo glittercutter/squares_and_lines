@@ -25,7 +25,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "shared.h"
 
 #define UI_BAR_PADDING 3
-#define SCROLLBAR_SIZE 10
+#define SCROLLBAR_SIZE 9
 
 enum {
 	ALIGN_CENTER,
@@ -51,6 +51,10 @@ typedef struct Text {
 	char player[ STRING_LENGTH ];
 	char win[ STRING_LENGTH ];
 	char no_win[ STRING_LENGTH ];
+
+	char lbox_server[ STRING_LENGTH ];
+	char lbox_ping[ STRING_LENGTH ];
+	char lbox_player[ STRING_LENGTH ];
 
 } Text;
 Text text;
@@ -94,13 +98,15 @@ typedef struct scrollbar_t {
 	Button handle, arrow1, arrow2;
 	float handle_pos;
 	float ratio;
+	int offset;
+	int *element, *viewable_element;
 } scrollbar_t;
 
 typedef struct widget_list_box_t {
 	int x1, y1, x2, y2, w, h;
 	int viewable_element;
-	string_list_t *list;
-	int list_offset;
+	struct string_list_t *list;
+	int selected_row;
 	scrollbar_t scrollbar;
 } widget_list_box_t;
 
@@ -143,7 +149,8 @@ int ui_button_check_click(Button **);
 void ui_button_close_window(void);
 void ui_button_drag_window(void);
 void ui_new_widget_list_box(int, int, int, int, string_list_t*, widget_t**);
-Button* ui_new_button(int, int, int, int, int, int, int, char*, void func(), Button **);
+void ui_scrollbar_update_size(int, int, scrollbar_t*);
+Button* ui_new_button(int, int, int, int, int, int, int, char*, void func(), int, int, Button **);
 Button* ui_button_check_pos(Button **);
 
 

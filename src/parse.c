@@ -26,10 +26,12 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define DEFAULT_VALUE_POS 1
 
 
-/*
+/* 
+====================
 parse_get_default
 
 Set default value to uninitialized variable.
+====================
 */
 void parse_get_default(struct Var_info* var_info, int tab_length)
 {
@@ -37,60 +39,62 @@ void parse_get_default(struct Var_info* var_info, int tab_length)
 	float** tmp_float;
 	double** tmp_double;
 	char** tmp_char;
-
 	ColorRGB** tmp_color;
 	int r, g, b;
 	
 	for (int i = 0; i < tab_length; i++) {
 		if (var_info[i].init != TRUE) {
-			printf("parse: getting default value for; %s -> ", var_info[i].str[ VAR_NAME_POS ]);
-			if (var_info[i].str[ DEFAULT_VALUE_POS ] != NULL) {
-				switch (var_info[i].type) {
-					case COLOR_T:
-						tmp_color = (ColorRGB **)&var_info[i].ptr;
-						sscanf(var_info[i].str[ DEFAULT_VALUE_POS ], 
-							"%d, %d, %d", &r, &g, &b);
-						(**tmp_color).r = r; 
-						(**tmp_color).g = g; 
-						(**tmp_color).b = b; 
+			printf("parse: getting default value for: %s -> ", 
+					var_info[i].str[ VAR_NAME_POS ]);
 
-						DEBUG(printf("%d, %d, %d\n", (**tmp_color).r, 
-							(**tmp_color).g, (**tmp_color).b));
-					break;
+			if (var_info[i].str[ DEFAULT_VALUE_POS ] == NULL) {
+				printf("NULL\n");
+				continue;
+			}
 
-					case INT_T:
-						tmp_int = (int **)&var_info[i].ptr;
-						**tmp_int = (int)strtod(var_info[i].str[ DEFAULT_VALUE_POS ], 
-								NULL);
-						
-						DEBUG(printf("%d\n", **tmp_int));
-					break;
-					
-					case FLOAT_T:
-						tmp_float = (float **)&var_info[i].ptr;
-						**tmp_float = (float)strtof(var_info[i].str[ DEFAULT_VALUE_POS ],
-								NULL);
-						
-						DEBUG(printf("%f\n", **tmp_float));
-					break;
+			switch (var_info[i].type) {
+			case COLOR_T:
+				tmp_color = (ColorRGB **)&var_info[i].ptr;
+				sscanf(var_info[i].str[ DEFAULT_VALUE_POS ], 
+					"%d, %d, %d", &r, &g, &b);
+				(**tmp_color).r = r; 
+				(**tmp_color).g = g; 
+				(**tmp_color).b = b; 
 
-					case DOUBLE_T:
-						tmp_double = (double **)&var_info[i].ptr;
-						**tmp_double = (double)strtod(var_info[i].str[ DEFAULT_VALUE_POS ],
-								NULL);
-		
-						DEBUG(printf("%lf\n", **tmp_double));
-					break;
+				DEBUG(printf("%d, %d, %d\n", (**tmp_color).r, 
+					(**tmp_color).g, (**tmp_color).b));
+				break;
 
-					case STRING_T:
-						tmp_char = (char**)&var_info[i].ptr;
-						strcpy((char*)*tmp_char, (char*)var_info[i].str[DEFAULT_VALUE_POS]);
-						
-						DEBUG(printf("%s\n", (char *)*tmp_char));
-					break;
-				}
-			} else {
-				DEBUG(printf("NULL\n"));
+			case INT_T:
+				tmp_int = (int **)&var_info[i].ptr;
+				**tmp_int = (int)strtod(var_info[i].str[ DEFAULT_VALUE_POS ], 
+						NULL);
+				
+				DEBUG(printf("%d\n", **tmp_int));
+				break;
+			
+			case FLOAT_T:
+				tmp_float = (float **)&var_info[i].ptr;
+				**tmp_float = (float)strtof(var_info[i].str[ DEFAULT_VALUE_POS ],
+						NULL);
+				
+				DEBUG(printf("%f\n", **tmp_float));
+				break;
+
+			case DOUBLE_T:
+				tmp_double = (double **)&var_info[i].ptr;
+				**tmp_double = (double)strtod(var_info[i].str[ DEFAULT_VALUE_POS ],
+						NULL);
+
+				DEBUG(printf("%lf\n", **tmp_double));
+				break;
+
+			case STRING_T:
+				tmp_char = (char**)&var_info[i].ptr;
+				strcpy((char*)*tmp_char, (char*)var_info[i].str[DEFAULT_VALUE_POS]);
+				
+				DEBUG(printf("%s\n", (char *)*tmp_char));
+				break;
 			}
 		}
 	}
@@ -106,27 +110,21 @@ void parse_read(struct Var_info* var_info, int tab_length, char* filename)
 	ColorRGB** tmp_color;
 
 	int r, g, b;
-	
 	double num_value;
 	char string_value[ STRING_LENGTH ];
-
 	char readed_line[ STRING_LENGTH * 2 ], readed_var_name[ STRING_LENGTH ];
 
 	FILE* readed_file;
-	
 	readed_file = fopen(filename, "r");
-	
 	if (readed_file == NULL) {
 		printf("parse: cannot read file; %s\n", filename);
 		return;
 	}
 
 	while (fgets(readed_line, sizeof readed_line, readed_file) != NULL) {
-
-		
 		/*
 		color
-		check for "string = int, int, int" formatting
+		Check for "string = int, int, int" formatting
 		*/
 		if (sscanf(readed_line, "%s = %d, %d, %d", readed_var_name, 
 				&r, &g, &b) == 4) {
@@ -144,43 +142,44 @@ void parse_read(struct Var_info* var_info, int tab_length, char* filename)
 					}
 					break;
 				}
-			}	
-		// check for "string = numeric value" formatting
+			}
+		/*
+		num
+		Check for "string = numeric value" formatting
+		*/
 		} else if (sscanf(readed_line, "%s = %lf", readed_var_name, &num_value) == 2) {
 			for (int i = 0; i < tab_length; i++) {
 				// search matching variable
-
 				if (strncmp(readed_var_name, var_info[i].str[ VAR_NAME_POS ],
 						strlen(*var_info[i].str)) == 0) {
 					switch (var_info[i].type) {
-						case INT_T:
-							tmp_int = (int **)&var_info[i].ptr;
-							**tmp_int = (int)num_value;
+					case INT_T:
+						tmp_int = (int **)&var_info[i].ptr;
+						**tmp_int = (int)num_value;
 
-							var_info[i].init = TRUE;
+						var_info[i].init = TRUE;
 						break;
-						
-						case FLOAT_T:
-							tmp_float = (float **)&var_info[i].ptr;
-							**tmp_float = (float)num_value;
+					
+					case FLOAT_T:
+						tmp_float = (float **)&var_info[i].ptr;
+						**tmp_float = (float)num_value;
 
-							var_info[i].init = TRUE;
+						var_info[i].init = TRUE;
 						break;
 
-						case DOUBLE_T:
-							tmp_double = (double **)&var_info[i].ptr;
-							**tmp_double = num_value;
+					case DOUBLE_T:
+						tmp_double = (double **)&var_info[i].ptr;
+						**tmp_double = num_value;
 
-							var_info[i].init = TRUE;
+						var_info[i].init = TRUE;
 						break;
 					}
 					break;
 				}
 			}
-
 		/*
 		string
-		check for "string = string" formatting (spaces are allowed)
+		Check for "string = string" formatting (spaces are allowed)
 		*/
 		} else if (sscanf(readed_line, "%s = %[^\n]s", readed_var_name, string_value) == 2) {
 			for (int i = 0; i < tab_length; i++) {
@@ -190,14 +189,12 @@ void parse_read(struct Var_info* var_info, int tab_length, char* filename)
 					if (var_info[i].type == STRING_T) {
 						tmp_char = (char **)&var_info[i].ptr;
 						strncpy(*tmp_char, string_value, STRING_LENGTH -1);
-
 						var_info[i].init = TRUE;
 					}
 					break;
 				}
 			}	
 		}
-
 	}
 
 	fclose(readed_file);	
@@ -207,16 +204,14 @@ void parse_read(struct Var_info* var_info, int tab_length, char* filename)
 
 int parse_write(struct Var_info *var_info, int tab_length, char* filename)
 {
-	FILE* writed_file;
-
+// TODO don't save if nothing changed ?
 	int** tmp_int;
 	float** tmp_float;
 	double** tmp_double;
 	char** tmp_char;
 	ColorRGB** tmp_color;
 
-	// TODO don't save if nothing changed ?
-
+	FILE* writed_file;
 	writed_file = fopen(filename, "w");
 	if (writed_file == NULL) {
 		return 1;
@@ -224,32 +219,31 @@ int parse_write(struct Var_info *var_info, int tab_length, char* filename)
 	
 	for(int i = 0; i < tab_length; i++) {
 		switch (var_info[i].type) {
-			case INT_T:
-				tmp_int = (int **)&var_info[i].ptr;
-				fprintf(writed_file, "%s = %d\n", *var_info[i].str, **tmp_int);
+		case INT_T:
+			tmp_int = (int **)&var_info[i].ptr;
+			fprintf(writed_file, "%s = %d\n", *var_info[i].str, **tmp_int);
 			break;
 
-			case FLOAT_T:
-				tmp_float = (float **)&var_info[i].ptr;
-				fprintf(writed_file, "%s = %f\n", *var_info[i].str, **tmp_float);
+		case FLOAT_T:
+			tmp_float = (float **)&var_info[i].ptr;
+			fprintf(writed_file, "%s = %f\n", *var_info[i].str, **tmp_float);
 			break;
 
-			case DOUBLE_T:
-				tmp_double = (double **)&var_info[i].ptr;
-				fprintf(writed_file, "%s = %lf\n", *var_info[i].str, **tmp_double);
+		case DOUBLE_T:
+			tmp_double = (double **)&var_info[i].ptr;
+			fprintf(writed_file, "%s = %lf\n", *var_info[i].str, **tmp_double);
 			break;
 
-			case STRING_T:	
-				tmp_char = (char **)&var_info[i].ptr;
-				fprintf(writed_file, "%s = %s\n", *var_info[i].str, *tmp_char);
+		case STRING_T:	
+			tmp_char = (char **)&var_info[i].ptr;
+			fprintf(writed_file, "%s = %s\n", *var_info[i].str, *tmp_char);
 			break;
 
-			case COLOR_T:
-				tmp_color = (ColorRGB **)&var_info[i].ptr;
-				fprintf(writed_file, "%s = %d, %d, %d\n", *var_info[i].str, 
-					(**tmp_color).r, (**tmp_color).g, (**tmp_color).b);
+		case COLOR_T:
+			tmp_color = (ColorRGB **)&var_info[i].ptr;
+			fprintf(writed_file, "%s = %d, %d, %d\n", *var_info[i].str, 
+				(**tmp_color).r, (**tmp_color).g, (**tmp_color).b);
 			break;
-
 		}
 	}
 
@@ -266,7 +260,8 @@ void load_config()
 
 void save_config()
 {
-	if (parse_write(global_config_info, TAB_LENGTH(global_config_info), CONFIG_FILENAME)) {
+	if (parse_write(global_config_info, TAB_LENGTH(global_config_info),
+			CONFIG_FILENAME)) {
 		printf("parse: cannot save to file\n");
 	}
 }
