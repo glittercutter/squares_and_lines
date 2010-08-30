@@ -30,7 +30,7 @@ void eprint(const char *fmt, ...)
 	vsnprintf(buf, sizeof buf, fmt, ap);
 	va_end(ap);
 	fprintf(stderr, "%s", buf);
-	if(fmt[0] && fmt[strlen(fmt) - 1] == ':')
+	if (fmt[0] && fmt[strlen(fmt) - 1] == ':')
 		fprintf(stderr, " %s\n", strerror(errno));
 	exit(EXIT_FAILURE);
 }
@@ -47,7 +47,7 @@ int get_fps()
 	static int fps = 0, last_tick = 0, frame_counter = 0;
 	int current_tick = SDL_GetTicks();
 	// Update count every second
-	if(current_tick >= (last_tick + 1000)) {
+	if (current_tick >= (last_tick + 1000)) {
 		fps = frame_counter;
 		frame_counter = 0;
 		last_tick = current_tick;
@@ -68,20 +68,18 @@ int get_random_number(int max_number)
 {
 	static int last_tick;
 	static int tick_instance = 0;
-
 	int current_tick = SDL_GetTicks();
-	if(last_tick == current_tick) {
+	
+	if (last_tick == current_tick) {
 		++tick_instance;
 		current_tick *= tick_instance; 
 	} else {
 		tick_instance = 0;
 		last_tick = current_tick;
-	}
-		
-	srand(current_tick);
-	int random_number = rand() % max_number;	
+	}	
+	srand(current_tick);	
 	
-	return random_number;
+	return rand() % max_number;
 }
 
 
@@ -144,55 +142,33 @@ com_add_string_node
 Add element to a list
 ====================
 */
-void com_add_string_node(string_list_t *list_head, char *str1, ...)
+string_list_s* com_add_string_node(string_list_t *list_head)
 {
-	size_t alloc_char = 0; // lenght of all string
-	char *tmp_char; // keep position for next string in allocated memory
-	char *tmp_str = str1;
 	string_list_s **tmp_node = &list_head->list;
-
-	va_list ap;
-	va_start(ap, str1);
-	
-	while (tmp_str) {
-		alloc_char += strlen(tmp_str) + 1;
-		tmp_str = va_arg(ap, char*);
-	}
-	tmp_char = calloc(alloc_char, sizeof(char));
-	printf("alloc_char: %d\n", alloc_char);
-
 	string_list_s *new_node = calloc(1, sizeof(string_list_s));
 	new_node->next = NULL;
 
-	va_end(ap);
-	va_start(ap, str1);
-
-	tmp_str = str1;
-	for (int i = 0; tmp_str != NULL && i < LS_MAX_STRING; i++) {
-		printf("i: %d\n", i);
-		printf("string: %s\n", tmp_str);
-		printf("string: %s\n", tmp_str);
-		strcpy(tmp_char, tmp_str);
-		new_node->string[i] = tmp_char;
-		tmp_char += strlen(tmp_str) + 1;
-		tmp_str = va_arg(ap, char*);
-	}
-
-	if (!*tmp_node) { // we are the first node
-		printf("first node\n");
-		*tmp_node = new_node;
-		va_end(ap);
-		return;
-	}
-	int i = 0;
 	while (*tmp_node) { // find last node
-		i++;
 		tmp_node = &(*tmp_node)->next;
 	}
 	*tmp_node = new_node;
-	printf("node: %d\n", i);
-	va_end(ap);
+	return new_node;
 }
+
+
+void clear_strlist(string_list_t *list_head)
+{
+	string_list_s *tmp_node = list_head->list;
+	string_list_s *next_node;
+
+	while (tmp_node) {
+		next_node = tmp_node->next;
+		free(tmp_node);
+		tmp_node = next_node;
+	}
+	list_head->list = NULL;
+}
+
 
 /* 
 ====================
@@ -209,7 +185,7 @@ int strlist_len(string_list_s *strlist)
 		i++;
 		strlist = strlist->next;
 	}
-	printf("len: %d\n", i);
+
 	return i;
 }
 

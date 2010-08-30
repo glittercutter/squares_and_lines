@@ -55,6 +55,13 @@ typedef struct Text {
 	char lbox_server[ STRING_LENGTH ];
 	char lbox_ping[ STRING_LENGTH ];
 	char lbox_player[ STRING_LENGTH ];
+	
+	char configure[ STRING_LENGTH ];
+	char join[ STRING_LENGTH ];
+	char update[ STRING_LENGTH ];
+
+	char txt_srv_name_is[ STRING_LENGTH ];
+	char txt_player_name_is[ STRING_LENGTH ];
 
 } Text;
 Text text;
@@ -110,13 +117,23 @@ typedef struct widget_list_box_t {
 	scrollbar_t scrollbar;
 } widget_list_box_t;
 
+typedef struct widget_plain_text_t {
+	int x1, y1;
+	char *text1;
+	char *text2;
+	char *text3;
+	ColorRGB color;
+} widget_plain_text_t;
+
 typedef union widget_union {
 	widget_list_box_t *list_box;
+	widget_plain_text_t *plain_text;
 } widget_union;
 
 // widget type
 enum {
-	LIST_BOX
+	LIST_BOX,
+	PLAIN_TEXT
 };
 
 typedef struct widget_t {
@@ -148,7 +165,10 @@ void ui_button_function(void);
 int ui_button_check_click(Button **);
 void ui_button_close_window(void);
 void ui_button_drag_window(void);
-void ui_new_widget_list_box(int, int, int, int, string_list_t*, widget_t**);
+void ui_new_widget_list_box(int, int, int, int, 
+		string_list_t*, widget_t**);
+void ui_new_widget_plain_text(char*, char*, char*, int, int,
+		ColorRGB, widget_t**);
 void ui_scrollbar_update_size(int, int, scrollbar_t*);
 Button* ui_new_button(int, int, int, int, int, int, int, char*, void func(), int, int, Button **);
 Button* ui_button_check_pos(Button **);

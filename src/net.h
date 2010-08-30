@@ -24,6 +24,28 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "shared.h"
 
+// net.c
+typedef struct client_s {
+	IPaddress ip;
+	IPaddress *tcp_ip;
+	TCPsocket tcp_socket;
+	UDPsocket udp_socket;
+	char username[20];
+	bool connected;
+	struct client_s *next;
+} client_s;
+client_s *client;
+
+UDPpacket *udp_out_p;
+UDPpacket *udp_in_p;
+
+void cl_request_connection(void);
+void request_local_srv(void);
+int start_srv(void);
+
+// net_z.c
+int zdeflate(char *source, unsigned char *out, int *size);
+int zinflate(char *source, char *out, int size);
 
 
 #endif

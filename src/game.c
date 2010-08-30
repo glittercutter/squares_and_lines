@@ -200,7 +200,7 @@ void g_add_segment()
 
 
 
-void g_do_game()
+void game_main()
 {
 	if (input.mouse_button_left || input.mouse_button_right) {
 		if (ui_button_check_click(&button_game)) return;

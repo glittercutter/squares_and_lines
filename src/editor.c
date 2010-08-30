@@ -73,7 +73,7 @@ void ed_change_state()
 }
 
 
-void ed_do_editor()
+void editor_main()
 {
 	if (input.mouse_button_left) {
 		// check button if mouse is on the topbar

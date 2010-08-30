@@ -26,10 +26,15 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "ui.h"
 
 
+typedef struct srv_s {
+	short nplayer, max_nplayer;
+	int id;
+	char name[32];
+} srv_s;
+srv_s srv;
+
+
 // variable
-pthread_t server_thread;
-int sv_thread_active;
-int lan_wait_client;
 string_list_t peer_list;
 
 

@@ -22,144 +22,18 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "client.h"
 
 #include "common.h"
+#include "net.h"
 #include "ui.h"
 
 
-void CL_add_lan_host(UDPpacket*);
-
-int lanclient_wait_host_response()
-{
-	UDPsocket sd;       /* Socket descriptor */
-	UDPpacket *p;       /* Pointer to packet memory */
-	
-	lan_search_host = TRUE;
-
-	/* Open a socket */
-	if (!(sd = SDLNet_UDP_Open(7788)))
-	{
-		fprintf(stderr, "SDLNet_UDP_Open: %s\n", SDLNet_GetError());
-		printf("lanclient_wait_host_response()\n");
-		SDLNet_UDP_Close(sd);
-		return 1;
-	}
- 
-	/* Make space for the packet */
-	if (!(p = SDLNet_AllocPacket(512)))
-	{
-		fprintf(stderr, "SDLNet_AllocPacket: %s\n", SDLNet_GetError());
-		exit(EXIT_FAILURE);
-	}
- 
-	while (lan_search_host) {
-		/* Wait a packet. UDP_Recv returns != 0 if a packet is coming */
-		if (SDLNet_UDP_Recv(sd, p)) {
-			printf("UDP Packet incoming\n");
-			printf("\tChan:    %d\n", p->channel);
-			printf("\tData:    %s\n", (char *)p->data);
-			printf("\tLen:     %d\n", p->len);
-			printf("\tMaxlen:  %d\n", p->maxlen);
-			printf("\tStatus:  %d\n", p->status);
-			printf("\tAddress: %x %x\n", p->address.host, p->address.port);
- 		
-			printf("%s\n", "client");
-
-			/* Quit if packet contains "quit" */
-			if (strcmp((char *)p->data, "54321/c_square/lan") == 0) {
-				printf("host responded!\n");
-				ui_new_message("host responded");
-				CL_add_lan_host(p);
-				break;
-			}
-		}	
-		SDL_Delay(10);
-	}
-
-	SDLNet_FreePacket(p);
-	SDLNet_UDP_Close(sd);
-
-	return 0;
-}
-
-
-void* lanclient_search_host(void *is_a_thread)
-{
-	int net_port = 2000;
-	UDPpacket *out_p;
-	IPaddress out_ip;
-	UDPsocket out_udpsd;
-	char out_adressip[] = {"255.255.255."};
-	char out_tmp_adressip[20];
-	
-	/* Open a socket on random port */
-	if (!(out_udpsd = SDLNet_UDP_Open(0)))
-	{
-		fprintf(stderr, "SDLNet_UDP_Open: %s\n", SDLNet_GetError());
-		printf("net_list_lan_host()\n");
-		exit(EXIT_FAILURE);
-	}
-	
-	/* Allocate memory for the packet */
-	if (!(out_p = SDLNet_AllocPacket(512)))
-	{
-		fprintf(stderr, "SDLNet_AllocPacket: %s\n", SDLNet_GetError());
-		exit(EXIT_FAILURE);
-	}
-	
-	// fill the packet
-	strcpy((char *)out_p->data, "12345/c_square/lan");
-	
-		
-	snprintf(out_tmp_adressip, 19, "%s%d%s", out_adressip, 255, "\0");
-	/* Resolve server name  */
-	if (SDLNet_ResolveHost(&out_ip, out_tmp_adressip, net_port) == -1)
-	{
-		fprintf(stderr, "SDLNet_ResolveHost(%s %d): %s\n", out_tmp_adressip,
-				net_port, SDLNet_GetError());
-// 		return;
-	}
-	
-	out_p->address.host = out_ip.host;	/* Set the destination host */
-	out_p->address.port = out_ip.port;	/* And destination port */
-
-	out_p->len = strlen((char *)out_p->data) + 1;
-	SDLNet_UDP_Send(out_udpsd, -1, out_p); /* This sets the p->channel */
-
-	printf("request server info at: %s\n", out_tmp_adressip);
-
-	lanclient_wait_host_response();
-
-	SDLNet_FreePacket(out_p);
-	SDLNet_UDP_Close(out_udpsd);
-
-	cl_thread_active = FALSE;
-
-	pthread_exit(NULL);
-
-}
+void cl_update_srvlist();
+void cl_clear_srvlist();
 
 
 void lanclient_start_client()
 {
-	int rc = 0;
-	
-	if (lan_search_host) {
-		lan_search_host = FALSE;
-		while (42) {
-			if (cl_thread_active) {
-				SDL_Delay(5);
-			} else break;
-		}
-	}
-
 	active_window = &client_window;
-
-	rc = pthread_create(&client_thread, NULL, lanclient_search_host, (void*)rc);
-	pthread_detach(client_thread);
-	if (rc) {
-		fprintf(stderr, "ERROR; return code from pthread_create() is %d\n", rc);
-		exit(-1);
-	}
-
+	request_local_srv();
 }
 
 
@@ -194,63 +68,169 @@ void cl_init_ui()
 	min_w = 1;
 	w = strlen("x") * button_font.w + UI_BAR_PADDING;
 	x = client_window.x2 - w - (UI_BAR_PADDING * 2); y = client_window.y1;
-	ui_new_button(x, y, w, h, min_w, max_w, ALIGN_CENTER,
-			"x", *cl_button_close_window, 1, 1, &client_window.close_button);
-	
-	x = client_window.x1 + (UI_BAR_PADDING * 2);
-	y = client_window.y1 + (h * 2);
+	ui_new_button(x, y, w, h, min_w, max_w, ALIGN_CENTER, "x", 
+			*cl_button_close_window, 1, 1, &client_window.close_button);
 
-	ui_new_widget_list_box(client_window.x1 + (UI_BAR_PADDING * 2), 
-			client_window.y1 + (h * 2) + (UI_BAR_PADDING * 2), client_window.x2 - (UI_BAR_PADDING * 2), 
+	// player name
+	x = client_window.x1 + (UI_BAR_PADDING * 3);
+	y = client_window.y1 + h + (UI_BAR_PADDING * 2);
+	ui_new_widget_plain_text(text.txt_player_name_is, local_player.name, "", x, y,
+			color.text, &client_window.widget);	
+	
+	// configure button
+	min_w = 80;
+	w = strlen(text.configure) * button_font.w + UI_BAR_PADDING;
+	x = host_window.x2 - min_w - (UI_BAR_PADDING * 4);
+	y = host_window.y1 + h + (UI_BAR_PADDING * 2);
+	ui_new_button(x, y, w, h, min_w, max_w, ALIGN_CENTER,
+			text.configure, *cl_button_close_window, 1, 1, 
+			&client_window.button);
+	// join button
+	w = strlen(text.join) * button_font.w + UI_BAR_PADDING;
+	y += h + (UI_BAR_PADDING);
+	ui_new_button(x, y, w, h, min_w, max_w, ALIGN_CENTER,
+			text.join, *cl_request_connection, 1, 1, 
+			&client_window.button);	
+	// update
+	w = strlen(text.update) * button_font.w + UI_BAR_PADDING;
+	y += h + (UI_BAR_PADDING);
+	ui_new_button(x, y, w, h, min_w, max_w, ALIGN_CENTER,
+			text.update, *cl_update_srvlist, 1, 1, 
+			&client_window.button);
+
+	ui_new_widget_list_box(
+			client_window.x1 + (UI_BAR_PADDING * 2), 
+			client_window.y1 +  (client_window.h / 2), 
+			client_window.x2 - (UI_BAR_PADDING * 2), 
 			client_window.y2 - (UI_BAR_PADDING * 2), &host_list, 
 			&client_window.widget);
 
 	// game name
 	host_list.col_position[0] = 0;
 	// ping
-	host_list.col_position[1] = (host_list.list_box->w - SCROLLBAR_SIZE) * 0.5f;
+	host_list.col_position[1] = (host_list.list_box->w - SCROLLBAR_SIZE) * 0.7f;
 	// player
-	host_list.col_position[2] = (host_list.list_box->w - SCROLLBAR_SIZE) * 0.75f;
+	host_list.col_position[2] = (host_list.list_box->w - SCROLLBAR_SIZE) * 0.8f;
 
 	// collum name buttons
 	w = strlen(text.lbox_server) * button_font.w + UI_BAR_PADDING;
 	min_w = host_list.col_position[1] - host_list.col_position[0];
-	ui_new_button(host_list.col_position[0] + host_list.list_box->x1, host_list.list_box->y1 - button_font.h, w, h,
-			min_w, max_w, ALIGN_LEFT, text.lbox_server, NULL, 1, 1, &host_list.col_name);
+	ui_new_button(host_list.col_position[0] + host_list.list_box->x1, 
+			host_list.list_box->y1 - button_font.h, w, h, min_w, max_w,
+			ALIGN_LEFT, text.lbox_server, NULL, 1, 0, &host_list.col_name);
 
 	w = strlen(text.lbox_ping) * button_font.w + UI_BAR_PADDING;
 	min_w = host_list.col_position[2] - host_list.col_position[1];
-	ui_new_button(host_list.col_position[1] + host_list.list_box->x1, host_list.list_box->y1 - button_font.h, w, h,
-			min_w, max_w, ALIGN_LEFT, text.lbox_ping, NULL, 1, 1, &host_list.col_name);
+	ui_new_button(host_list.col_position[1] + host_list.list_box->x1, 
+			host_list.list_box->y1 - button_font.h, w, h, min_w, max_w,
+			ALIGN_LEFT, text.lbox_ping, NULL, 1, 0, &host_list.col_name);
 
 	w = strlen(text.lbox_player) * button_font.w + UI_BAR_PADDING;
-	min_w = host_list.list_box->w - (SCROLLBAR_SIZE * 1.6f) - host_list.col_position[2];
-	ui_new_button(host_list.col_position[2] + host_list.list_box->x1, host_list.list_box->y1 - button_font.h, w, h,
-			min_w, max_w, ALIGN_LEFT, text.lbox_player, NULL, 1, 1, &host_list.col_name);
+	min_w = host_list.list_box->w - (SCROLLBAR_SIZE * 1.6f) - 
+			host_list.col_position[2];
+	ui_new_button(host_list.col_position[2] + host_list.list_box->x1, 
+			host_list.list_box->y1 - button_font.h, w, h, min_w, max_w,
+			ALIGN_LEFT, text.lbox_player, NULL, 1, 0, &host_list.col_name);
 
 	host_list.list = NULL;
 
 }
 
 
-void CL_add_lan_host(UDPpacket *p)
+void cl_add_lan_srv(int byte_readed, UDPpacket *p)
 {
-// 	char ip[13];
-// 	char host_info[STRING_LENGTH];
-	char ip[] = {"12321"};
-	char host_info[] = {"info"};
-	
-	static int count = 0;
-	count++;
-	char count_str[10];
-	sprintf(count_str, "%d%c", count, '\0');
+	srv_list_s **tmp_node = &srv_list;
+	srv_list_s *new_node;
+	char *name = (char*)&p->data[byte_readed];
+	byte_readed += strlen((char*)&p->data[byte_readed]) + 1;
 
-	com_add_string_node(&host_list, count_str, ip, host_info, NULL);
+	int id = SDLNet_Read32(&p->data[byte_readed]);
+	byte_readed += 4;
+
+	short nplayer = SDLNet_Read16(&p->data[byte_readed]);
+	byte_readed += 2;
+	short max_nplayer = SDLNet_Read16(&p->data[byte_readed]);
+	byte_readed += 2;
+
+	Uint32 ping = SDLNet_Read32(&p->data[byte_readed]);
+	byte_readed += 4;
+
+	printf("recv tick: %u", ping);		
+
+	while (*tmp_node) {
+		if ((p->address.host == (*tmp_node)->address.host) && 
+				(id == (*tmp_node)->id)) {
+
+			/* We have this one already, dont create a new instance */
+			goto update_info_only;
+
+		}
+		printf("node\n");	
+		tmp_node = &(*tmp_node)->next;
+	}
+	
+	new_node = malloc(sizeof(srv_list_s));
+	printf("address: %p\n", (void*)new_node);
+	new_node->next = NULL;
+	new_node->address = p->address;
+	new_node->id = id;
+	
+	tmp_node = &srv_list;
+	if (!*tmp_node) {
+		// first node
+		*tmp_node = new_node;
+	} else {
+		while (*tmp_node) {
+			tmp_node = &(*tmp_node)->next;
+		}
+		// append to list
+		*tmp_node = new_node;
+	}
+
+	new_node->list = com_add_string_node(&host_list);	
+	new_node->list->string[0] = new_node->name;
+	new_node->list->string[1] = new_node->ping;
+	new_node->list->string[2] = new_node->player;
+
 	ui_scrollbar_update_size(strlist_len(host_list.list), 
 			host_list.max_element, &host_list.list_box->scrollbar);
 
-// 	printf("element: %d\n", 
+update_info_only:
+
+	// server name
+	strncpy((*tmp_node)->name, name, sizeof((*tmp_node)->name));
+	// ping
+	snprintf((*tmp_node)->ping, sizeof((*tmp_node)->ping), 
+			"%d", (SDL_GetTicks() - ping));
+	// player
+	snprintf((*tmp_node)->player, sizeof((*tmp_node)->player), 
+			"%hd / %hd", nplayer, max_nplayer);
+
 }
+
+
+void cl_update_srvlist()
+{
+	cl_clear_srvlist();
+	request_local_srv();
+}
+
+
+void cl_clear_srvlist()
+{
+	srv_list_s *tmp_node = srv_list;
+	srv_list_s *next_node;
+	
+	while (tmp_node) {
+		next_node = tmp_node->next;
+		free(tmp_node);
+		tmp_node = next_node;
+	}
+	srv_list = NULL;
+
+	clear_strlist(&host_list);
+}
+
 
 
 

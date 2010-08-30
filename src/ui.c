@@ -24,6 +24,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "draw.h"
 #include "input.h"
 
+char draw_txt_buf[200];
 
 int ui_scrollbar_check(scrollbar_t*);
 
@@ -38,12 +39,10 @@ Return a pointer to the created button.
 ====================
 */
 Button* ui_new_button(int x, int y, int w, int h, int min_w, int max_w, 
-		int align, char *text, void func(), int three_d, int gradient, Button **node)
+		int align, char *text, void func(), int three_d, int gradient,
+		Button **node)
 {
 	Button **node2 = node;
-
-	DEBUG(int i = 1);
-
 	int alfa = 255;
 	int text_x = 0;
 	int nor_w;
@@ -53,7 +52,6 @@ Button* ui_new_button(int x, int y, int w, int h, int min_w, int max_w,
 	} else if (w < min_w) {
 		nor_w = min_w;
 	} else nor_w = w;
-
 	nor_w += (UI_BAR_PADDING * 2);
 
 	Button *button;
@@ -74,28 +72,12 @@ Button* ui_new_button(int x, int y, int w, int h, int min_w, int max_w,
 	boxRGBA(button->surface, 0, 0, nor_w, h, color.topbar.r, 
 			color.topbar.g, color.topbar.b, alfa);
 
-	if (gradient) sdl_create_button_gradient_effect(button->surface);
+	// draw gradient
+	if (gradient) 
+		sdl_create_button_gradient_effect(button->surface);
 
-	// text
-	switch (align) {
-		case ALIGN_LEFT:
-			text_x = (UI_BAR_PADDING * 2);
-		break;
-
-		case ALIGN_CENTER:
-			text_x = ((nor_w - w) / 2 + (UI_BAR_PADDING / 2));
-		break;
-
-		case ALIGN_RIGHT:
-			text_x = (nor_w - w) - (UI_BAR_PADDING * 2);
-		break;
-	}
-
-	sdl_draw_text_blended2(button->surface, text_x, -1, text, button_font.data, 
-			color.text);
-	
+	// draw 3d effect
 	if (three_d) {
-		// 3d effect
 		rectangleRGBA(button->surface, 0, 0, button->w - 1, button->h - 1, 
 				color.button_highlight.r, color.button_highlight.g, 
 				color.button_highlight.b, 150);
@@ -105,24 +87,41 @@ Button* ui_new_button(int x, int y, int w, int h, int min_w, int max_w,
 				color.ed_outline.g, color.ed_outline.b, 200);
 	}
 
-	// adding to button list
-	if (!*node2) {
-		// first node
-		*node2 = button;
-		return *node2;
-	}
+	// draw text
+	switch (align) {
+	case ALIGN_LEFT:
+		text_x = (UI_BAR_PADDING * 2);
+		break;
 
+	case ALIGN_CENTER:
+		text_x = ((nor_w - w) / 2 + (UI_BAR_PADDING / 2));
+		break;
+
+	case ALIGN_RIGHT:
+		text_x = (nor_w - w) - (UI_BAR_PADDING * 2);
+		break;
+	}
+	sdl_draw_text_blended2(button->surface, text_x, -1, text, 
+			button_font.data, color.text);
+
+	// Add to button list
 	while (*node2) {
-		DEBUG(++i);
 		node2 = &(*node2)->next;
 	}
-	// append to list
 	*node2 = button;
 
 	return *node2;
 }
 
 
+/* 
+====================
+ui_button_check_click
+
+Return true and store a pointer in "ui_pressed_button"
+if a button is under the mouse.
+====================
+*/
 int ui_button_check_click(Button **button_type)
 {
 	Button *button = *button_type;
@@ -142,6 +141,13 @@ int ui_button_check_click(Button **button_type)
 	return 0;
 }
 
+/* 
+====================
+ui_button_check_click
+
+Return true if "button" is under the mouse
+====================
+*/
 int ui_singlebutton_check_click(Button *button)
 {
 	if ((input.mouse_y < button->y2) && 
@@ -154,10 +160,17 @@ int ui_singlebutton_check_click(Button *button)
 	return 0;
 }
 
+/* 
+====================
+ui_button_check_click
+
+Return a pointer to the button under the mouse.
+====================
+*/
 Button* ui_button_check_pos(Button **button_type)
 {
 	Button *button = *button_type;
-	int offset = 1; // used to remove (crack) between buttons
+	static const int offset = 1; // remove hole between buttons
 
 	while (button) {
 		if ((input.mouse_y < button->y2 + offset) && 
@@ -226,7 +239,8 @@ void ui_new_message(char* text)
 
 void ui_display_message()
 {
-	if (!ui_message.active) return;
+	if (!ui_message.active) 
+		return;
 
 	sdl_draw_box2(ui_message.x1, ui_message.y1, ui_message.x2, 
 			ui_message.y2, color.topbar);
@@ -236,14 +250,17 @@ void ui_display_message()
 			ui_message.text, button_font.data, color.text);
 
 	--ui_message.time;
-	if (!ui_message.time) ui_message.active = FALSE;
+	if (!ui_message.time) 
+		ui_message.active = FALSE;
 }
 
 
 int ui_list_box_check(widget_list_box_t *list_box)
 {
+	// collum name button
 	ui_button_check_click(&list_box->list->col_name);
-
+	
+	// check if the mouse is over the box
 	if (input.mouse_x > list_box->x2 - SCROLLBAR_SIZE || 
 			input.mouse_x < list_box->x1)
 		return 0;
@@ -270,7 +287,8 @@ void ui_display_window()
 	if (active_window->widget) {
 		while (widget_node != NULL) {
 			// all widget for the window are in a single linked list
-			if (widget_node->type == LIST_BOX) {
+			switch (widget_node->type) {
+			case LIST_BOX:
 				sdl_draw_widget_list_box(widget_node->widget.list_box);
 				
 				if (input.mouse_button_left || widget_node->
@@ -279,6 +297,21 @@ void ui_display_window()
 							scrollbar)) {
 					} else (ui_list_box_check(widget_node->widget.list_box));
 				}
+				break;
+
+			case PLAIN_TEXT:
+				snprintf(draw_txt_buf, sizeof(draw_txt_buf), "%s%s%s", 
+						widget_node->widget.plain_text->text1,
+						widget_node->widget.plain_text->text2, 
+						widget_node->widget.plain_text->text3),
+
+				sdl_draw_text_solid2(widget_node->widget.plain_text->x1, 
+						widget_node->widget.plain_text->y1,
+						draw_txt_buf,
+						button_font.data,
+						widget_node->widget.plain_text->color);
+				break;
+
 			}
 			widget_node = widget_node->next;
 		}
@@ -402,16 +435,14 @@ int ui_scrollbar_check(scrollbar_t *scrollbar)
 	return 1;
 }
 
+
 void ui_new_widget_list_box(int x1, int y1, int x2, int y2, 
 		string_list_t *strlist, widget_t **widget_head_node)
 {
 	widget_t **tmp_node = widget_head_node;
 
-	widget_t *new_widget;
-	new_widget = malloc(sizeof(widget_t));
-
-	widget_list_box_t *list_box;
-	list_box = calloc(1, sizeof(widget_list_box_t));
+	widget_t *new_widget = malloc(sizeof(widget_t));
+	widget_list_box_t *list_box = calloc(1, sizeof(widget_list_box_t));
 
 	list_box->x1 = x1;
 	list_box->y1 = y1;
@@ -506,8 +537,10 @@ void ui_new_widget_list_box(int x1, int y1, int x2, int y2,
 	new_widget->type = LIST_BOX;
 	new_widget->widget.list_box = list_box;
 	new_widget->next = NULL;
+	
+	printf("created list_box\n");	
 
-	// adding to window widget list
+	// add to window widget list
 	if (!*tmp_node) {
 		// first node
 		*tmp_node = new_widget;
@@ -517,10 +550,36 @@ void ui_new_widget_list_box(int x1, int y1, int x2, int y2,
 	while (*tmp_node) {
 		tmp_node = &(*tmp_node)->next;
 	}
-	// append to list
 	*tmp_node = new_widget;
 
 }
 
+void ui_new_widget_plain_text(char *text1, char *text2, char *text3, 
+		int x1, int y1, ColorRGB color, widget_t **widget_head_node)
+{
+	widget_t **tmp_node = widget_head_node;
+
+	widget_t *new_widget;
+	new_widget = malloc(sizeof(widget_t));
+
+	widget_plain_text_t *plain_text = malloc(sizeof(widget_plain_text_t));
+
+	new_widget->type = PLAIN_TEXT;
+	new_widget->widget.plain_text = plain_text;
+	new_widget->next = NULL;
+	
+	plain_text->text1 = text1;
+	plain_text->text2 = text2;
+	plain_text->text3 = text3;
+	plain_text->color = color;
+	plain_text->x1 = x1;
+	plain_text->y1 = y1;
+
+	// add to window widget list
+	while (*tmp_node) {
+		tmp_node = &(*tmp_node)->next;
+	}
+	*tmp_node = new_widget;
+}
 
 

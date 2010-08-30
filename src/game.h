@@ -35,7 +35,7 @@ Player player[2];
 
 
 void g_change_state();
-void g_do_game();
+void game_main();
 void g_init_ui();
 int g_init();
 

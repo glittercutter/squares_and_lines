@@ -31,15 +31,16 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 void fx_new_transition(void (*func)(), int step, int type)
 {
 	Fx_transition *fx = NULL;
+
 	switch (type) {
-		case FX_PLAYER_CHANGE:
-			fx = &fx_transition[FX_PLAYER_CHANGE];
+	case FX_PLAYER_CHANGE:
+		fx = &fx_transition[FX_PLAYER_CHANGE];
 		break;
 
-		case FX_FADE:
-			fx = &fx_transition[FX_FADE];
-		break;
+	case FX_FADE:
+		fx = &fx_transition[FX_FADE];
 	}
+
 	fx->active = TRUE;
 	fx->max_step = step;
 	fx->current_step = step;
@@ -66,14 +67,14 @@ static void fx_do_transition()
 			fx = &fx_transition[i];
 		} else continue;
 		
-		if ((fx->halfway) && (fx->current_step ==
-				fx->max_step)) {
+		if ((fx->halfway) && (fx->current_step == fx->max_step)) {
 			fx->active = FALSE;
 			return;
 		}
 
 		if (fx->current_step == 0) {
-			if (*fx->func != NULL) fx->func();
+			if (*fx->func != NULL) 
+				fx->func();
 			fx->halfway = TRUE;
 		}
 
@@ -99,32 +100,32 @@ static void fx_new_glow_segment()
 			seg_glow[i].glow_level = 0;
 			seg_glow[i].player = seg_glow_current.player;
 			switch (seg_glow_current.pos) {
-				case UP:
-					seg_glow[i].x1 = seg_glow_current.square->x1;
-					seg_glow[i].y1 = seg_glow_current.square->y1;
-					seg_glow[i].x2 = seg_glow_current.square->x2;
-					seg_glow[i].y2 = seg_glow_current.square->y1;
+			case UP:
+				seg_glow[i].x1 = seg_glow_current.square->x1;
+				seg_glow[i].y1 = seg_glow_current.square->y1;
+				seg_glow[i].x2 = seg_glow_current.square->x2;
+				seg_glow[i].y2 = seg_glow_current.square->y1;
 				break;
 
-				case RIGHT:
-					seg_glow[i].x1 = seg_glow_current.square->x2;
-					seg_glow[i].y1 = seg_glow_current.square->y1;
-					seg_glow[i].x2 = seg_glow_current.square->x2;
-					seg_glow[i].y2 = seg_glow_current.square->y2;
+			case RIGHT:
+				seg_glow[i].x1 = seg_glow_current.square->x2;
+				seg_glow[i].y1 = seg_glow_current.square->y1;
+				seg_glow[i].x2 = seg_glow_current.square->x2;
+				seg_glow[i].y2 = seg_glow_current.square->y2;
 				break;
 
-				case DOWN:
-					seg_glow[i].x1 = seg_glow_current.square->x1;
-					seg_glow[i].y1 = seg_glow_current.square->y2;
-					seg_glow[i].x2 = seg_glow_current.square->x2;
-					seg_glow[i].y2 = seg_glow_current.square->y2;
+			case DOWN:
+				seg_glow[i].x1 = seg_glow_current.square->x1;
+				seg_glow[i].y1 = seg_glow_current.square->y2;
+				seg_glow[i].x2 = seg_glow_current.square->x2;
+				seg_glow[i].y2 = seg_glow_current.square->y2;
 				break;
 
-				case LEFT:
-					seg_glow[i].x1 = seg_glow_current.square->x1;
-					seg_glow[i].y1 = seg_glow_current.square->y1;
-					seg_glow[i].x2 = seg_glow_current.square->x1;
-					seg_glow[i].y2 = seg_glow_current.square->y2;
+			case LEFT:
+				seg_glow[i].x1 = seg_glow_current.square->x1;
+				seg_glow[i].y1 = seg_glow_current.square->y1;
+				seg_glow[i].x2 = seg_glow_current.square->x1;
+				seg_glow[i].y2 = seg_glow_current.square->y2;
 				break;
 			}
 			return; // segment added
@@ -174,42 +175,42 @@ static void fx_glow_closest_segment()
 
 	// segment currently glowing
 	switch (closest_seg) {
-		case UP:
-			if (squares[pos_y][pos_x].owner_up == NONE) {
-				seg_glow_current.square = &squares[pos_y][pos_x];
-				seg_glow_current.pos = UP;
-				seg_glow_current.player = player_turn;
-			} else seg_glow_current.square = NULL;
+	case UP:
+		if (squares[pos_y][pos_x].owner_up == NONE) {
+			seg_glow_current.square = &squares[pos_y][pos_x];
+			seg_glow_current.pos = UP;
+			seg_glow_current.player = player_turn;
+		} else seg_glow_current.square = NULL;
 		break;
 
-		case RIGHT:
-			if (squares[pos_y][pos_x].owner_right == NONE) {
-				seg_glow_current.square = &squares[pos_y][pos_x];
-				seg_glow_current.pos = RIGHT;
-				seg_glow_current.player = player_turn;
-			} else seg_glow_current.square = NULL;
+	case RIGHT:
+		if (squares[pos_y][pos_x].owner_right == NONE) {
+			seg_glow_current.square = &squares[pos_y][pos_x];
+			seg_glow_current.pos = RIGHT;
+			seg_glow_current.player = player_turn;
+		} else seg_glow_current.square = NULL;
 		break;
 
-		case DOWN:
-			if (squares[pos_y][pos_x].owner_down == NONE) {
-				seg_glow_current.square = &squares[pos_y][pos_x];
-				seg_glow_current.pos = DOWN;
-				seg_glow_current.player = player_turn;
-			} else seg_glow_current.square = NULL;
+	case DOWN:
+		if (squares[pos_y][pos_x].owner_down == NONE) {
+			seg_glow_current.square = &squares[pos_y][pos_x];
+			seg_glow_current.pos = DOWN;
+			seg_glow_current.player = player_turn;
+		} else seg_glow_current.square = NULL;
 		break;
-		
-		case LEFT:
-			if (squares[pos_y][pos_x].owner_left == NONE) {
-				seg_glow_current.square = &squares[pos_y][pos_x];
-				seg_glow_current.pos = LEFT;
-				seg_glow_current.player = player_turn;
-			} else seg_glow_current.square = NULL;
+	
+	case LEFT:
+		if (squares[pos_y][pos_x].owner_left == NONE) {
+			seg_glow_current.square = &squares[pos_y][pos_x];
+			seg_glow_current.pos = LEFT;
+			seg_glow_current.player = player_turn;
+		} else seg_glow_current.square = NULL;
 		break;
 	}
 }
 
 
-static const int inc_glow_rate = 85;
+static const int inc_glow_rate = 150;
 static const int dec_glow_rate = 20;
 
 static void fx_glow_segment()
@@ -220,26 +221,29 @@ static void fx_glow_segment()
 		if (seg_glow[i].square) {
 			// increase glow level of closest segment
 			if (seg_glow_current.square == seg_glow[i].square && 
-				seg_glow_current.pos == seg_glow[i].pos) {
+					seg_glow_current.pos == seg_glow[i].pos) {
+
 				if (seg_glow[i].glow_level < 255) {
 					seg_glow[i].glow_level += inc_glow_rate;
-					if (seg_glow[i].glow_level > 255) seg_glow[i].glow_level = 255;
+					if (seg_glow[i].glow_level > 255) 
+						seg_glow[i].glow_level = 255;
+
 				} else seg_glow[i].glow_level = 255;
-				new_segment = false; // was glowing
+				new_segment = false; // was glowing, not a new one
 
 			} else {
-				/* 	Decrease glow level of other segment and remove from array if 
-				glow level is less than 0 */
+				/* Decrease glow level of other segment and remove from 
+				   array if glow level is less than 0 */
 				seg_glow[i].glow_level -= dec_glow_rate;
-				if (seg_glow[i].glow_level <= 0) {
+				if (seg_glow[i].glow_level <= 0)
 					seg_glow[i].square = NULL;
-				}
 			}
 		}
 	}
 	/* Closest segment was not glowing already */
 	if (new_segment && seg_glow_current.square) {
-		if (seg_glow_current.square->active) fx_new_glow_segment();
+		if (seg_glow_current.square->active) 
+			fx_new_glow_segment();
 	}
 }
 

@@ -32,43 +32,38 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "ui.h"
 
 
-int get_fps();
-
-
 int main(int argc, char **argv)
 {
-	if(init()) {
+	if (init()) {
 		return 1;
 	}
 
 	while (gamestate != QUIT) {
 
 		get_input();
-
-		m_do_menu();
+		menu_main();
 		fx_main();
 		
 		if (!active_window) {
 			switch (gamestate) {
 			case GAME:
-				g_do_game();
+				game_main();
 				break;
 			
 			case EDITOR:
-				ed_do_editor();
-				break;
+				editor_main();
 			}
 		}
 
+		// Draw
 		// TODO frame skip
 		switch (gamestate) {
-			case GAME:
-				sdl_draw_game();
+		case GAME:
+			sdl_draw_game();
 			break;
-			
-			case EDITOR:
-				sdl_draw_editor();
-			break;
+		
+		case EDITOR:
+			sdl_draw_editor();
 		}	
 		
 		ui_display_window();
@@ -78,11 +73,9 @@ int main(int argc, char **argv)
 
 // 		printf("fps: %d\n", get_fps());
 		sdl_render();
-
 	}
 
 	save_config();
-	
 	return 0;
 }
 

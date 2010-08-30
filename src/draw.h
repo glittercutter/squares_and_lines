@@ -25,6 +25,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "shared.h"
 #include "ui.h"
 
+// Buffer for dinamic text drawing
+char draw_txt_buf[200];
+
 
 void sdl_draw_button();
 SDL_Surface* sdl_create_surface(int, int);

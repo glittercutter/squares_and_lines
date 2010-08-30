@@ -48,9 +48,12 @@ GAME_OBJ = \
 	$(OBJDIR)/init.o \
 	$(OBJDIR)/main.o \
 	$(OBJDIR)/menu.o \
+	$(OBJDIR)/net.o \
+	$(OBJDIR)/net_z.o \
 	$(OBJDIR)/parse.o \
 	$(OBJDIR)/server.o \
 	$(OBJDIR)/ui.o \
+
 
 $(OBJDIR)/common.o : $(SRCDIR)/common.c; $(DO_CC)
 $(OBJDIR)/client.o : $(SRCDIR)/client.c; $(DO_CC)
@@ -62,9 +65,12 @@ $(OBJDIR)/input.o : $(SRCDIR)/input.c; $(DO_CC)
 $(OBJDIR)/init.o : $(SRCDIR)/init.c; $(DO_CC)
 $(OBJDIR)/main.o : $(SRCDIR)/main.c; $(DO_CC)
 $(OBJDIR)/menu.o : $(SRCDIR)/menu.c; $(DO_CC)
+$(OBJDIR)/net.o : $(SRCDIR)/net.c; $(DO_CC)
+$(OBJDIR)/net_z.o : $(SRCDIR)/net_z.c; $(DO_CC)
 $(OBJDIR)/parse.o : $(SRCDIR)/parse.c; $(DO_CC)
 $(OBJDIR)/server.o : $(SRCDIR)/server.c; $(DO_CC)
 $(OBJDIR)/ui.o : $(SRCDIR)/ui.c; $(DO_CC)
+
 
 
 #############################################################################

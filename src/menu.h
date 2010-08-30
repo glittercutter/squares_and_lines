@@ -24,7 +24,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "shared.h"
 
-void m_do_menu();
+void menu_main();
 void m_init_ui();
 void m_button_new_game();
 

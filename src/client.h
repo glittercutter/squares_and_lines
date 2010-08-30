@@ -23,9 +23,31 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define __CLIENT_H__
 
 #include "shared.h"
+#include "ui.h"
+
 
 
 #define PACKET_SEND_RATE 2
+
+
+typedef struct srv_list_s {
+	int id;
+	IPaddress address;
+	char name[32];
+	char ping[8];
+	char player[16];
+	string_list_s *list;
+	struct srv_list_s *next;
+} srv_list_s;
+srv_list_s *srv_list;
+
+
+typedef struct local_player_s {
+	int id;
+	char name[32];
+} local_player_s;
+local_player_s local_player;
+
 
 
 // variable
@@ -37,5 +59,6 @@ string_list_t host_list;
 // function
 void lanclient_start_client(void);
 void cl_init_ui(void);
+void cl_add_lan_srv(int byte_readed, UDPpacket *p);
 
 #endif

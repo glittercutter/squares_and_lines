@@ -26,7 +26,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 
 void ed_change_state();
-void ed_do_editor();
+void editor_main();
 void ed_init_ui();
 int ed_init();
 

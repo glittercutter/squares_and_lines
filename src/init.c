@@ -27,6 +27,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "editor.h"
 #include "game.h"
 #include "menu.h"
+#include "net.h"
 #include "parse_public.h"
 #include "server.h"
 #include "ui.h"
@@ -49,7 +50,7 @@ sdl_cleanup()
 
 static void sdl_init()
 {
-	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) != 0 )
+	if (SDL_Init(SDL_INIT_VIDEO) != 0 )
 		eprint("Unable to initialize SDL: %s\n", SDL_GetError());
 }
 
@@ -111,6 +112,11 @@ int init()
 	/* Initialize SDL_net */
 	if (SDLNet_Init() < 0) 
 		eprint("SDLNet_Init: %s\n", SDLNet_GetError());
+	/* Allocate memory for the packet */
+	if (!(udp_in_p = SDLNet_AllocPacket(512)))
+		eprint("SDLNet_AllocPacket: %s\n", SDLNet_GetError());
+	if (!(udp_out_p = SDLNet_AllocPacket(512)))
+		eprint("SDLNet_AllocPacket: %s\n", SDLNet_GetError());
 	
 	ui_init();
 

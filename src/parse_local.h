@@ -120,6 +120,13 @@ static const char* lang_lbox_server_str[]		= {"lbox_server", "Server"};
 static const char* lang_lbox_ping_str[]			= {"lbox_ping", "Ping"};
 static const char* lang_lbox_player_str[]		= {"lbox_player", "Player"};
 
+static const char* lang_txt_srv_name_is_str[]	= {"txt_srv_name_is", "Server name: "};
+static const char* lang_txt_player_name_is_str[]= {"txt_player_name_is", "Player name: "};
+static const char* lang_configure_str[]			= {"configure", "Configure"};
+static const char* lang_join_str[]				= {"join", "Join"};
+static const char* lang_update_str[]			= {"update", "Update"};
+
+
 static struct Var_info lang_info[] = {
 	
 	//	NAME						VAR (ptr)					TYPE
@@ -143,6 +150,11 @@ static struct Var_info lang_info[] = {
 	{	lang_lbox_ping_str,			&text.lbox_ping,			STRING_T		},
 	{	lang_lbox_player_str,		&text.lbox_player,			STRING_T		},
 
+	{	lang_txt_srv_name_is_str,	&text.txt_srv_name_is,		STRING_T		},
+	{	lang_txt_player_name_is_str,&text.txt_player_name_is,	STRING_T		},
+	{	lang_configure_str,			&text.configure,			STRING_T		},
+	{	lang_join_str,				&text.join,					STRING_T		},
+	{	lang_update_str,			&text.update,				STRING_T		},
 };
 
 

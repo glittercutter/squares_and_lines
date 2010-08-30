@@ -87,7 +87,6 @@ void m_init_ui()
 	int w;
 	int h = button_font.size + UI_BAR_PADDING;
 	int x, y;
-
 	// buttons position are based previously created button
 	Button *last_button;
 	Button *topbar;
@@ -152,7 +151,7 @@ void m_init_ui()
 }
 
 
-void m_ui()
+static void m_ui()
 {
 	if (active_dropmenu) {
 		ui_highlight_button = ui_button_check_pos(&active_dropmenu);
@@ -171,7 +170,7 @@ void m_ui()
 }
 
 
-void m_do_menu()
+void menu_main()
 {
 	m_ui();
 }

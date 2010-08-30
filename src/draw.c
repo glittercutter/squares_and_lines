@@ -625,7 +625,7 @@ void sdl_draw_widget_list_box(widget_list_box_t *list_box)
 
 		for (int j = 0; j < LS_MAX_STRING; j++) {
 			if (!(*list)->string[j]) continue;
-			x = list_box->list->col_position[j] + list_box->x1;
+			x = list_box->list->col_position[j] + list_box->x1 + 2;
 			sdl_draw_text_solid2(x, y, (*list)->string[j], button_font.data,
 					color.text);
 		}
