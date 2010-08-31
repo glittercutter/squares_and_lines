@@ -377,12 +377,19 @@ void cl_request_connection()
 }
 
 
+/* 
+====================
+msv_send_info
+
+Send info about our server.
+====================
+*/
 void msv_send_info(int byte_readed)
 {
 	int byte_writed = 0;
 
 	/* Write packet */
-	// write connection request bytes
+	// write info answer bytes
 	udp_out_p->data[byte_writed++] = 0x82;
 	udp_out_p->data[byte_writed++] = 0x00;
 	
@@ -443,6 +450,7 @@ int msv_parse_udp_packet()
 		msv_send_info(byte_readed);
 		return 0;
 
+	// connection request
 	case 0x01:
 		if ((udp_in_p->data[byte_readed++]) != 0x00) break;
 		if (strcmp((char *)&udp_in_p->data[byte_readed], "udp_sdltest")) break;
@@ -466,7 +474,8 @@ void cl_parse_udp_packet()
 		printf("\nMessage from UDP connection\n");
 // 		message_printf("%s\n", (char *)&udp_in_p->data[byte_readed]);
 		break;
-
+	
+	// server info
 	case 0x82:
 		if ((udp_in_p->data[byte_readed++]) != 0x00)
 			break;

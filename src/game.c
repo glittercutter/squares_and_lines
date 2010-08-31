@@ -140,41 +140,45 @@ void g_add_segment()
 	}
 
 	switch (closest_segment) {
-		case UP:
-			if (squares[pos_y][pos_x].owner_up == NONE) {
-				squares[pos_y][pos_x].owner_up = player_turn;
-				*squares[pos_y][pos_x].neighbour_up = player_turn;
-			} else return;
+	case UP:
+		if (squares[pos_y][pos_x].owner_up == NONE) {
+			squares[pos_y][pos_x].owner_up = player_turn;
+			*squares[pos_y][pos_x].neighbour_up = player_turn;
+		} else return;
 		break;
 
-		case RIGHT:
-			if (squares[pos_y][pos_x].owner_right == NONE) {
-				squares[pos_y][pos_x].owner_right = player_turn;
-				*squares[pos_y][pos_x].neighbour_right = player_turn;
-			} else return;
+	case RIGHT:
+		if (squares[pos_y][pos_x].owner_right == NONE) {
+			squares[pos_y][pos_x].owner_right = player_turn;
+			*squares[pos_y][pos_x].neighbour_right = player_turn;
+		} else return;
 		break;
 
-		case DOWN:
-			if (squares[pos_y][pos_x].owner_down == NONE) {
-				squares[pos_y][pos_x].owner_down = player_turn;
-				*squares[pos_y][pos_x].neighbour_down = player_turn;
-			} else return;
+	case DOWN:
+		if (squares[pos_y][pos_x].owner_down == NONE) {
+			squares[pos_y][pos_x].owner_down = player_turn;
+			*squares[pos_y][pos_x].neighbour_down = player_turn;
+		} else return;
 		break;
-		
-		case LEFT:
-			if (squares[pos_y][pos_x].owner_left == NONE) {
-				squares[pos_y][pos_x].owner_left = player_turn;
-				*squares[pos_y][pos_x].neighbour_left = player_turn;
-			} else return;
+	
+	case LEFT:
+		if (squares[pos_y][pos_x].owner_left == NONE) {
+			squares[pos_y][pos_x].owner_left = player_turn;
+			*squares[pos_y][pos_x].neighbour_left = player_turn;
+		} else return;
 		break;
 	}
 
 	g_check_complete_square(&squares[pos_y][pos_x]);
 	// check neighbour squares
-	if (pos_y != 0) g_check_complete_square(&squares[pos_y - 1][pos_x]);
-	if (pos_x != ed_grid_w) g_check_complete_square(&squares[pos_y][pos_x + 1]);
-	if (pos_y < ed_grid_h - 1) g_check_complete_square(&squares[pos_y + 1][pos_x]);
-	if (pos_x != 0) g_check_complete_square(&squares[pos_y][pos_x - 1]);
+	if (pos_y != 0) 
+		g_check_complete_square(&squares[pos_y - 1][pos_x]);
+	if (pos_x != ed_grid_w)
+		g_check_complete_square(&squares[pos_y][pos_x + 1]);
+	if (pos_y < ed_grid_h - 1)
+		g_check_complete_square(&squares[pos_y + 1][pos_x]);
+	if (pos_x != 0)
+		g_check_complete_square(&squares[pos_y][pos_x - 1]);
 
 	input.mouse_button_left = FALSE;
 	input.mouse_button_right = FALSE;
@@ -244,11 +248,10 @@ int g_init_square()
 	g_min_y = ed_grid_h;
 	g_max_y = 0;
 
-	// find dimension and remove uncompletable square
+	// remove uncompletable square
 	for (int i = 0; i < ed_grid_h; i++) {
 		for (int j = 0; j < ed_grid_w; j++) {
-			if (squares[i][j].active) {
-				
+			if (squares[i][j].active) {	
 				if (i == 0 || !squares[i - 1][j].active) {
 					if (j == (ed_grid_w - 1) || !squares[i][j + 1].active) {
 						if (i == (ed_grid_h - 1) || !squares[i + 1][j].active) {
@@ -260,7 +263,7 @@ int g_init_square()
 						}
 					}
 				}
-
+				// find dimension 
 				if (i < g_min_y) g_min_y = i;
 				if (i > g_max_y) g_max_y = i;
 				if (j < g_min_x) g_min_x = j;
@@ -271,7 +274,8 @@ int g_init_square()
 		}
 
 	}
-
+	
+	// noy enough active square
 	if ((g_max_x - g_min_x <= 1) || (g_max_y - g_min_y <= 1)) {
 		ui_new_message("not enough square!");
 		return 1;
@@ -280,13 +284,14 @@ int g_init_square()
 	g_max_x += 1;
 	g_max_y += 1;
 
-	// find new square size
+	// find square size for the game
 	tmp_size = w / (g_max_x - g_min_x);
 	g_square_size = h / (g_max_y - g_min_y);
 	if (tmp_size < g_square_size) g_square_size = tmp_size;
 
-	g_offset_x = (display_width - ((g_max_x - g_min_x) * g_square_size)) / 2 ;
-	g_offset_y = button_topbar->h + (h - ((g_max_y - g_min_y) * g_square_size)) / 2;
+	g_offset_x = (display_width - ((g_max_x - g_min_x) * g_square_size)) / 2;
+	g_offset_y = button_topbar->h + (h - ((g_max_y - g_min_y) *
+			g_square_size)) / 2;
 
 	// clear position from editor for all square
 	for (int i = 0; i < ed_grid_h; i++) {
@@ -327,9 +332,7 @@ Called before every game
 int g_init()
 {
 	player_turn = PLAYER_0;	
-	
 	score[0] = 0; score[1] = 0;
-
 	squares_remaining = 0;
 	
 	if (g_init_square()) return 1;
