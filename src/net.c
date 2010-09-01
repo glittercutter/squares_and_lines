@@ -33,17 +33,13 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define BROADCAST_PORT 2091
 #define HEADER_SIZE 2
 
-static bool connected = false;
-static bool master_server = false;
-
-static int server_port = BROADCAST_PORT;
-
-static char username[20]; // username of the local user
+static bool net_is_server = false;
+static bool net_is_client = false;
 
 static TCPsocket main_tcp_socket;
 static UDPsocket main_udp_socket;
-static IPaddress host_udp_ip;
-static IPaddress host_tcp_ip;
+static IPaddress main_tcp_ip;
+static IPaddress main_udp_ip;
 
 static SDLNet_SocketSet tcp_socket_set;
 static SDLNet_SocketSet udp_socket_set;
@@ -57,93 +53,138 @@ static pthread_t tcp_listen_th;
 void msv_send_message(client_s*, char*);
 void cl_send_message(char*);
 void message_printf(char*, ...);
-void* udp_listen_main(void *is_a_thread);
-void* tcp_listen_main(void *is_a_thread);
+void* srv_udp_listen(void *is_a_thread);
+void* srv_tcp_listen(void *is_a_thread);
+void* cl_udp_listen(void *is_a_thread);
+void* cl_tcp_listen(void *is_a_thread);
+void close_server();
+void close_client();
 
 
-int net_init()
+
+int net_init_server()
 {
-	static bool inited = false;
-	if (inited) return 0;
-
 	IPaddress server_tcp_ip;
-	int tmp_port = server_port;
+	int server_port = BROADCAST_PORT;
 	int rc = 0;
 
-	if (master_server) {
-		/* UDP - Open a socket on a known port */
-		if (!(main_udp_socket = SDLNet_UDP_Open(server_port))) {
-			fprintf(stderr, "SDLNet_UDP_Open: %s\n", SDLNet_GetError());
-			fprintf(stderr, "Master server can't open port: %d.\n", server_port);
-			SDLNet_UDP_Close(main_udp_socket);
-			return 1;
-		}
-		/* TCP - Resolving the host using NULL make network interface to
-		listen. Open on the same known port */
-		if (SDLNet_ResolveHost(&server_tcp_ip, NULL, server_port) < 0) {
-			fprintf(stderr, "SDLNet_ResolveHost: %s\n", SDLNet_GetError());
-			SDLNet_UDP_Close(main_udp_socket);
-			return 1;
-		}
-		/*  TCP - Open a connection with client */
-		if (!(main_tcp_socket = SDLNet_TCP_Open(&server_tcp_ip))) {
-			fprintf(stderr, "SDLNet_TCP_Open: %s\n", SDLNet_GetError());
-			SDLNet_TCP_Close(main_tcp_socket);
-			return 1;
-		}
-		tcp_socket_set = SDLNet_AllocSocketSet(msv_max_connection);
-		udp_socket_set = SDLNet_AllocSocketSet(msv_max_connection);
-		SDLNet_UDP_AddSocket(udp_socket_set, main_udp_socket);
+	if (net_is_server) return 0;
+	if (net_is_client) close_client();
+	
+	// Generate ID
+	if (!srv.id)
+		srv.id = get_random_number(1000000);
+	printf("srv id: %d\n", srv.id);	
 
-		srv.max_nplayer = 2;
-		srv.nplayer = 1;
-
-	} else { /* We are a client */
-		while (42) {
-			/* UDP - Open a socket on avalable port*/
-			if ((main_udp_socket = SDLNet_UDP_Open(++tmp_port)))
-				break; // sucess
-			if (server_port == MAX_PORT) { // checked all ports
-				fprintf(stderr, "SDLNet_UDP_Open: %s\n", SDLNet_GetError());
-				SDLNet_UDP_Close(main_udp_socket);
-				printf("Can't open any port !\n");
-				return 1;
-			}
-		}
-		tcp_socket_set = SDLNet_AllocSocketSet(1);
-		udp_socket_set = SDLNet_AllocSocketSet(1);
-		SDLNet_UDP_AddSocket(udp_socket_set, main_udp_socket);
+	/* UDP - Open a socket on a known port */
+	if (!(main_udp_socket = SDLNet_UDP_Open(server_port))) {
+		fprintf(stderr, "SDLNet_UDP_Open: %s\n", SDLNet_GetError());
+		fprintf(stderr, "Master server can't open port: %d.\n", server_port);
+		SDLNet_UDP_Close(main_udp_socket);
+		return 1;
 	}
+	/* TCP - Resolving the host using NULL make network interface to
+	listen. Open on the same known port */
+	if (SDLNet_ResolveHost(&server_tcp_ip, NULL, server_port) < 0) {
+		fprintf(stderr, "SDLNet_ResolveHost: %s\n", SDLNet_GetError());
+		SDLNet_UDP_Close(main_udp_socket);
+		return 1;
+	}
+	/*  TCP - Open a connection with client */
+	if (!(main_tcp_socket = SDLNet_TCP_Open(&server_tcp_ip))) {
+		fprintf(stderr, "SDLNet_TCP_Open: %s\n", SDLNet_GetError());
+		SDLNet_TCP_Close(main_tcp_socket);
+		SDLNet_UDP_Close(main_udp_socket);
+		return 1;
+	}
+	tcp_socket_set = SDLNet_AllocSocketSet(msv_max_connection);
+	udp_socket_set = SDLNet_AllocSocketSet(msv_max_connection);
+	SDLNet_UDP_AddSocket(udp_socket_set, main_udp_socket);
 
-	rc = pthread_create(&udp_listen_th, NULL, udp_listen_main, (void*)rc);
+	srv.max_nplayer = 2;
+	srv.nplayer = 1;
+
+	net_is_server = true;
+
+	rc = pthread_create(&udp_listen_th, NULL, srv_udp_listen, (void*)rc);
 	pthread_detach(udp_listen_th);
-	rc = pthread_create(&tcp_listen_th, NULL, tcp_listen_main, (void*)rc);
+	rc = pthread_create(&tcp_listen_th, NULL, srv_tcp_listen, (void*)rc);
 	pthread_detach(tcp_listen_th);
 
-	inited = true;
+	return 0;
+}
+
+int net_init_client()
+{
+	int tmp_port = BROADCAST_PORT;
+	int rc = 0;
+	
+	if (net_is_client) return 0;
+	if (net_is_server) close_server();
+	
+	while (42) {
+		/* UDP - Open a socket on avalable port*/
+		if ((main_udp_socket = SDLNet_UDP_Open(++tmp_port)))
+			break; // sucess
+		if (tmp_port == MAX_PORT) { // checked all ports
+			fprintf(stderr, "SDLNet_UDP_Open: %s\n", SDLNet_GetError());
+			SDLNet_UDP_Close(main_udp_socket);
+			printf("Can't open any port !\n");
+			return 1;
+		}
+	}
+	tcp_socket_set = SDLNet_AllocSocketSet(1);
+	udp_socket_set = SDLNet_AllocSocketSet(1);
+	SDLNet_UDP_AddSocket(udp_socket_set, main_udp_socket);
+
+	net_is_client = true;
+
+	rc = pthread_create(&udp_listen_th, NULL, cl_udp_listen, (void*)rc);
+	pthread_detach(udp_listen_th);
+	rc = pthread_create(&tcp_listen_th, NULL, cl_tcp_listen, (void*)rc);
+	pthread_detach(tcp_listen_th);
+
 	return 0;
 }
 
 
-// TODO better
-void close_master_server()
+void close_server()
 {
-	master_server = false;
-	connected = false;
+	net_is_server = false;
+	local_player.connected = false;
 	SDL_Delay(2000);
+	SDLNet_FreeSocketSet(tcp_socket_set);
+	SDLNet_FreeSocketSet(udp_socket_set);
+	SDLNet_UDP_Close(main_udp_socket);
+	SDLNet_TCP_Close(main_tcp_socket);
 }
 
 
+void close_client()
+{
+	net_is_client = false;
+	SDL_Delay(2000);
+
+	SDLNet_FreeSocketSet(tcp_socket_set);
+	SDLNet_FreeSocketSet(udp_socket_set);
+	
+	SDLNet_UDP_Close(main_udp_socket);	
+	if (local_player.connected)
+		SDLNet_TCP_Close(main_tcp_socket);
+	
+	local_player.connected = false;
+}
+
 /* 
 ====================
-msv_accept_request
+srv_accept_request
 
 Open a new UDP socket for the client.
 Accept client request by replying with a UDP packet 
 and wait for the client to initialise the TCP connection
 ====================
 */
-int msv_accept_request(client_s *cl)
+int srv_accept_request(client_s *cl)
 {	
 #define MAX_ACK_PACKET 5
 #define MAX_ACK_WAIT 10
@@ -214,7 +255,7 @@ int msv_accept_request(client_s *cl)
 }
 
 
-void msv_new_client(int byte_readed)
+void srv_new_client(int byte_readed)
 {
 	int i = 0;
 	char i_string[10];
@@ -249,7 +290,7 @@ void msv_new_client(int byte_readed)
 	new_client->ip = udp_in_p->address;
 	strncpy(new_client->username, tmp_username, sizeof(new_client->username));
 		
-	if (!msv_accept_request(new_client)) {
+	if (!srv_accept_request(new_client)) {
 		tmp_client = &client;
 		// add client to the end of the list
 		while (*tmp_client) {
@@ -264,10 +305,10 @@ void msv_new_client(int byte_readed)
 }
 
 
-void msv_rm_client(client_s *cl)
+void srv_rm_client(client_s *cl)
 {	
 	client_s *tmp_cl = client;
-	printf("%s: disconnected\n", cl->username);
+	printf("%s: dislocal_player.connected\n", cl->username);
 
 	SDLNet_TCP_DelSocket(tcp_socket_set, cl->tcp_socket);
 	SDLNet_UDP_DelSocket(udp_socket_set, cl->udp_socket);	
@@ -288,22 +329,22 @@ void msv_rm_client(client_s *cl)
 
 void cl_make_connection(int byte_readed)
 {
-	if (connected) return;
+	if (local_player.connected) return;
 
 	// read username (in case the host changed it)
-	strncpy(username, (char *)&udp_in_p->data[byte_readed], sizeof(username));
+	strncpy(local_player.name, (char *)&udp_in_p->data[byte_readed], sizeof(local_player.name));
 	byte_readed += strlen((char *)&udp_out_p->data[byte_readed]) + 1;
 
 	// Read the port number the host opened for UDP communication
 	// The port number is already in network byte order
-	memcpy(&host_udp_ip.port, &udp_in_p->data[byte_readed], sizeof(short));
+	memcpy(&main_udp_ip.port, &udp_in_p->data[byte_readed], sizeof(short));
 	byte_readed += sizeof(short);
-	host_udp_ip.host = udp_in_p->address.host; // use the address we received from
+	main_udp_ip.host = udp_in_p->address.host; // use the address we received from
 	
-	host_tcp_ip.host = udp_in_p->address.host;
-	SDLNet_Write16(BROADCAST_PORT, &host_tcp_ip.port);
+	main_tcp_ip.host = udp_in_p->address.host;
+	SDLNet_Write16(BROADCAST_PORT, &main_tcp_ip.port);
 	
-	if (!(main_tcp_socket = SDLNet_TCP_Open(&host_tcp_ip))) {
+	if (!(main_tcp_socket = SDLNet_TCP_Open(&main_tcp_ip))) {
 		fprintf(stderr, "SDLNet_TCP_Open: %s\n", SDLNet_GetError());
 		SDLNet_TCP_Close(main_tcp_socket);
 		return;
@@ -311,8 +352,8 @@ void cl_make_connection(int byte_readed)
 	SDLNet_TCP_AddSocket(tcp_socket_set, main_tcp_socket);
 
 	printf("Connected\n");
-	printf("Username: %s\n", username);
-	connected = true;
+	printf("Username: %s\n", local_player.name);
+	local_player.connected = true;
 }
 
 
@@ -379,12 +420,12 @@ void cl_request_connection()
 
 /* 
 ====================
-msv_send_info
+srv_send_info
 
 Send info about our server.
 ====================
 */
-void msv_send_info(int byte_readed)
+void srv_send_info(int byte_readed)
 {
 	int byte_writed = 0;
 
@@ -431,7 +472,7 @@ void msv_send_info(int byte_readed)
 }
 
 
-int msv_parse_udp_packet()
+int srv_parse_udp_packet()
 {
 	int byte_readed = 0;
 	printf("receive UDP packet\n");
@@ -447,7 +488,7 @@ int msv_parse_udp_packet()
 		if ((udp_in_p->data[byte_readed++]) != 0x00) break;
 		if (strcmp((char *)&udp_in_p->data[byte_readed], "udp_sdltest")) break;
 		byte_readed += strlen((char *)&udp_in_p->data[byte_readed]) + 1;
-		msv_send_info(byte_readed);
+		srv_send_info(byte_readed);
 		return 0;
 
 	// connection request
@@ -455,7 +496,7 @@ int msv_parse_udp_packet()
 		if ((udp_in_p->data[byte_readed++]) != 0x00) break;
 		if (strcmp((char *)&udp_in_p->data[byte_readed], "udp_sdltest")) break;
 		byte_readed += strlen((char *)&udp_in_p->data[byte_readed]) + 1;
-		msv_new_client(byte_readed);
+		srv_new_client(byte_readed);
 		return 0;
 	}
 	// no header recognised
@@ -500,59 +541,58 @@ void cl_parse_udp_packet()
 }
 
 
-void msv_udp_listen()
+void* srv_udp_listen(void *is_a_thread)
 {
 	client_s *checked_client;
 	int numready = 0;
 
-	while (master_server) {
+	while (net_is_server) {
 		numready = SDLNet_CheckSockets(udp_socket_set, 1000);
 		if (numready == -1) {
 			printf("SDLNet_CheckSockets: %s\n", SDLNet_GetError());
-			//most of the time this is a system error, where perror might help you.
+			/* Most of the time this is a system error, where perror 
+			   might help you. */
 			perror("SDLNet_CheckSockets");
 		}
 		
 		if (numready) {
-			// check all sockets with SDLNet_SocketReady and handle the active ones.
+			/* Check all sockets with SDLNet_SocketReady and handle 
+			   the active ones. */
 			checked_client = client;
 			while (checked_client) {
 				if (SDLNet_SocketReady(checked_client->udp_socket)) {
 					udp_in_p->data[udp_in_p->len] = 0;
-					if (SDLNet_UDP_Recv(checked_client->udp_socket, udp_in_p) >
-							0) {
-						if (msv_parse_udp_packet(checked_client)) {
-							// not a packet destined to the server
+					if (SDLNet_UDP_Recv(checked_client->udp_socket, 
+							udp_in_p) > 0) {
+						if (srv_parse_udp_packet(checked_client)) {
+							// server parsing did not recognized the header
 							cl_parse_udp_packet(checked_client);
 						}
 						--numready;
 					}
 				}
 
-				if (numready) { 
+				if (numready) { // packets in the queue
 					checked_client = checked_client->next;
 				} else {
-					// dont check other socket
-					break;
+					break; // dont check other socket
 				}
 			}
 
-			if (numready) {
+			if (numready) { // still packets in the queue
 				// not a packet from any known client, ckeck main socket
-				if (SDLNet_UDP_Recv(main_udp_socket, udp_in_p)) {		
-					// null terminate data to the received length
-					msv_parse_udp_packet();
-				}
+				if (SDLNet_UDP_Recv(main_udp_socket, udp_in_p))
+					srv_parse_udp_packet();
 			}
 		}
 	}
-
+	pthread_exit(NULL);
 }
 
 
-void cl_udp_listen()
+void* cl_udp_listen(void *is_a_thread)
 {
-	while (!master_server) {
+	while (net_is_client) {
 		if (SDLNet_CheckSockets(udp_socket_set, 1000)) {
 			if (SDLNet_UDP_Recv(main_udp_socket, udp_in_p)) {		
 				// null terminate data to the received length
@@ -562,37 +602,24 @@ void cl_udp_listen()
 			}
 		}
 	}
-
-}
-
-
-void* udp_listen_main(void *is_a_thread)
-{
-	if (master_server) {
-		msv_udp_listen();
-	} else {
-		cl_udp_listen();
-	}
-
 	pthread_exit(NULL);
 }
 
 
-#define MESSAGE_HEADER_LEN 2
-void msv_parse_tcp_packet(client_s *cl, byte *buffer)
+void srv_parse_tcp_packet(client_s *cl, byte *buffer)
 {
 	switch (buffer[0]) {
 	// chat message from client "0300"
 	case 0x03:
 		if (buffer[1] != 0x00) break;
-// 		message_printf("%s: %s\n", cl->username, (char *)&buffer[MESSAGE_HEADER_LEN]);
-		msv_send_message(cl, (char *)&buffer[MESSAGE_HEADER_LEN]);
+// 		message_printf("%s: %s\n", cl->username, (char *)&buffer[HEADER_SIZE]);
+		msv_send_message(cl, (char *)&buffer[HEADER_SIZE]);
 		break;
 	
 	// client is disconnecting "0000"
 	case 0x00:
 		if (buffer[1] != 0x00) break;
-		msv_rm_client(cl);
+		srv_rm_client(cl);
 		break;
 
 	}
@@ -606,14 +633,14 @@ void cl_parse_tcp_packet(byte *buffer)
 	// chat message from server "8300"
 	case 0x83:
 		if (buffer[1] != 0x00) break;
-// 		message_printf("%s\n", (char *)&buffer[MESSAGE_HEADER_LEN]);
+// 		message_printf("%s\n", (char *)&buffer[HEADER_SIZE]);
 		break;
 	
 	// server is disconnecting "8000"
 	case 0x80:
 		if (buffer[1] != 0x00) break;
-		printf("Server disconnected.\n");
-		connected = false;
+		printf("Server dislocal_player.connected.\n");
+		local_player.connected = false;
 		break;
 
 	}
@@ -621,13 +648,13 @@ void cl_parse_tcp_packet(byte *buffer)
 }
 
 
-void msv_tcp_listen()
+void* srv_tcp_listen(void *is_a_thread)
 {
 	int numready;
 	client_s *checked_client;
 	byte buffer[512];
 
-	while (master_server) {
+	while (net_is_server) {
 		numready = SDLNet_CheckSockets(tcp_socket_set, 1000);
 		if (numready) {
 			printf("received TCP packet!\n");
@@ -645,11 +672,11 @@ void msv_tcp_listen()
 					if (checked_client) {
 						if (SDLNet_TCP_Recv(checked_client->tcp_socket, buffer, 512) >
 								0) {
-							msv_parse_tcp_packet(checked_client, buffer);
+							srv_parse_tcp_packet(checked_client, buffer);
 							--numready;
 						} else { 
-							/* client probably disconnected */
-							msv_rm_client(checked_client);
+							/* client probably dislocal_player.connected */
+							srv_rm_client(checked_client);
 							--numready;
 						}
 					}
@@ -667,14 +694,14 @@ void msv_tcp_listen()
 			memset(buffer, 0, sizeof(buffer)); // NEEDED?
 		}
 	}	
-
+	pthread_exit(NULL);
 }
 
-void cl_tcp_listen()
+void* cl_tcp_listen(void *is_a_thread)
 {
 	byte buffer[512];
 
-	while (!master_server) {
+	while (net_is_client) {
 		if (SDLNet_CheckSockets(tcp_socket_set, 1000)) {
 			printf("received TCP packet!\n");
 			if (SDLNet_TCP_Recv(main_tcp_socket, buffer, 512) >
@@ -682,42 +709,15 @@ void cl_tcp_listen()
 				cl_parse_tcp_packet(buffer);
 
 			} else { 
-				/* server probably disconnected */
-				connected = false;
+				/* server probably dislocal_player.connected */
+				local_player.connected = false;
 				SDLNet_TCP_DelSocket(tcp_socket_set, main_tcp_socket);
 				printf("Server disconnected\n");
-				return;
+				break;
 			}
 			memset(buffer, 0, sizeof(buffer)); // NEEDED?
 		}
 	}
-
-}
-
-
-
-/* 
-====================
-tcp_listen_main
-
-Maun function for the TCP thread.
-Listen directly if we are the server, else
-wait until the client is connected.
-====================
-*/
-void* tcp_listen_main(void *is_a_thread)
-{
-	while (42) {
-		if (master_server) {
-			msv_tcp_listen();
-		} else {
-			if (connected) {
-				cl_tcp_listen();
-			}
-		}
-		SDL_Delay(10);
-	}
-
 	pthread_exit(NULL);
 }
 
@@ -795,7 +795,7 @@ void cl_send_message(char *buffer)
 				sizeof(data) - HEADER_SIZE);
 		udp_out_p->len = strlen(buffer) + HEADER_SIZE + 1;
 
-		udp_out_p->address = host_udp_ip;
+		udp_out_p->address = main_udp_ip;
 		printf("sending UDP packet.\naddress: %d, port %hd.\n", 
 				udp_out_p->address.host, SDLNet_Read16(&udp_out_p->address.port));
 		if (SDLNet_UDP_Send(main_udp_socket, -1, udp_out_p) < len)
@@ -828,7 +828,7 @@ void disconnect()
 	int len = HEADER_SIZE;
 	client_s *tmp_cl = client;
 
-	if (master_server) {
+	if (net_is_server) {
 		buffer[0] = 0x80;
 		buffer[1] = 0x00;
 
@@ -846,8 +846,8 @@ void disconnect()
 			fprintf(stderr, "SDLNet_TCP_Send: %s\n", SDLNet_GetError());
 	}
 	
-	connected = false;
-	master_server = false;
+	local_player.connected = false;
+	net_is_server = false;
 }
 
 
@@ -855,10 +855,6 @@ void request_local_srv()
 {
 	int byte_writed = 0; // last byte writed position
 	IPaddress udp_ip;
-
-	if (net_init()) {
-		// TODO handle error
-	}
 	
 	// write server request info bytes
 	udp_out_p->data[byte_writed++] = 0x02;
@@ -883,22 +879,6 @@ void request_local_srv()
 	udp_out_p->address = udp_ip;
 	udp_out_p->len = byte_writed;
 	SDLNet_UDP_Send(main_udp_socket, -1, udp_out_p);
-}
-
-
-int start_srv()
-{
-	master_server = true;
-	if (net_init()) {
-		return 1;
-	}
-
-	// Generate ID only once
-	if (!srv.id)
-		srv.id = get_random_number(1000000);
-	printf("srv id: %d\n", srv.id);	
-
-	return 0;
 }
 
 

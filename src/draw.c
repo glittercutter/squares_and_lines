@@ -84,7 +84,7 @@ void sdl_draw_text_solid(int x, int y, char *text, TTF_Font *font, int r, int g,
 	
 	SDL_FreeSurface(textSurface);
 }
-void sdl_draw_text_solid2(int x, int y, char *text, TTF_Font *font, ColorRGB color)
+void sdl_draw_text_solid2(int x, int y, char *text, TTF_Font *font, colorRGB_t color)
 {
 	SDL_Color sdl_color = { color.r, color.g, color.b };
 	SDL_Surface* textSurface = TTF_RenderText_Solid(font, text, sdl_color);
@@ -117,7 +117,7 @@ void sdl_draw_text_blended(SDL_Surface *surface, int x, int y, char *text,
 	SDL_FreeSurface(textSurface);
 }
 void sdl_draw_text_blended2(SDL_Surface *surface, int x, int y, char *text,
-			TTF_Font *font, ColorRGB color)
+			TTF_Font *font, colorRGB_t color)
 {
 	SDL_Color sdl_color = { color.r, color.g, color.b };
 	SDL_Surface* textSurface = TTF_RenderText_Blended(font, text, sdl_color);
@@ -136,19 +136,19 @@ void sdl_draw_line(int x1, int y1, int x2, int y2, int r, int g, int b)
 	int a = 255;
 	lineRGBA(screen, x1, y1, x2, y2, r, g, b, a);
 }
-void sdl_draw_line2(int x1, int y1, int x2, int y2, ColorRGB color)
+void sdl_draw_line2(int x1, int y1, int x2, int y2, colorRGB_t color)
 {
 	int a = 255;
 	lineRGBA(screen, x1, y1, x2, y2, color.r, color.g, color.b, a);
 }
-void sdl_draw_line3(SDL_Surface *surface, int x1, int y1, int x2, int y2, ColorRGB color)
+void sdl_draw_line3(SDL_Surface *surface, int x1, int y1, int x2, int y2, colorRGB_t color)
 {
 	int a = 200;
 	lineRGBA(surface, x1, y1, x2, y2, color.r, color.g, color.b, a);
 }
 
 // Line with alfa value
-void sdl_draw_glow_line(int x1, int y1, int x2, int y2, ColorRGB color, int level)
+void sdl_draw_glow_line(int x1, int y1, int x2, int y2, colorRGB_t color, int level)
 {
 	lineRGBA(screen, x1, y1, x2, y2, color.r, color.g, color.b, level);
 }
@@ -159,7 +159,7 @@ void sdl_draw_rect(int x1, int y1, int x2, int y2, int r, int g, int b)
 	int a = 255;
 	rectangleRGBA(screen, x1, y1, x2, y2, r, g, b, a);
 }
-void sdl_draw_rect2(SDL_Surface *surface, int x1, int y1, int x2, int y2, ColorRGB color)
+void sdl_draw_rect2(SDL_Surface *surface, int x1, int y1, int x2, int y2, colorRGB_t color)
 {
 	int a = 255;
 	rectangleRGBA(surface, x1, y1, x2, y2, color.r, color.g, color.b, a);
@@ -178,7 +178,7 @@ void sdl_draw_box(int x1, int y1, int x2, int y2, int r, int g, int b)
 	int a = 255;
 	boxRGBA(screen, x1, y1, x2, y2, r, g, b, a);
 }
-void sdl_draw_box2(int x1, int y1, int x2, int y2, ColorRGB color)
+void sdl_draw_box2(int x1, int y1, int x2, int y2, colorRGB_t color)
 {
 	int a = 255;
 	boxRGBA(screen, x1, y1, x2, y2, color.r, color.g, color.b, a);
@@ -186,7 +186,7 @@ void sdl_draw_box2(int x1, int y1, int x2, int y2, ColorRGB color)
 
 
 void sdl_draw_triangle(SDL_Surface *surface, int x1, int y1, int x2, int y2,
-	   	int x3, int y3, ColorRGB color)
+	   	int x3, int y3, colorRGB_t color)
 {
 	int a = 255;
 	filledTrigonRGBA(surface, x1, y1, x2, y2, x3, y3, color.r, color.g, color.b, a);
@@ -194,6 +194,33 @@ void sdl_draw_triangle(SDL_Surface *surface, int x1, int y1, int x2, int y2,
 /* Primitive end
 ==============
 */
+
+void sdl_draw_3d_fx(int x1, int y1, int x2, int y2)
+{
+
+	lineRGBA(screen, x1, y1, x2, y1, 
+			170, 170, 170, 255);
+	lineRGBA(screen, x1, y1, x1, y2, 
+			170, 170, 170, 255);
+	lineRGBA(screen, x1, y2, x2, y2,
+			50, 50, 50, 255);
+	lineRGBA(screen, x2, y1, x2, y2,
+			50, 50, 50, 255);
+}
+
+void sdl_draw_3d_fx_inv(int x1, int y1, int x2, int y2)
+{
+
+	lineRGBA(screen, x1, y1, x2, y1, 
+			50, 50, 50, 255);
+	lineRGBA(screen, x1, y1, x1, y2, 
+			50, 50, 50, 255);
+	lineRGBA(screen, x1, y2, x2, y2,
+			170, 170, 170, 255);
+	lineRGBA(screen, x2, y1, x2, y2,
+			170, 170, 170, 255);
+}
+
 
 /*
 ==============
@@ -208,20 +235,20 @@ static void sdl_draw_ed_grid()
 	int x2, y2;
 
 	x1 = ed_start_x;
-	x2 = ed_start_x + (ed_grid_w * min_square_size);
+	x2 = ed_start_x + (ed_grid_w * ed_square_size);
 	y1 = ed_start_y;
 
 	for (int i = 0; i <= ed_grid_h; i++) {
 		sdl_draw_line2(x1, y1, x2, y1, color.ed_grid);
-		y1 += min_square_size;
+		y1 += ed_square_size;
 	}
 
 	y1 = ed_start_y;
-	y2 = ed_start_y + (ed_grid_h * min_square_size);
+	y2 = ed_start_y + (ed_grid_h * ed_square_size);
 
 	for (int i = 0; i <= ed_grid_w; i++) {
 		sdl_draw_line2(x1, y1, x1, y2, color.ed_grid);
-		x1 += min_square_size;
+		x1 += ed_square_size;
 	}
 }
 
@@ -236,7 +263,7 @@ static void sdl_draw_game_info()
 {
 	char string[30];
 	int offset = display_width - TEXT_MARGIN;
-	ColorRGB tmp_color;
+	colorRGB_t tmp_color;
 
 	if (player_turn == PLAYER_1) {
 		tmp_color.r = 0;
@@ -524,7 +551,7 @@ void sdl_draw_main_fx()
 // UI
 // =======================================
 
-void sdl_draw_button(Button *button)
+void sdl_draw_button(button_s *button)
 {
 	while (button != NULL) {
 		if (button == ui_pressed_button) {
@@ -583,14 +610,8 @@ void sdl_draw_widget_scrollbar(scrollbar_t *scrollbar)
 			handle_center_x + 2, handle_center_y + 3, 50, 50, 50, 255);
 	
 	// 3d effect
-	lineRGBA(screen, scrollbar->handle.x2 - 1, scrollbar->handle.y1 + 1, 
-			scrollbar->handle.x2 - 1, scrollbar->handle.y2, 50, 50, 50, 255);
-	lineRGBA(screen, scrollbar->handle.x1, scrollbar->handle.y2, 
-			scrollbar->handle.x2 - 1, scrollbar->handle.y2, 50, 50, 50, 255);
-	lineRGBA(screen, scrollbar->handle.x1, scrollbar->handle.y1, 
-			scrollbar->handle.x1, scrollbar->handle.y2 - 1, 130, 130, 130, 255);
-	lineRGBA(screen, scrollbar->handle.x1, scrollbar->handle.y1, 
-			scrollbar->handle.x2 - 1, scrollbar->handle.y1, 130, 130, 130, 255);
+// 	sdl_draw_3d_fx(scrollbar->handle.x1, scrollbar->handle.y1,
+// 			scrollbar->handle.x2 - 1, scrollbar->handle.y2);
 }
 
 
@@ -615,6 +636,8 @@ void sdl_draw_widget_list_box(widget_list_box_t *list_box)
 	sdl_draw_box2(list_box->x1, list_box->y1, list_box->x2 
 			- SCROLLBAR_SIZE, list_box->y2, color.button_highlight);
 	sdl_draw_widget_scrollbar(&list_box->scrollbar);
+	sdl_draw_3d_fx_inv(list_box->x1 - 1, list_box->y1 - button_font.h - 1,
+			list_box->x2, list_box->y2 + 1);
 
 	for (int i = list_box->scrollbar.offset; (*list != NULL) &&
 			(i < offset_viewable_element); i++) {
@@ -694,7 +717,8 @@ static void sdl_draw_topbar()
 {
 	int ui_bar_height = button_font.size + UI_BAR_PADDING;
 	sdl_draw_box2(0, 0, display_width, ui_bar_height, color.topbar);
-	sdl_draw_line2(0, ui_bar_height, display_width, ui_bar_height, color.button_highlight);
+	sdl_draw_line2(0, ui_bar_height, display_width, ui_bar_height, 
+	color.button_highlight);
 }
 
 void sdl_draw_menu()

@@ -31,10 +31,4 @@ void save_config();
 void load_lang();
 
 
-int int_test;
-float float_test;
-double double_test;
-char string_test[ STRING_LENGTH ];
-
-
 #endif

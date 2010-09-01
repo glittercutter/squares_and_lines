@@ -26,12 +26,12 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #define TEXT_MARGIN 10
 
-typedef struct Player Player;
-struct Player {
+typedef struct player_s player_s;
+struct player_s {
 	int score_text_pos_x;
 	int score;
 };
-Player player[2];
+player_s player[2];
 
 
 void g_change_state();

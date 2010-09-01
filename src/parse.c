@@ -33,28 +33,28 @@ parse_get_default
 Set default value to uninitialized variable.
 ====================
 */
-void parse_get_default(struct Var_info* var_info, int tab_length)
+void parse_get_default(struct var_info_s* var_info, int tab_length)
 {
 	int** tmp_int;
 	float** tmp_float;
 	double** tmp_double;
 	char** tmp_char;
-	ColorRGB** tmp_color;
+	colorRGB_t** tmp_color;
 	int r, g, b;
 	
 	for (int i = 0; i < tab_length; i++) {
 		if (var_info[i].init != TRUE) {
-			printf("parse: getting default value for: %s -> ", 
-					var_info[i].str[ VAR_NAME_POS ]);
+			DEBUG(printf("parse: getting default value for: %s -> ", 
+					var_info[i].str[ VAR_NAME_POS ]));
 
 			if (var_info[i].str[ DEFAULT_VALUE_POS ] == NULL) {
-				printf("NULL\n");
+				DEBUG(printf("NULL\n"));
 				continue;
 			}
 
 			switch (var_info[i].type) {
 			case COLOR_T:
-				tmp_color = (ColorRGB **)&var_info[i].ptr;
+				tmp_color = (colorRGB_t **)&var_info[i].ptr;
 				sscanf(var_info[i].str[ DEFAULT_VALUE_POS ], 
 					"%d, %d, %d", &r, &g, &b);
 				(**tmp_color).r = r; 
@@ -101,13 +101,13 @@ void parse_get_default(struct Var_info* var_info, int tab_length)
 }
 
 
-void parse_read(struct Var_info* var_info, int tab_length, char* filename)
+void parse_read(struct var_info_s* var_info, int tab_length, char* filename)
 {	
 	int** tmp_int;
 	float** tmp_float;
 	double** tmp_double;
 	char** tmp_char;
-	ColorRGB** tmp_color;
+	colorRGB_t** tmp_color;
 
 	int r, g, b;
 	double num_value;
@@ -133,7 +133,7 @@ void parse_read(struct Var_info* var_info, int tab_length, char* filename)
 						strlen(readed_var_name)) == 0) {
 
 					if (var_info[i].type == COLOR_T) {
-						tmp_color = (ColorRGB **)&var_info[i].ptr;
+						tmp_color = (colorRGB_t **)&var_info[i].ptr;
 						(**tmp_color).r = r;
 						(**tmp_color).g = g;
 						(**tmp_color).b = b;
@@ -202,14 +202,14 @@ void parse_read(struct Var_info* var_info, int tab_length, char* filename)
 }
 
 
-int parse_write(struct Var_info *var_info, int tab_length, char* filename)
+int parse_write(struct var_info_s *var_info, int tab_length, char* filename)
 {
 // TODO don't save if nothing changed ?
 	int** tmp_int;
 	float** tmp_float;
 	double** tmp_double;
 	char** tmp_char;
-	ColorRGB** tmp_color;
+	colorRGB_t** tmp_color;
 
 	FILE* writed_file;
 	writed_file = fopen(filename, "w");
@@ -240,7 +240,7 @@ int parse_write(struct Var_info *var_info, int tab_length, char* filename)
 			break;
 
 		case COLOR_T:
-			tmp_color = (ColorRGB **)&var_info[i].ptr;
+			tmp_color = (colorRGB_t **)&var_info[i].ptr;
 			fprintf(writed_file, "%s = %d, %d, %d\n", *var_info[i].str, 
 				(**tmp_color).r, (**tmp_color).g, (**tmp_color).b);
 			break;

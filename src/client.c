@@ -32,7 +32,8 @@ void cl_clear_srvlist();
 
 void lanclient_start_client()
 {
-	active_window = &client_window;
+	if (!net_init_client())
+		active_window = &client_window;
 	request_local_srv();
 }
 

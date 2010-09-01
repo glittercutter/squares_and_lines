@@ -41,7 +41,8 @@ UDPpacket *udp_in_p;
 
 void cl_request_connection(void);
 void request_local_srv(void);
-int start_srv(void);
+int net_init_server(void);
+int net_init_client(void);
 
 // net_z.c
 int zdeflate(char *source, unsigned char *out, int *size);

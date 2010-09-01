@@ -49,11 +49,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 typedef unsigned char byte;
 
 #define WINDOW_TITLE "crucially square"
+#define CONFIG_FILENAME "game.conf"
 
 #define MAX_FPS 40 //milliseconds
 #define LIMIT_FPS 1
-
-#define CONFIG_FILENAME "game.conf"
 
 #define LONG_STRING_LENGTH 88
 #define STRING_LENGTH 50
@@ -68,12 +67,14 @@ typedef unsigned char byte;
 #define TAB_LENGTH(X) (sizeof(X)/sizeof(*X))
 
 
+// gamestate
 enum {
 	EDITOR,
 	GAME,
 	QUIT
 };
 
+// square owner
 enum {
 	NONE,
 	PLAYER_0,
@@ -81,6 +82,7 @@ enum {
 	OUTLINE,
 };
 
+// square boundary
 enum {
 	UP,
 	RIGHT,
@@ -98,52 +100,42 @@ typedef struct string_list_t {
 	string_list_s *list;
 	int element, max_element;
 	int col_position[LS_MAX_STRING];
-	struct Button *col_name;
+	struct button_s *col_name;
 	struct widget_list_box_t *list_box;
 } string_list_t;
 
 
-typedef struct ColorRGB ColorRGB;
-struct ColorRGB {
+typedef struct colorRGB_t {
 	int r, g, b;
-};
+} colorRGB_t;
+
+typedef struct color_s {
+	colorRGB_t square_owner[4];
+	colorRGB_t ed_outline;
+	colorRGB_t ed_grid;
+	colorRGB_t text;
+	colorRGB_t topbar;
+	colorRGB_t button_highlight;
+} color_s;
+color_s color;
 
 
-typedef struct Color Color;
-struct Color {
-	ColorRGB square_owner[4];
-	ColorRGB ed_outline;
-	ColorRGB ed_grid;
-	ColorRGB text;
-	ColorRGB topbar;
-	ColorRGB button_highlight;
-};
-Color color;
-
-
-typedef struct Square Square;
-struct Square {
-	
+typedef struct square_s {
 	int active;
+	int owner;
 	int x1, y1;
 	int x2, y2;
 
-	int owner;
-
 	int owner_up;
 	int *neighbour_up;
-
 	int owner_right;
 	int *neighbour_right;
-
 	int owner_down;
 	int *neighbour_down;
-
 	int owner_left;
 	int *neighbour_left;
-
-};
-Square **squares;
+} square_s;
+square_s **squares;
 
 
 // variables
@@ -152,7 +144,6 @@ int gamestate;
 int display_width;
 int display_height;
 int display_fullscreen;
-int min_square_size;
 
 
 #endif

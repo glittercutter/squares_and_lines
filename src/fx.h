@@ -39,29 +39,25 @@ enum {
 	TRANSITION_SWITCH_PLAYER,
 	TRANSITION_NEW_POINT, // TODO
 };
-typedef struct Fx_transition Fx_transition;
-struct Fx_transition {
+typedef struct fx_transition_s {
 	int active;
 	int current_step;
 	int max_step;
 	int halfway;
 	int fx_type;
 	void (*func)();
-};
-Fx_transition fx_transition[NUM_OF_TRANSITION];
+} fx_transition_s;
+fx_transition_s fx_transition[NUM_OF_TRANSITION];
 
-typedef struct Seg_glow Seg_glow;
-struct Seg_glow {
-	Square *square;
+typedef struct seg_glow_s {
+	square_s *square;
 	int pos;
 	int glow_level;
 	int player;
 	int x1, y1, x2, y2;
-};
-
-Seg_glow seg_glow[MAX_GLOWING_SEGMENT];
-
-Seg_glow seg_glow_current;
+} seg_glow_s;
+seg_glow_s seg_glow[MAX_GLOWING_SEGMENT];
+seg_glow_s seg_glow_current;
 
 
 void fx_new_transition(void (*func)(), int, int);

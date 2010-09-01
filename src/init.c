@@ -40,8 +40,7 @@ sdl_cleanup
 Called by SDL at the end of the program.
 ====================
 */
-void 
-sdl_cleanup()
+void sdl_cleanup()
 {
 	TTF_Quit();
 	SDL_Quit();
@@ -72,7 +71,7 @@ static void sdl_init_video()
 }
 
 
-static void sdl_load_font(Font *font)
+static void sdl_load_font(font_s *font)
 {
 	font->data = (TTF_Font *)TTF_OpenFont(font->name, font->size);
 	if (!font->data) {
@@ -80,6 +79,7 @@ static void sdl_load_font(Font *font)
 		// FIXME crash later in program when font is used but not loaded
     	// TODO try loading a backup font ? maybe precompiled one ?
 	}
+	// for monospace fonts
 	TTF_SizeText(font->data, "0", &font->w, &font->h);
 }
 

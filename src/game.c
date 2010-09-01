@@ -72,15 +72,15 @@ void g_end()
 }
 
 
-void g_check_complete_square(Square *square)
+void g_check_complete_square(square_s *square)
 {
 	if (square->owner != NONE) return;
-
 	if (square->owner_up == NONE) return;
 	if (square->owner_right == NONE) return;
 	if (square->owner_down == NONE) return;
 	if (square->owner_left == NONE) return;
 	
+	// current player own the square
 	square->owner = player_turn;
 
 	++score[player_turn - 1];
@@ -94,20 +94,20 @@ void g_add_segment()
 {
 	int pos_x = g_min_x + (input.mouse_x - g_offset_x) / g_square_size;
 	int pos_y = g_min_y + (input.mouse_y - g_offset_y) / g_square_size;
-
- 	int center_x = squares[pos_y][pos_x].x1 + 
+	if (!squares[pos_y][pos_x].active) return;
+	if (pos_x < g_min_x || pos_x >= g_max_x) return;
+	if (pos_y < g_min_y || pos_y >= g_max_y) return;
+ 	
+	int center_x = squares[pos_y][pos_x].x1 + 
 			(squares[pos_y][pos_x].x2 - squares[pos_y][pos_x].x1) / 2;
  	int center_y = squares[pos_y][pos_x].y1 + 
 			(squares[pos_y][pos_x].y2 - squares[pos_y][pos_x].y1) / 2;
 
 	int current_dist;
-	int shortest_dist = g_square_size * 2; // (set to max distance)
+	int shortest_dist = g_square_size * 2; // start with maximum distance
 	int closest_segment;
 	
-	if (!squares[pos_y][pos_x].active) return;
-	
 	// top
-
 	current_dist = sqrt(ipow(input.mouse_y - squares[pos_y][pos_x].y1, 2) + 
 			ipow(input.mouse_x - center_x, 2));
 	if (current_dist < shortest_dist) {

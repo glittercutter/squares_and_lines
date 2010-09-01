@@ -26,10 +26,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "ui.h"
 
 
-
-#define PACKET_SEND_RATE 2
-
-
 typedef struct srv_list_s {
 	int id;
 	IPaddress address;
@@ -45,6 +41,7 @@ srv_list_s *srv_list;
 typedef struct local_player_s {
 	int id;
 	char name[32];
+	bool connected;
 } local_player_s;
 local_player_s local_player;
 

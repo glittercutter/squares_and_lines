@@ -28,7 +28,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 typedef struct srv_s {
 	short nplayer, max_nplayer;
-	int id;
+	int id, last_ack_packet;
 	char name[32];
 } srv_s;
 srv_s srv;

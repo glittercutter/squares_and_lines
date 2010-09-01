@@ -38,11 +38,11 @@ Button is added at the tail of the familly node.
 Return a pointer to the created button.
 ====================
 */
-Button* ui_new_button(int x, int y, int w, int h, int min_w, int max_w, 
+button_s* ui_new_button(int x, int y, int w, int h, int min_w, int max_w, 
 		int align, char *text, void func(), int three_d, int gradient,
-		Button **node)
+		button_s **node)
 {
-	Button **node2 = node;
+	button_s **node2 = node;
 	int alfa = 255;
 	int text_x = 0;
 	int nor_w;
@@ -54,8 +54,8 @@ Button* ui_new_button(int x, int y, int w, int h, int min_w, int max_w,
 	} else nor_w = w;
 	nor_w += (UI_BAR_PADDING * 2);
 
-	Button *button;
-	button = malloc(sizeof(Button));
+	button_s *button;
+	button = malloc(sizeof(button_s));
 	button->next = NULL;
 
 	button->x1 = x;
@@ -122,9 +122,9 @@ Return true and store a pointer in "ui_pressed_button"
 if a button is under the mouse.
 ====================
 */
-int ui_button_check_click(Button **button_type)
+int ui_button_check_click(button_s **button_type)
 {
-	Button *button = *button_type;
+	button_s *button = *button_type;
 
 	while (button) {
 		if ((input.mouse_y < button->y2) && 
@@ -148,7 +148,7 @@ ui_button_check_click
 Return true if "button" is under the mouse
 ====================
 */
-int ui_singlebutton_check_click(Button *button)
+int ui_singlebutton_check_click(button_s *button)
 {
 	if ((input.mouse_y < button->y2) && 
 			(input.mouse_x < button->x2) && 
@@ -167,9 +167,9 @@ ui_button_check_click
 Return a pointer to the button under the mouse.
 ====================
 */
-Button* ui_button_check_pos(Button **button_type)
+button_s* ui_button_check_pos(button_s **button_type)
 {
-	Button *button = *button_type;
+	button_s *button = *button_type;
 	static const int offset = 1; // remove hole between buttons
 
 	while (button) {
@@ -283,6 +283,10 @@ void ui_display_window()
 	// draw background
 	sdl_draw_box2(active_window->x1, active_window->y1, active_window->x2,
 			active_window->y2, color.topbar);
+
+	// draw 3d effect
+	sdl_draw_3d_fx(active_window->x1, active_window->y1, active_window->x2,
+			active_window->y2);
 
 	if (active_window->widget) {
 		while (widget_node != NULL) {
@@ -538,8 +542,6 @@ void ui_new_widget_list_box(int x1, int y1, int x2, int y2,
 	new_widget->widget.list_box = list_box;
 	new_widget->next = NULL;
 	
-	printf("created list_box\n");	
-
 	// add to window widget list
 	if (!*tmp_node) {
 		// first node
@@ -555,7 +557,7 @@ void ui_new_widget_list_box(int x1, int y1, int x2, int y2,
 }
 
 void ui_new_widget_plain_text(char *text1, char *text2, char *text3, 
-		int x1, int y1, ColorRGB color, widget_t **widget_head_node)
+		int x1, int y1, colorRGB_t color, widget_t **widget_head_node)
 {
 	widget_t **tmp_node = widget_head_node;
 

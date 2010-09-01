@@ -88,8 +88,8 @@ void m_init_ui()
 	int h = button_font.size + UI_BAR_PADDING;
 	int x, y;
 	// buttons position are based previously created button
-	Button *last_button;
-	Button *topbar;
+	button_s *last_button;
+	button_s *topbar;
 
 	// ================================================================
 	// topbar

@@ -24,6 +24,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "shared.h"
 #include "parse_public.h"
+#include "editor.h"
 #include "ui.h"
 
 
@@ -37,7 +38,7 @@ enum {
 	DSTRING
 };
 
-struct Var_info {
+struct var_info_s {
 	const char** str;
 	const void* ptr;
 	const int type;
@@ -56,7 +57,7 @@ static const char* button_font_name_str[]		= {"button_font_name", "font/EnvyCode
 static const char* button_font_size_str[]		= {"button_font_size", "10"};
 
 static const char* ui_language_str[]			= {"language", "lang/en"};
-static const char* min_square_size_str[]		= {"min_square_size", "20"};
+static const char* ed_square_size_str[]			= {"ed_square_size", "20"};
 
 static const char* color_own_player0_str[]		= {"color_own_player0", "140, 170, 222"};
 static const char* color_own_player1_str[]		= {"color_own_player1", "148, 178, 107"};
@@ -69,18 +70,18 @@ static const char* color_topbar_str[]			= {"color_topbar", "90, 101, 115"};
 static const char* color_button_highlight_str[]	= {"color_button_highlight", "33, 40, 41"};
 
 
-static struct Var_info global_config_info[] = {
+static struct var_info_s global_config_info[] = {
 	
 	//	NAME						VAR (ptr)					TYPE
 	{	display_width_str,			&display_width,				INT_T		},
 	{	display_height_str,			&display_height,			INT_T		},
 	{	display_fullscreen_str,		&display_fullscreen,		INT_T		},
+	{	ed_square_size_str,			&ed_square_size,			INT_T		},
 
 	{	button_font_name_str,		&button_font.name,			STRING_T	},
 	{	button_font_size_str,		&button_font.size,			INT_T		},
 
 	{	ui_language_str,			&ui_language,				STRING_T	},
-	{	min_square_size_str,		&min_square_size,			INT_T		},
 
 	{	color_own_player0_str,		&color.square_owner[PLAYER_1],		COLOR_T		},
 	{	color_own_player1_str,		&color.square_owner[PLAYER_0],		COLOR_T		},
@@ -118,16 +119,16 @@ static const char* lang_no_win_str[]			= {"no_win", NULL};
 
 static const char* lang_lbox_server_str[]		= {"lbox_server", "Server"};
 static const char* lang_lbox_ping_str[]			= {"lbox_ping", "Ping"};
-static const char* lang_lbox_player_str[]		= {"lbox_player", "Player"};
+static const char* lang_lbox_player_str[]		= {"lbox_player", "player_s"};
 
 static const char* lang_txt_srv_name_is_str[]	= {"txt_srv_name_is", "Server name: "};
-static const char* lang_txt_player_name_is_str[]= {"txt_player_name_is", "Player name: "};
+static const char* lang_txt_player_name_is_str[]= {"txt_player_name_is", "player_s name: "};
 static const char* lang_configure_str[]			= {"configure", "Configure"};
 static const char* lang_join_str[]				= {"join", "Join"};
 static const char* lang_update_str[]			= {"update", "Update"};
 
 
-static struct Var_info lang_info[] = {
+static struct var_info_s lang_info[] = {
 	
 	//	NAME						VAR (ptr)					TYPE
 	{	lang_play_str,				&text.play,					STRING_T		},

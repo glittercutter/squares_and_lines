@@ -38,8 +38,8 @@ void ed_set_square_pos();
 
 void ed_add_square()
 {
-	int pos_x = (input.mouse_x - ed_start_x) / min_square_size;
-	int pos_y = (input.mouse_y - ed_start_y) / min_square_size;
+	int pos_x = (input.mouse_x - ed_start_x) / ed_square_size;
+	int pos_y = (input.mouse_y - ed_start_y) / ed_square_size;
 
 	if ((pos_x < ed_grid_w) && (pos_x >= 0)) {
 		if ((pos_y < ed_grid_h) && (pos_y >= 0))
@@ -49,8 +49,8 @@ void ed_add_square()
 
 void ed_rmv_square()
 {
-	int pos_x = (input.mouse_x - ed_start_x) / min_square_size;
-	int pos_y = (input.mouse_y - ed_start_y) / min_square_size;
+	int pos_x = (input.mouse_x - ed_start_x) / ed_square_size;
+	int pos_y = (input.mouse_y - ed_start_y) / ed_square_size;
 
 	if ((pos_x < ed_grid_w) && (pos_x >= 0)) {
 		if ((pos_y < ed_grid_h) && (pos_y >= 0))
@@ -98,7 +98,7 @@ void ed_init_ui()
 	int mirror_x;
 
 	// align properly with last button created
-	Button *last_button = button_topbar;
+	button_s *last_button = button_topbar;
 	if (!last_button)
 		return;
 	while (last_button->next) {
@@ -146,13 +146,13 @@ void ed_set_square_pos()
 	for (int i = 0; i < ed_grid_h; i++) {
 		for (int j = 0; j < ed_grid_w; j++) {
 			squares[i][j].x1 = x;
-			squares[i][j].x2 = x + min_square_size;
+			squares[i][j].x2 = x + ed_square_size;
 			squares[i][j].y1 = y;
-			squares[i][j].y2 = y + min_square_size;
-			x += min_square_size;
+			squares[i][j].y2 = y + ed_square_size;
+			x += ed_square_size;
 		}
 		x = ed_start_x;
-		y += min_square_size;
+		y += ed_square_size;
 	}
 }
 
@@ -164,13 +164,13 @@ int ed_init()
 	int h = display_height - button_topbar->h;
 	
 	// are the square size valid ?
-	if (!min_square_size) min_square_size = DEFAULT_SQUARE_SIZE;
-	ed_grid_w = w / min_square_size;
-	ed_grid_h = h / min_square_size;
+	if (!ed_square_size) ed_square_size = DEFAULT_SQUARE_SIZE;
+	ed_grid_w = w / ed_square_size;
+	ed_grid_h = h / ed_square_size;
 
 	// center the editor grid
-	ed_start_x = (w - (ed_grid_w * min_square_size)) / 2;
-	ed_start_y = button_topbar->h + (h - (ed_grid_h * min_square_size)) / 2;
+	ed_start_x = (w - (ed_grid_w * ed_square_size)) / 2;
+	ed_start_y = button_topbar->h + (h - (ed_grid_h * ed_square_size)) / 2;
 
 	// create 2d array for the squares
 	// allocate memory for rows

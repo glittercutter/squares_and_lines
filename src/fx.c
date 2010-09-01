@@ -30,7 +30,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 void fx_new_transition(void (*func)(), int step, int type)
 {
-	Fx_transition *fx = NULL;
+	fx_transition_s *fx = NULL;
 
 	switch (type) {
 	case FX_PLAYER_CHANGE:
@@ -59,7 +59,7 @@ then increase to max value; end
 */
 static void fx_do_transition()
 {
-	Fx_transition *fx;
+	fx_transition_s *fx;
 
 	for (int i = 0; i < NUM_OF_TRANSITION; i++) {
 
@@ -140,6 +140,9 @@ static void fx_glow_closest_segment()
 	// Find closest square
 	int pos_x = g_min_x + (input.mouse_x - g_offset_x) / g_square_size;
 	int pos_y = g_min_y + (input.mouse_y - g_offset_y) / g_square_size;
+	if (pos_x < g_min_x || pos_x >= g_max_x) return;
+	if (pos_y < g_min_y || pos_y >= g_max_y) return;
+
 	// Closest square's center position
  	int center_x = squares[pos_y][pos_x].x1 + 
 			(squares[pos_y][pos_x].x2 - squares[pos_y][pos_x].x1) / 2;
