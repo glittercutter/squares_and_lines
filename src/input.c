@@ -29,8 +29,8 @@ void get_input()
 	SDL_Event event;
 	// loop through waiting messages and process them
 	while (SDL_PollEvent(&event)) {
-		switch (event.type) {	
-		// closing the window exit the program
+		switch (event.type) {
+
 		case SDL_MOUSEBUTTONDOWN:
 			switch(event.button.button) {
 			case SDL_BUTTON_LEFT:
@@ -70,6 +70,7 @@ void get_input()
 			break;
 			
 		case SDL_QUIT:
+			// closing the window exit the program
 			gamestate = QUIT;
 			break;
 				

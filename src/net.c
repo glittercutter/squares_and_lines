@@ -136,7 +136,6 @@ int net_init_server()
 	local_player.unack_packet_tail = *tmp_unack_packet;
 	local_player.unack_packet_next = local_player.unack_packet_head;
 
-
 	srv.max_nplayer = 2;
 	srv.nplayer = 1;
 
@@ -147,8 +146,6 @@ int net_init_server()
 	pthread_detach(udp_listen_th);
 	rc = pthread_create(&tcp_listen_th, NULL, srv_tcp_listen, (void*)rc);
 	pthread_detach(tcp_listen_th);
-// 	rc = pthread_create(&packet_send_th, NULL, srv_send_game_packet, (void*)rc);
-// 	pthread_detach(packet_send_th);
 
 	return 0;
 }
@@ -199,8 +196,6 @@ int net_init_client()
 	pthread_detach(udp_listen_th);
 	rc = pthread_create(&tcp_listen_th, NULL, cl_tcp_listen, (void*)rc);
 	pthread_detach(tcp_listen_th);
-// 	rc = pthread_create(&packet_send_th, NULL, cl_send_game_packet, (void*)rc);
-// 	pthread_detach(packet_send_th);
 
 	return 0;
 }
@@ -227,7 +222,6 @@ void close_server()
 void close_client()
 {
 	if (!net_is_client) return;
-	printf("closing\n");
 
 	net_is_client = false;
 	net_game = false;
@@ -266,7 +260,7 @@ int srv_accept_request(client_s *cl)
 	// open a UDP socket for client
 	while (42) {	
 		if ((cl->udp_socket = SDLNet_UDP_Open(port)))
-			break;	// opened a port
+			break;// succes
 
 		if (port == MAX_PORT) { // cant open any port
 			fprintf(stderr, "SDLNet_UDP_Open: %s\n", SDLNet_GetError());
@@ -278,7 +272,7 @@ int srv_accept_request(client_s *cl)
 	printf("Opened UDP port %d for client\n", port);
 
 	/* Write packet */
-	// write connection request bytes
+	// write connection accepted bytes
 	udp_out_p->data[byte_writed++] = 0x81;
 	udp_out_p->data[byte_writed++] = 0x00;
 	// Application ID
@@ -334,18 +328,18 @@ srv_refuse_request
 */
 void srv_refuse_request(char *reason)
 {	
-	int byte_writed = 0; // next write position
+	int byte_writed = 0;
 
 	/* Write packet */
-	// write connection request bytes
+	// write connection refused bytes
 	udp_out_p->data[byte_writed++] = 0x81;
 	udp_out_p->data[byte_writed++] = 0x01;
 	// Application ID
 	strcpy((char *)&udp_out_p->data[byte_writed], "udp_sdltest");
 	byte_writed += strlen((char *)&udp_out_p->data[byte_writed]);
-	strcat((char *)&udp_out_p->data[byte_writed], "\0"); // terminate the string
-	byte_writed += 1; // count null character
-	// Client username
+	strcat((char *)&udp_out_p->data[byte_writed], "\0");
+	byte_writed += 1;
+	// refused reason string
 	strcpy((char *)&udp_out_p->data[byte_writed], reason);
 	byte_writed += strlen((char *)&udp_out_p->data[byte_writed]);
 	strcat((char *)&udp_out_p->data[byte_writed], "\0");
@@ -356,8 +350,6 @@ void srv_refuse_request(char *reason)
 
 	SDLNet_UDP_Send(main_udp_socket, -1, udp_out_p);
 }
-
-
 
 
 void srv_new_client(int byte_readed)
@@ -377,7 +369,6 @@ void srv_new_client(int byte_readed)
 	// get username from the packet
 	strncpy(tmp_username, (char *)&udp_in_p->data[byte_readed],
 			sizeof(tmp_username) - 1);
-
 	// check if the username is already in the list, if so, it is numbered
 	while (*tmp_client) {
 		if (!strcmp((*tmp_client)->username, tmp_username)) {
@@ -514,18 +505,20 @@ void cl_make_connection(int byte_readed)
 	if (local_player.connected) return;
 
 	// read username (in case the host changed it)
-	strncpy(local_player.name, (char *)&udp_in_p->data[byte_readed], sizeof(local_player.name));
+	strncpy(local_player.name, (char *)&udp_in_p->data[byte_readed],
+			sizeof(local_player.name));
 	byte_readed += strlen((char *)&udp_out_p->data[byte_readed]) + 1;
 
 	// Read the port number the host opened for UDP communication
 	// The port number is already in network byte order
 	memcpy(&main_udp_ip.port, &udp_in_p->data[byte_readed], sizeof(short));
 	byte_readed += sizeof(short);
-	main_udp_ip.host = udp_in_p->address.host; // use the address we received from
-	
+	// use the address we received the packet from
+	main_udp_ip.host = udp_in_p->address.host;
+
+	// TCP
 	main_tcp_ip.host = udp_in_p->address.host;
 	SDLNet_Write16(BROADCAST_PORT, &main_tcp_ip.port);
-	
 	if (!(main_tcp_socket = SDLNet_TCP_Open(&main_tcp_ip))) {
 		fprintf(stderr, "SDLNet_TCP_Open: %s\n", SDLNet_GetError());
 		SDLNet_TCP_Close(main_tcp_socket);
@@ -557,7 +550,7 @@ void cl_request_connection()
 		return;
 	}
 	
-	int byte_writed = 0; // last byte writed position
+	int byte_writed = 0;
 	srv_list_s **tmp_srv_list = &srv_list;
 
 	int offset_viewable_element = host_list.list_box->scrollbar.offset + 
@@ -580,8 +573,8 @@ void cl_request_connection()
 	strcpy((char *)&udp_out_p->data[byte_writed], "udp_sdltest");
 	 /* set position for next write */
 	byte_writed += strlen((char *)&udp_out_p->data[byte_writed]);
-	strcat((char *)&udp_out_p->data[byte_writed], "\0"); // terminate the string
-	byte_writed += 1; // count null character
+	strcat((char *)&udp_out_p->data[byte_writed], "\0");
+	byte_writed += 1;
 
 	if (!local_player.name[0]) strncpy(local_player.name, "noname",
 			sizeof(local_player.name));
@@ -616,14 +609,12 @@ void srv_send_info(int byte_readed)
 	/* Write packet */
 	// write info answer bytes
 	udp_out_p->data[byte_writed++] = 0x82;
-	udp_out_p->data[byte_writed++] = 0x00;
-	
+	udp_out_p->data[byte_writed++] = 0x00;	
 	// Program name
 	strcpy((char *)&udp_out_p->data[byte_writed], "udp_sdltest");
 	byte_writed += strlen((char *)&udp_out_p->data[byte_writed]);
-	strcat((char *)&udp_out_p->data[byte_writed], "\0"); // terminate the string
-	byte_writed += 1; // count null character
-	
+	strcat((char *)&udp_out_p->data[byte_writed], "\0");
+	byte_writed += 1;
 	// Server name
 	if (!srv.name[0])
 		strncpy(srv.name, "default name", sizeof(srv.name));
@@ -631,18 +622,15 @@ void srv_send_info(int byte_readed)
 	byte_writed += strlen((char *)&udp_out_p->data[byte_writed]);
 	strcat((char *)&udp_out_p->data[byte_writed], "\0");
 	byte_writed += 1;
-	
 	// Server ID
 	SDLNet_Write32(srv.id, &udp_out_p->data[byte_writed]);
 	byte_writed += 4;
-
 	// Current/Max players
 	SDLNet_Write16(srv.nplayer, &udp_out_p->data[byte_writed]);
 	byte_writed += 2;
 	SDLNet_Write16(srv.max_nplayer, &udp_out_p->data[byte_writed]);
 	byte_writed += 2;
-
-	// Tick for ping
+	// Tick for ping latency
 	memcpy(&udp_out_p->data[byte_writed], &udp_in_p->data[byte_readed], 4);
 	byte_writed += 4;
 
@@ -686,6 +674,7 @@ void srv_parse_game_packet(int byte_readed, client_s *cl)
 			}
 			break;
 
+		/* EDITOR */
 		case ED_ADD_SQUARE_BYTE:
 			ed_net_add_square(SDLNet_Read32(&udp_in_p->data[byte_readed]),
 					SDLNet_Read32(&udp_in_p->data[byte_readed + 4]));
@@ -736,12 +725,12 @@ void cl_parse_game_packet(int byte_readed)
 			}
 			break;
 
+		/* EDITOR */
 		case ED_ADD_SQUARE_BYTE:
 			ed_net_add_square(SDLNet_Read32(&udp_in_p->data[byte_readed]),
 					SDLNet_Read32(&udp_in_p->data[byte_readed + 4]));
 			byte_readed += 8;
 			break;
-
 		case ED_RM_SQUARE_BYTE:
 			ed_net_rm_square(SDLNet_Read32(&udp_in_p->data[byte_readed]),
 					SDLNet_Read32(&udp_in_p->data[byte_readed + 4]));
@@ -787,7 +776,8 @@ int srv_parse_udp_packet(client_s *cl)
 	// Info request
 	case 0x02:
 		if ((udp_in_p->data[byte_readed++]) != 0x00) break;
-		if (strcmp((char *)&udp_in_p->data[byte_readed], "udp_sdltest")) break;
+		if (strcmp((char *)&udp_in_p->data[byte_readed], "udp_sdltest"))
+			break;
 		byte_readed += strlen((char *)&udp_in_p->data[byte_readed]) + 1;
 		srv_send_info(byte_readed);
 		return 0;
@@ -795,7 +785,8 @@ int srv_parse_udp_packet(client_s *cl)
 	// connection request
 	case 0x01:
 		if ((udp_in_p->data[byte_readed++]) != 0x00) break;
-		if (strcmp((char *)&udp_in_p->data[byte_readed], "udp_sdltest")) break;
+		if (strcmp((char *)&udp_in_p->data[byte_readed], "udp_sdltest"))
+			break;
 		byte_readed += strlen((char *)&udp_in_p->data[byte_readed]) + 1;
 		srv_new_client(byte_readed);
 		return 0;
@@ -831,7 +822,7 @@ void cl_parse_udp_packet()
 	case 0x83:
 		if ((udp_in_p->data[byte_readed++]) != 0x00) 
 			break;
-
+		// display message
 		break;
 	
 	// server info
@@ -973,7 +964,6 @@ void srv_parse_tcp_packet(client_s *cl, byte *buffer)
 		break;
 
 	}
-
 }
 
 
@@ -994,7 +984,6 @@ void cl_parse_tcp_packet(byte *buffer)
 		break;
 
 	}
-
 }
 
 
