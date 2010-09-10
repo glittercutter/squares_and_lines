@@ -100,7 +100,7 @@ void m_init_ui()
 	x = 0; y = 0;
 	w = strlen(text.main_menu) * button_font.w;
 	last_button = ui_new_button(x, y, w, h, min_w, max_w, ALIGN_CENTER,
-			text.main_menu, *m_open_main, 1, 1, &button_topbar);
+			text.main_menu, *m_open_main, 0, 1, &button_topbar);
 	topbar = last_button;
 	
 	// dropmenu
@@ -111,18 +111,18 @@ void m_init_ui()
 	x = 0; y = last_button->y2;
 	w = strlen(text.new_game) * button_font.w + UI_BAR_PADDING;
 	last_button = ui_new_button(x, y, w, h, min_w, max_w, ALIGN_LEFT,
-			text.new_game, *m_button_new_game, 1, 0, &button_dropmenu_main);
+			text.new_game, *m_button_new_game, 0, 0, &button_dropmenu_main);
 
 	x = last_button->x1; y = last_button->y2;
 	w = strlen(text.option) * button_font.w + UI_BAR_PADDING;
 	last_button = ui_new_button(x, y, w, h, min_w, max_w, ALIGN_LEFT, 
-			text.option, *m_open_option, 1, 0, &button_dropmenu_main);
+			text.option, *m_open_option, 0, 0, &button_dropmenu_main);
 	// TODO actual option window ;)
 
 	x = last_button->x1; y = last_button->y2;
 	w = strlen(text.quit) * button_font.w + UI_BAR_PADDING;
 	last_button = ui_new_button(x, y, w, h, min_w, max_w, ALIGN_LEFT, 
-			text.quit, *m_button_quit, 1, 0, &button_dropmenu_main);
+			text.quit, *m_button_quit, 0, 0, &button_dropmenu_main);
 
 	// multiplayer
 	// ================================================================
@@ -130,7 +130,7 @@ void m_init_ui()
 	x = topbar->x2; y = topbar->y1;
 	w = strlen(text.multiplayer) * button_font.w;
 	last_button = ui_new_button(x, y, w, h, min_w, max_w, ALIGN_CENTER,
-			text.multiplayer, *m_open_multiplayer, 1, 1, &button_topbar);
+			text.multiplayer, *m_open_multiplayer, 0, 1, &button_topbar);
 	topbar = last_button;
 	
 	// dropmenu
@@ -141,12 +141,12 @@ void m_init_ui()
 	x = last_button->x1; y = last_button->y2;
 	w = strlen(text.host_game) * button_font.w + UI_BAR_PADDING;
 	last_button = ui_new_button(x, y, w, h, min_w, max_w, ALIGN_LEFT,
-			text.host_game, *m_button_host_game, 1, 0, &button_dropmenu_multiplayer);
+			text.host_game, *m_button_host_game, 0, 0, &button_dropmenu_multiplayer);
 
 	x = last_button->x1; y = last_button->y2;
 	w = strlen(text.join_game) * button_font.w + UI_BAR_PADDING;
 	last_button = ui_new_button(x, y, w, h, min_w, max_w, ALIGN_LEFT,
-			text.join_game, *m_button_join_game, 1, 0, &button_dropmenu_multiplayer);
+			text.join_game, *m_button_join_game, 0, 0, &button_dropmenu_multiplayer);
 
 }
 

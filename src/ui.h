@@ -64,6 +64,9 @@ typedef struct text_s {
 	char txt_srv_name_is[ STRING_LENGTH ];
 	char txt_player_name_is[ STRING_LENGTH ];
 
+	char cl_connected[ STRING_LENGTH ];
+	char srv_full[ STRING_LENGTH ];
+
 } text_s;
 text_s text;
 
@@ -151,10 +154,16 @@ typedef struct window_s {
 	widget_t *widget;
 	button_s *close_button;
 	button_s *button;
+	char notification[ LONG_STRING_LENGTH ];
 } window_s;
 
 typedef struct gui_surface_s {
-	SDL_Surface *arrow_up, *arrow_down, *arrow_left, *arrow_right;
+	SDL_Surface 
+		*arrow_up, 
+		*arrow_down, 
+		*arrow_left, 
+		*arrow_right,
+		*gradient;
 } gui_surface_s;
 gui_surface_s gui_surface;
 
@@ -197,6 +206,7 @@ button_s *active_dropmenu_parent;
 window_s host_window;
 window_s client_window;
 window_s *active_window;
+window_s *open_window[10]; // max opened windows TODO
 
 scrollbar_t *ui_dragged_scrollbar;
 

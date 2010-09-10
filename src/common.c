@@ -137,12 +137,12 @@ int longest_string(char *str1, ...)
 
 /* 
 ====================
-com_add_string_node
+add_string_node
 
 Add element to a list
 ====================
 */
-string_list_s* com_add_string_node(string_list_t *list_head)
+string_list_s* add_string_node(string_list_t *list_head)
 {
 	string_list_s **tmp_node = &list_head->list;
 	string_list_s *new_node = calloc(1, sizeof(string_list_s));
@@ -155,6 +155,40 @@ string_list_s* com_add_string_node(string_list_t *list_head)
 	return new_node;
 }
 
+/* 
+====================
+rm_string_node
+
+Remove element from a list
+====================
+*/
+void rm_string_node(string_list_t *list_head, string_list_s *node)
+{
+	pthread_mutex_lock(&list_box_mutex);
+
+	string_list_s **tmp_node = &list_head->list;
+
+	if (list_head->list == node) {
+		// first node
+		if (node->next) {
+			list_head->list = node->next;
+		} else {
+			list_head->list = NULL;
+		}
+		free(node);
+	} else { 
+		while (*tmp_node) {
+			if ((*tmp_node)->next == node) {
+				// replace with the next node
+				(*tmp_node)->next = node->next;
+				break;
+			}
+			tmp_node = &(*tmp_node)->next;
+		}
+		free(node);
+	}
+	pthread_mutex_unlock(&list_box_mutex);
+}
 
 void clear_strlist(string_list_t *list_head)
 {

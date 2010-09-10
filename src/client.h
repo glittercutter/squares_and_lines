@@ -23,6 +23,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define __CLIENT_H__
 
 #include "shared.h"
+#include "net.h"
 #include "ui.h"
 
 
@@ -42,20 +43,26 @@ typedef struct local_player_s {
 	int id;
 	char name[32];
 	bool connected;
+	Uint32 ack_packet_n;
+	Uint32 recev_packet_n;
+	bool recev_packet_ack_sent;
+	unack_packet_s *unack_packet_mem;
+	unack_packet_s *unack_packet_head;
+	unack_packet_s *unack_packet_tail;
+	unack_packet_s *unack_packet_next;
 } local_player_s;
 local_player_s local_player;
 
 
-
 // variable
-pthread_t client_thread;
-int cl_thread_active;
-int lan_search_host;
 string_list_t host_list;
+
 
 // function
 void lanclient_start_client(void);
 void cl_init_ui(void);
 void cl_add_lan_srv(int byte_readed, UDPpacket *p);
+void cl_button_close_window(void);
+
 
 #endif

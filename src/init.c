@@ -97,7 +97,7 @@ void ui_init()
 
 
 int init()
-{
+{	
 	load_config();
 	load_lang();
 	
@@ -118,8 +118,13 @@ int init()
 	if (!(udp_out_p = SDLNet_AllocPacket(512)))
 		eprint("SDLNet_AllocPacket: %s\n", SDLNet_GetError());
 	
+	if (pthread_mutex_init(&list_box_mutex, NULL))
+		eprint("pthread_mutex_init\n");
+	if (pthread_mutex_init(&udp_new_buffer_mutex, NULL))
+		eprint("pthread_mutex_init\n");
+	
 	ui_init();
-
+	
 	/* We start in the editor */
 	ed_init();
 	gamestate = EDITOR;

@@ -27,6 +27,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "game.h"
 #include "input.h"
 #include "main.h"
+#include "net.h"
 #include "ui.h"
 
 
@@ -38,25 +39,49 @@ void ed_set_square_pos();
 
 void ed_add_square()
 {
-	int pos_x = (input.mouse_x - ed_start_x) / ed_square_size;
-	int pos_y = (input.mouse_y - ed_start_y) / ed_square_size;
+	int x = (input.mouse_x - ed_start_x) / ed_square_size;
+	int y = (input.mouse_y - ed_start_y) / ed_square_size;
 
-	if ((pos_x < ed_grid_w) && (pos_x >= 0)) {
-		if ((pos_y < ed_grid_h) && (pos_y >= 0))
-			squares[pos_y][pos_x].active = TRUE;
-	}
+	if ((x >= ed_grid_w) || (x < 0)) return;
+	if ((y >= ed_grid_h) || (y < 0)) return;
+	if (squares[y][x].active == TRUE) return;
+	squares[y][x].active = TRUE;
+	if (net_game)
+		net_write_vector(ED_ADD_SQUARE_BYTE, x, y);
 }
 
 void ed_rmv_square()
 {
-	int pos_x = (input.mouse_x - ed_start_x) / ed_square_size;
-	int pos_y = (input.mouse_y - ed_start_y) / ed_square_size;
+	int x = (input.mouse_x - ed_start_x) / ed_square_size;
+	int y = (input.mouse_y - ed_start_y) / ed_square_size;
 
-	if ((pos_x < ed_grid_w) && (pos_x >= 0)) {
-		if ((pos_y < ed_grid_h) && (pos_y >= 0))
-			squares[pos_y][pos_x].active = FALSE;
+	if ((x >= ed_grid_w) || (x < 0)) return;
+	if ((y >= ed_grid_h) || (y < 0)) return;
+	if (squares[y][x].active == FALSE) return;
+	squares[y][x].active = FALSE;
+	if (net_game)
+		net_write_vector(ED_RM_SQUARE_BYTE, x, y);
+}
+
+void ed_net_add_square(int x, int y)
+{
+	if ((x < ed_grid_w) && (x >= 0)) {
+		if ((y < ed_grid_h) && (y >= 0)) {
+			squares[y][x].active = TRUE;
+		}
 	}
 }
+
+void ed_net_rm_square(int x, int y)
+{
+	if ((x < ed_grid_w) && (x >= 0)) {
+		if ((y < ed_grid_h) && (y >= 0)) {
+			squares[y][x].active = FALSE;
+		}
+	}
+}
+
+
 
 void ed_button_play()
 {
@@ -108,7 +133,7 @@ void ed_init_ui()
 	x = last_button->x2; y = 0;
 	w = strlen(text.play) * button_font.w;
 	last_button = ui_new_button(x, y, w, h, min_w, max_w, ALIGN_CENTER, text.play,
-			*ed_button_play, 1, 1, &button_editor);
+			*ed_button_play, 0, 1, &button_editor);
 	last_button->x1 = display_width - last_button->w;
 	last_button->x2 = last_button->x1 + last_button->w;
 	mirror_x = last_button->x1;
@@ -116,7 +141,7 @@ void ed_init_ui()
 	x = last_button->x2; y = 0;
 	w = strlen(text.random) * button_font.w;
 	last_button = ui_new_button(x, y, w, h, min_w, max_w, ALIGN_CENTER, text.random,
-			*ed_gen_random, 1, 1, &button_editor);
+			*ed_gen_random, 0, 1, &button_editor);
 	last_button->x1 = mirror_x - last_button->w;
 	last_button->x2 = mirror_x;
 

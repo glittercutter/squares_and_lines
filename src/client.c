@@ -40,7 +40,6 @@ void lanclient_start_client()
 
 void cl_button_close_window() 
 {	
-	lan_search_host = FALSE;
 	ui_button_close_window();
 }
 
@@ -140,8 +139,8 @@ void cl_init_ui()
 
 void cl_add_lan_srv(int byte_readed, UDPpacket *p)
 {
-	srv_list_s **tmp_node = &srv_list;
-	srv_list_s *new_node;
+	srv_list_s **tmp_srv = &srv_list;
+	srv_list_s *new_srv;
 	char *name = (char*)&p->data[byte_readed];
 	byte_readed += strlen((char*)&p->data[byte_readed]) + 1;
 
@@ -158,40 +157,40 @@ void cl_add_lan_srv(int byte_readed, UDPpacket *p)
 
 	printf("recv tick: %u", ping);		
 
-	while (*tmp_node) {
-		if ((p->address.host == (*tmp_node)->address.host) && 
-				(id == (*tmp_node)->id)) {
+	while (*tmp_srv) {
+		if ((p->address.host == (*tmp_srv)->address.host) && 
+				(id == (*tmp_srv)->id)) {
 
 			/* We have this one already, dont create a new instance */
 			goto update_info_only;
 
 		}
 		printf("node\n");	
-		tmp_node = &(*tmp_node)->next;
+		tmp_srv = &(*tmp_srv)->next;
 	}
 	
-	new_node = malloc(sizeof(srv_list_s));
-	printf("address: %p\n", (void*)new_node);
-	new_node->next = NULL;
-	new_node->address = p->address;
-	new_node->id = id;
+	new_srv = malloc(sizeof(srv_list_s));
+	printf("address: %p\n", (void*)new_srv);
+	new_srv->next = NULL;
+	new_srv->address = p->address;
+	new_srv->id = id;
 	
-	tmp_node = &srv_list;
-	if (!*tmp_node) {
+	tmp_srv = &srv_list;
+	if (!*tmp_srv) {
 		// first node
-		*tmp_node = new_node;
+		*tmp_srv = new_srv;
 	} else {
-		while (*tmp_node) {
-			tmp_node = &(*tmp_node)->next;
+		while (*tmp_srv) {
+			tmp_srv = &(*tmp_srv)->next;
 		}
 		// append to list
-		*tmp_node = new_node;
+		*tmp_srv = new_srv;
 	}
 
-	new_node->list = com_add_string_node(&host_list);	
-	new_node->list->string[0] = new_node->name;
-	new_node->list->string[1] = new_node->ping;
-	new_node->list->string[2] = new_node->player;
+	new_srv->list = add_string_node(&host_list);	
+	new_srv->list->string[0] = new_srv->name;
+	new_srv->list->string[1] = new_srv->ping;
+	new_srv->list->string[2] = new_srv->player;
 
 	ui_scrollbar_update_size(strlist_len(host_list.list), 
 			host_list.max_element, &host_list.list_box->scrollbar);
@@ -199,12 +198,12 @@ void cl_add_lan_srv(int byte_readed, UDPpacket *p)
 update_info_only:
 
 	// server name
-	strncpy((*tmp_node)->name, name, sizeof((*tmp_node)->name));
+	strncpy((*tmp_srv)->name, name, sizeof((*tmp_srv)->name));
 	// ping
-	snprintf((*tmp_node)->ping, sizeof((*tmp_node)->ping), 
+	snprintf((*tmp_srv)->ping, sizeof((*tmp_srv)->ping), 
 			"%d", (SDL_GetTicks() - ping));
 	// player
-	snprintf((*tmp_node)->player, sizeof((*tmp_node)->player), 
+	snprintf((*tmp_srv)->player, sizeof((*tmp_srv)->player), 
 			"%hd / %hd", nplayer, max_nplayer);
 
 }

@@ -144,6 +144,7 @@ int gamestate;
 int display_width;
 int display_height;
 int display_fullscreen;
+pthread_mutex_t list_box_mutex;
 
 
 #endif

@@ -82,29 +82,29 @@ void sv_init_ui()
 	ui_new_widget_list_box(host_window.x1 + (UI_BAR_PADDING * 2), 
 			host_window.y1 + (host_window.h / 2),
 			host_window.x2 - (UI_BAR_PADDING * 2), 
-			host_window.y2 - (UI_BAR_PADDING * 2), &peer_list, 
+			host_window.y2 - (UI_BAR_PADDING * 2), &client_list, 
 			&host_window.widget);
 
 	// client name
-	peer_list.col_position[0] = 0;
+	client_list.col_position[0] = 0;
 	// ping
-	peer_list.col_position[1] = (peer_list.list_box->w - SCROLLBAR_SIZE) * 0.7f;
+	client_list.col_position[1] = (client_list.list_box->w - SCROLLBAR_SIZE) * 0.7f;
 
 	// collum name buttons
 	w = strlen(text.lbox_player) * button_font.w + UI_BAR_PADDING;
-	min_w = peer_list.col_position[1] - peer_list.col_position[0];
-	ui_new_button(peer_list.col_position[0] + peer_list.list_box->x1, 
-			peer_list.list_box->y1 - button_font.h, w, h, min_w, max_w,
-			ALIGN_LEFT, text.lbox_player, NULL, 1, 0, &peer_list.col_name);
+	min_w = client_list.col_position[1] - client_list.col_position[0];
+	ui_new_button(client_list.col_position[0] + client_list.list_box->x1, 
+			client_list.list_box->y1 - button_font.h, w, h, min_w, max_w,
+			ALIGN_LEFT, text.lbox_player, NULL, 1, 0, &client_list.col_name);
 
 	w = strlen(text.lbox_ping) * button_font.w + UI_BAR_PADDING;
-	min_w = peer_list.list_box->w - (SCROLLBAR_SIZE * 1.6f) - 
-			peer_list.col_position[1];	
-	ui_new_button(peer_list.col_position[1] + peer_list.list_box->x1, 
-			peer_list.list_box->y1 - button_font.h, w, h, min_w, max_w,
-			ALIGN_LEFT, text.lbox_ping, NULL, 1, 0, &peer_list.col_name);
+	min_w = client_list.list_box->w - (SCROLLBAR_SIZE * 1.6f) - 
+			client_list.col_position[1];	
+	ui_new_button(client_list.col_position[1] + client_list.list_box->x1, 
+			client_list.list_box->y1 - button_font.h, w, h, min_w, max_w,
+			ALIGN_LEFT, text.lbox_ping, NULL, 1, 0, &client_list.col_name);
 
-	peer_list.list = NULL;
+	client_list.list = NULL;
 
 }
 

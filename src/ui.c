@@ -227,7 +227,6 @@ void ui_new_message(char* text)
 	ui_message.active = TRUE;
 	ui_message.time = MESSAGE_TIME;
 	strncpy(ui_message.text, text, LONG_STRING_LENGTH - 1);
-	
 	w = strlen(ui_message.text) * button_font.w + (UI_BAR_PADDING * 2);
 
 	ui_message.x1 = (display_width - w) / 2;

@@ -257,7 +257,8 @@ int g_init_square()
 						if (i == (ed_grid_h - 1) || !squares[i + 1][j].active) {
 							if (j == 0 || !squares[i][j - 1].active) {
 								squares[i][j].active = FALSE;
-								// skip min/max position check
+								/* 	skip min/max position check, we removed 
+									the square */
 								continue;
 							}
 						}
@@ -275,7 +276,7 @@ int g_init_square()
 
 	}
 	
-	// noy enough active square
+	// not enough active square
 	if ((g_max_x - g_min_x <= 1) || (g_max_y - g_min_y <= 1)) {
 		ui_new_message("not enough square!");
 		return 1;

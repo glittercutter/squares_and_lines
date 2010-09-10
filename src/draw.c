@@ -377,6 +377,9 @@ static void sdl_draw_ed_squares()
 	for (int i = 0; i < ed_grid_h; i++) {		
 		for (int j = 0; j < ed_grid_w; j++) {
 			if (squares[i][j].active) {
+				// filling
+				sdl_draw_box2(squares[i][j].x1, squares[i][j].y1,
+						squares[i][j].x2, squares[i][j].y2, color.button_highlight);
 				// outline
 				// top
 				if ((i == 0) || (!squares[i - 1][j].active)) {
@@ -617,7 +620,7 @@ void sdl_draw_widget_scrollbar(scrollbar_t *scrollbar)
 
 void sdl_draw_widget_list_box(widget_list_box_t *list_box)
 {
-	
+	pthread_mutex_lock(&list_box_mutex);
 	sdl_draw_button(list_box->list->col_name);
 
 	string_list_t *tmp_list = list_box->list;
@@ -647,6 +650,7 @@ void sdl_draw_widget_list_box(widget_list_box_t *list_box)
 		}
 
 		for (int j = 0; j < LS_MAX_STRING; j++) {
+			if (*list == NULL) break;
 			if (!(*list)->string[j]) continue;
 			x = list_box->list->col_position[j] + list_box->x1 + 2;
 			sdl_draw_text_solid2(x, y, (*list)->string[j], button_font.data,
@@ -656,6 +660,7 @@ void sdl_draw_widget_list_box(widget_list_box_t *list_box)
 		y += button_font.h;
 		list = &(*list)->next;
 	}
+	pthread_mutex_unlock(&list_box_mutex);
 }
 
 void sdl_create_button_3d_effect(SDL_Surface *surface)
@@ -711,14 +716,24 @@ void sdl_create_gui_graphic(void)
 			gui_surface.arrow_down->w * 0.4f, gui_surface.arrow_down->w * 0.6f, 
 			color.button_highlight);
 	sdl_create_button_3d_effect(gui_surface.arrow_down);
+
+	int topbar_height = button_font.size + UI_BAR_PADDING;
+	gui_surface.gradient = sdl_create_surface(topbar_height, topbar_height);
+	boxRGBA(gui_surface.gradient, 0, 0, gui_surface.gradient->w, 
+			gui_surface.gradient->w, color.topbar.r, color.topbar.g, 
+			color.topbar.b, 255);
+	sdl_create_button_gradient_effect(gui_surface.gradient);
+
 }
 
 static void sdl_draw_topbar()
 {
-	int ui_bar_height = button_font.size + UI_BAR_PADDING;
-	sdl_draw_box2(0, 0, display_width, ui_bar_height, color.topbar);
-	sdl_draw_line2(0, ui_bar_height, display_width, ui_bar_height, 
-	color.button_highlight);
+	int i = 0;
+	while (i < display_width) {
+		sdl_draw_surface(gui_surface.gradient, 0, 0, gui_surface.gradient->w,
+				gui_surface.gradient->h, screen, i, 0, 255);
+		i += gui_surface.gradient->w;
+	}
 }
 
 void sdl_draw_menu()

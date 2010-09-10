@@ -107,7 +107,7 @@ static const char* lang_main_menu_str[]			= {"main_menu", NULL};
 static const char* lang_option_str[]			= {"option", NULL};
 static const char* lang_new_game_str[]			= {"new_game", NULL};
 
-static const char* lang_multiplayer_str[]		= {"multiplayer", NULL};
+static const char* lang_multiplayer_str[]		= {"multiplayer", "Multiplayer"};
 static const char* lang_host_game_str[]			= {"host_game", NULL};
 static const char* lang_join_game_str[]			= {"join_game", NULL};
 
@@ -119,13 +119,15 @@ static const char* lang_no_win_str[]			= {"no_win", NULL};
 
 static const char* lang_lbox_server_str[]		= {"lbox_server", "Server"};
 static const char* lang_lbox_ping_str[]			= {"lbox_ping", "Ping"};
-static const char* lang_lbox_player_str[]		= {"lbox_player", "player_s"};
+static const char* lang_lbox_player_str[]		= {"lbox_player", "Player"};
 
 static const char* lang_txt_srv_name_is_str[]	= {"txt_srv_name_is", "Server name: "};
-static const char* lang_txt_player_name_is_str[]= {"txt_player_name_is", "player_s name: "};
+static const char* lang_txt_player_name_is_str[]= {"txt_player_name_is", "Player name: "};
 static const char* lang_configure_str[]			= {"configure", "Configure"};
 static const char* lang_join_str[]				= {"join", "Join"};
 static const char* lang_update_str[]			= {"update", "Update"};
+static const char* lang_cl_connected_str[]		= {"cl_connected", "Joined game"};
+static const char* lang_srv_full_str[]			= {"srv_full", "Server is full"};
 
 
 static struct var_info_s lang_info[] = {
@@ -156,6 +158,10 @@ static struct var_info_s lang_info[] = {
 	{	lang_configure_str,			&text.configure,			STRING_T		},
 	{	lang_join_str,				&text.join,					STRING_T		},
 	{	lang_update_str,			&text.update,				STRING_T		},
+	{	lang_cl_connected_str,		&text.cl_connected,			STRING_T		},
+	{	lang_srv_full_str,			&text.srv_full,				STRING_T		},
+
+
 };
 
 
