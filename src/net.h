@@ -27,13 +27,18 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define PACKET_LENGHT 512
 #define UNACK_PACKET_STORAGE_SIZE 60
 
-// net.c
-#define ED_ADD_SQUARE_BYTE 0x51
-#define ED_RM_SQUARE_BYTE 0x52
 #define PACKET_ACK_BYTE 0x11
 #define RESENT_BYTE 0x12
+#define STATE_CHANGE_BYTE 0x21
+#define ED_ADD_SQUARE_BYTE 0x51
+#define ED_RM_SQUARE_BYTE 0x52
+#define G_SEG_GLOW_BYTE 0x71
+#define G_ADD_SEG_BYTE 0x72
+#define G_PLAYER_TURN_BYTE 0x73
 
-
+//
+// net.c
+//
 typedef struct unack_packet_s {
 	bool active;
 	Uint32 packet_n;
@@ -42,21 +47,30 @@ typedef struct unack_packet_s {
 	struct unack_packet_s *next;
 } unack_packet_s;
 
+bool net_is_server;
+bool net_is_client;
+bool net_game;
 
-int net_game;
 UDPpacket *udp_out_p;
 UDPpacket *udp_in_p;
+
 byte udp_new_buffer[PACKET_LENGHT];
 int udp_new_buffer_writed;
 pthread_mutex_t udp_new_buffer_mutex;
+
 
 void cl_request_connection(void);
 void request_local_srv(void);
 int net_init_server(void);
 int net_init_client(void);
 void net_write_vector(byte id_byte, int x, int y);
+void net_write_int(byte id_byte, int count, ...);
+void net_write_state_change(int state);
+void net_write_sync_square(void);
 
+//
 // net_z.c
+//
 int zdeflate(char *source, unsigned char *out, int *size);
 int zinflate(char *source, char *out, int size);
 

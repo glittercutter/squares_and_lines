@@ -4,7 +4,6 @@
 #include "shared.h"
 
 
-// function
 void eprint(const char *fmt, ...); 
 int get_random_number(int);
 int ipow(int, int);

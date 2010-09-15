@@ -39,11 +39,6 @@ void m_open_main()
 	active_dropmenu_parent = button_topbar;
 }
 
-void m_close_main()
-{
-	active_dropmenu = NULL;
-}
-
 void m_open_option()
 {
 	char string[ LONG_STRING_LENGTH ];

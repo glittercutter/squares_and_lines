@@ -26,28 +26,28 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #define TEXT_MARGIN 10
 
+
 typedef struct player_s player_s;
 struct player_s {
 	int score_text_pos_x;
 	int score;
 };
-player_s player[2];
+player_s player[2]; // TODO rewrite
 
 
-void g_change_state();
-void game_main();
-void g_init_ui();
-int g_init();
-
-
-// variable
-int player_turn;
-int score[2];
 int winning_player;
 int squares_remaining;
 int g_min_x, g_max_x;
 int g_min_y, g_max_y;
 int g_square_size;
 int g_offset_x, g_offset_y;
+
+
+void g_change_state(void);
+void game_main(void);
+void g_init_ui(void);
+int g_init(void);
+void g_add_segment(int x, int y, int side);
+
 
 #endif

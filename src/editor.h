@@ -25,17 +25,19 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "shared.h"
 
 
-void ed_change_state();
-void editor_main();
-void ed_init_ui();
-int ed_init();
-void ed_net_add_square(int x, int y);
-void ed_net_rm_square(int x, int y);
-
 int ed_grid_w;
 int ed_grid_h;
 int ed_square_size;
 int ed_start_x;
 int ed_start_y;
+
+
+void ed_change_state(void);
+void editor_main(void);
+void ed_init_ui(void);
+int ed_init(void);
+void ed_net_add_square(int x, int y);
+void ed_net_rm_square(int x, int y);
+
 
 #endif

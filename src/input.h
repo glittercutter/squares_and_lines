@@ -25,15 +25,17 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "shared.h"
 
 
-typedef struct Input Input;
-struct Input {
-	int mouse_x, mouse_y;
-	int mouse_button_left;
-	int mouse_button_middle;
-	int mouse_button_right;
-};
-Input input;
+typedef struct input_s {
+	int mouse_x;
+	int mouse_y;
+	bool mouse_button_left;
+	bool mouse_button_middle;
+	bool mouse_button_right;
+} input_s;
+input_s input;
 
-void get_input();
+
+void get_input(void);
+
 
 #endif

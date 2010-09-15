@@ -20,24 +20,27 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // draw.c - 
 
 #include "draw.h"
+
+#include "client.h"
 #include "editor.h"
 #include "fx.h"
 #include "game.h"
 #include "ui.h"
 
 
-void sdl_create_button_gradient_effect(SDL_Surface*);
-
-
 SDL_Surface* sdl_create_surface(int w, int h)
 {
 	SDL_Surface *surface;
+
+	// 32 bits
 // 	surface = SDL_CreateRGBSurface(SDL_SWSURFACE, w, h, 32, 
 // #if SDL_BYTEORDER == SDL_BIG_ENDIAN
 // 	   					0xFF000000, 0x00FF0000, 0x0000FF00, 0x000000FF);
 // #else
 // 						0x000000FF, 0x0000FF00, 0x00FF0000, 0xFF000000);
 // #endif
+
+	// 24 bits
 	surface = SDL_CreateRGBSurface(SDL_SWSURFACE, w, h, 24, 
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
 	   					0xFF0000, 0x00FF00, 0x0000FF, 0);
@@ -74,16 +77,7 @@ Text with transparent background.
 Draw to screen.
 ==============
 */
-void sdl_draw_text_solid(int x, int y, char *text, TTF_Font *font, int r, int g, int b)
-{
-	SDL_Color color = { r, g, b };
-	SDL_Surface* textSurface = TTF_RenderText_Solid(font, text, color);
 
-	SDL_Rect textLocation = { x, y, 0, 0 };
-	SDL_BlitSurface(textSurface, NULL, screen, &textLocation);
-	
-	SDL_FreeSurface(textSurface);
-}
 void sdl_draw_text_solid2(int x, int y, char *text, TTF_Font *font, colorRGB_t color)
 {
 	SDL_Color sdl_color = { color.r, color.g, color.b };
@@ -105,19 +99,8 @@ text is antialiased with transparent background.
 Draw to specified SDL_Surface.
 ==============
 */
-void sdl_draw_text_blended(SDL_Surface *surface, int x, int y, char *text,
-			TTF_Font *font, int r, int g, int b)
-{
-	SDL_Color color = { r, g, b };
-	SDL_Surface* textSurface = TTF_RenderText_Blended(font, text, color);
-
-	SDL_Rect textLocation = { x, y, 0, 0 };
-	SDL_BlitSurface(textSurface, NULL, surface, &textLocation);
-	
-	SDL_FreeSurface(textSurface);
-}
 void sdl_draw_text_blended2(SDL_Surface *surface, int x, int y, char *text,
-			TTF_Font *font, colorRGB_t color)
+		TTF_Font *font, colorRGB_t color)
 {
 	SDL_Color sdl_color = { color.r, color.g, color.b };
 	SDL_Surface* textSurface = TTF_RenderText_Blended(font, text, sdl_color);
@@ -131,69 +114,50 @@ void sdl_draw_text_blended2(SDL_Surface *surface, int x, int y, char *text,
 /* Primitive
 ==============
 */
-void sdl_draw_line(int x1, int y1, int x2, int y2, int r, int g, int b)
-{
-	int a = 255;
-	lineRGBA(screen, x1, y1, x2, y2, r, g, b, a);
-}
 void sdl_draw_line2(int x1, int y1, int x2, int y2, colorRGB_t color)
 {
 	int a = 255;
 	lineRGBA(screen, x1, y1, x2, y2, color.r, color.g, color.b, a);
 }
-void sdl_draw_line3(SDL_Surface *surface, int x1, int y1, int x2, int y2, colorRGB_t color)
+void sdl_draw_line3(SDL_Surface *surface, int x1, int y1, int x2, int y2,
+		colorRGB_t color)
 {
 	int a = 200;
 	lineRGBA(surface, x1, y1, x2, y2, color.r, color.g, color.b, a);
 }
 
-// Line with alfa value
-void sdl_draw_glow_line(int x1, int y1, int x2, int y2, colorRGB_t color, int level)
-{
-	lineRGBA(screen, x1, y1, x2, y2, color.r, color.g, color.b, level);
-}
-
-
-void sdl_draw_rect(int x1, int y1, int x2, int y2, int r, int g, int b)
-{
-	int a = 255;
-	rectangleRGBA(screen, x1, y1, x2, y2, r, g, b, a);
-}
-void sdl_draw_rect2(SDL_Surface *surface, int x1, int y1, int x2, int y2, colorRGB_t color)
+void sdl_draw_rect2(SDL_Surface *surface, int x1, int y1, int x2, int y2,
+		colorRGB_t color)
 {
 	int a = 255;
 	rectangleRGBA(surface, x1, y1, x2, y2, color.r, color.g, color.b, a);
 }
 
-
-void sdl_draw_filled_circle(int x, int y, int radius, int r, int g, int b)
-{
-	int a = 255;
-	filledEllipseRGBA(screen, x, y, radius, radius, r, g, b, a);
-}
-
-
-void sdl_draw_box(int x1, int y1, int x2, int y2, int r, int g, int b)
-{
-	int a = 255;
-	boxRGBA(screen, x1, y1, x2, y2, r, g, b, a);
-}
 void sdl_draw_box2(int x1, int y1, int x2, int y2, colorRGB_t color)
 {
 	int a = 255;
 	boxRGBA(screen, x1, y1, x2, y2, color.r, color.g, color.b, a);
 }
 
-
 void sdl_draw_triangle(SDL_Surface *surface, int x1, int y1, int x2, int y2,
 	   	int x3, int y3, colorRGB_t color)
 {
 	int a = 255;
-	filledTrigonRGBA(surface, x1, y1, x2, y2, x3, y3, color.r, color.g, color.b, a);
+	filledTrigonRGBA(surface, x1, y1, x2, y2, x3, y3, 
+			color.r, color.g, color.b, a);
 }
 /* Primitive end
 ==============
 */
+
+
+// Line with alfa value
+void sdl_draw_glow_line(int x1, int y1, int x2, int y2, 
+		colorRGB_t color, int level)
+{
+	lineRGBA(screen, x1, y1, x2, y2, color.r, color.g, color.b, level);
+}
+
 
 void sdl_draw_3d_fx(int x1, int y1, int x2, int y2)
 {
@@ -265,7 +229,7 @@ static void sdl_draw_game_info()
 	int offset = display_width - TEXT_MARGIN;
 	colorRGB_t tmp_color;
 
-	if (player_turn == PLAYER_1) {
+	if (local_player.turn == PLAYER_1) {
 		tmp_color.r = 0;
 		tmp_color.g = 0;
 		tmp_color.b = 0;
@@ -275,12 +239,12 @@ static void sdl_draw_game_info()
 		tmp_color.b = color.square_owner[PLAYER_1].b;
 	}
 
-	sprintf(string, "%s 2 : %d", text.player, score[1]);
+	sprintf(string, "%s 2 : %d", text.player, player[1].score);
 	offset -= button_font.w * (strlen(string));
 	sdl_draw_text_solid2(offset, -1, string, button_font.data, tmp_color);
 	player[1].score_text_pos_x = offset;
 
-	if (player_turn == PLAYER_0) {
+	if (local_player.turn == PLAYER_0) {
 		tmp_color.r = 0;
 		tmp_color.g = 0;
 		tmp_color.b = 0;
@@ -290,7 +254,7 @@ static void sdl_draw_game_info()
 		tmp_color.b = color.square_owner[PLAYER_0].b;
 	}
 
-	sprintf(string, "%s 1 : %d", text.player, score[0]);
+	sprintf(string, "%s 1 : %d", text.player, player[0].score);
 	offset -= button_font.w * (strlen(string)) + TEXT_MARGIN + TEXT_MARGIN;
 	sdl_draw_text_solid2(offset, -1, string, button_font.data, tmp_color);
 	player[0].score_text_pos_x = offset;
@@ -379,7 +343,8 @@ static void sdl_draw_ed_squares()
 			if (squares[i][j].active) {
 				// filling
 				sdl_draw_box2(squares[i][j].x1, squares[i][j].y1,
-						squares[i][j].x2, squares[i][j].y2, color.button_highlight);
+						squares[i][j].x2, squares[i][j].y2, 
+						color.button_highlight);
 				// outline
 				// top
 				if ((i == 0) || (!squares[i - 1][j].active)) {
@@ -439,14 +404,14 @@ static void sdl_draw_current_player_box()
 	if (fx_transition[FX_PLAYER_CHANGE].active) {
 		if (fx_transition[FX_PLAYER_CHANGE].halfway) {
 			// do only first half the transition cycle
-			fx_transition[FX_PLAYER_CHANGE].active = FALSE;
+			fx_transition[FX_PLAYER_CHANGE].active = false;
 
 			/* Draw static box (prevent flashing between state) */
 			goto no_animation; 
 		
 		}
 		// animate the box
-		if (player_turn - 1 == 1) {
+		if (local_player.turn - 1 == 1) {
 			x1 = player[1].score_text_pos_x - TEXT_MARGIN +
 					((fx_transition[FX_PLAYER_CHANGE].max_step -
 					fx_transition[FX_PLAYER_CHANGE].current_step) * 
@@ -495,7 +460,7 @@ static void sdl_draw_current_player_box()
 no_animation: /* Prevent flashing between state */
 		
 		// static box
-		if (player_turn - 1 == 1) {
+		if (local_player.turn - 1 == 1) {
 			boxRGBA(screen, player[1].score_text_pos_x - TEXT_MARGIN, 0,
 					display_width, button_topbar->h - 1, 
 					color.square_owner[PLAYER_1].r, 

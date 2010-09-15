@@ -25,10 +25,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "shared.h"
 
 
-// function
-void load_config();
-void save_config();
-void load_lang();
+void load_config(void);
+void save_config(void);
+void load_lang(void);
 
 
 #endif

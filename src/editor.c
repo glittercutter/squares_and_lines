@@ -31,43 +31,45 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "ui.h"
 
 
-void ed_clear_squares();
-void ed_gen_random();
-void ed_clear_squares();
-void ed_set_square_pos();
+#define DEFAULT_SQUARE_SIZE 20
+
+void ed_clear_squares(void);
+void ed_gen_random(void);
+void ed_clear_squares(void);
+void ed_set_square_pos(void);
 
 
-void ed_add_square()
+static void ed_add_square()
 {
 	int x = (input.mouse_x - ed_start_x) / ed_square_size;
 	int y = (input.mouse_y - ed_start_y) / ed_square_size;
 
 	if ((x >= ed_grid_w) || (x < 0)) return;
 	if ((y >= ed_grid_h) || (y < 0)) return;
-	if (squares[y][x].active == TRUE) return;
-	squares[y][x].active = TRUE;
+	if (squares[y][x].active == true) return;
+	squares[y][x].active = true;
 	if (net_game)
-		net_write_vector(ED_ADD_SQUARE_BYTE, x, y);
+		net_write_int(ED_ADD_SQUARE_BYTE, 2, x, y);
 }
 
-void ed_rmv_square()
+static void ed_rmv_square()
 {
 	int x = (input.mouse_x - ed_start_x) / ed_square_size;
 	int y = (input.mouse_y - ed_start_y) / ed_square_size;
 
 	if ((x >= ed_grid_w) || (x < 0)) return;
 	if ((y >= ed_grid_h) || (y < 0)) return;
-	if (squares[y][x].active == FALSE) return;
-	squares[y][x].active = FALSE;
+	if (squares[y][x].active == false) return;
+	squares[y][x].active = false;
 	if (net_game)
-		net_write_vector(ED_RM_SQUARE_BYTE, x, y);
+		net_write_int(ED_RM_SQUARE_BYTE, 2, x, y);
 }
 
 void ed_net_add_square(int x, int y)
 {
 	if ((x < ed_grid_w) && (x >= 0)) {
 		if ((y < ed_grid_h) && (y >= 0)) {
-			squares[y][x].active = TRUE;
+			squares[y][x].active = true;
 		}
 	}
 }
@@ -76,15 +78,15 @@ void ed_net_rm_square(int x, int y)
 {
 	if ((x < ed_grid_w) && (x >= 0)) {
 		if ((y < ed_grid_h) && (y >= 0)) {
-			squares[y][x].active = FALSE;
+			squares[y][x].active = false;
 		}
 	}
 }
 
 
-
 void ed_button_play()
 {
+	if (net_is_client) return;
 	fx_new_transition(*g_change_state, 3, FX_FADE);
 }
 
@@ -92,9 +94,13 @@ void ed_button_play()
 void ed_change_state()
 {
 	gamestate = EDITOR;
-	active_dropmenu = NULL;
 	ed_clear_squares();
 	ed_set_square_pos();
+
+	if (net_is_server) {
+		net_write_int(STATE_CHANGE_BYTE, 1, EDITOR);
+		net_write_sync_square();
+	}
 }
 
 
@@ -112,6 +118,7 @@ void editor_main()
 	if (input.mouse_button_right)
 		ed_rmv_square();
 }
+
 
 void ed_init_ui()
 {	
@@ -152,12 +159,12 @@ void ed_clear_squares()
 {
 	for (int i = 0; i < ed_grid_h; i++) {
 		for (int j = 0; j < ed_grid_w; j++) {
-			squares[i][j].active = FALSE;
-			squares[i][j].owner = FALSE;
-			squares[i][j].owner_up = FALSE;
-			squares[i][j].owner_right = FALSE;
-			squares[i][j].owner_down = FALSE;
-			squares[i][j].owner_left = FALSE;
+			squares[i][j].active = false;
+			squares[i][j].owner = false;
+			squares[i][j].owner_up = false;
+			squares[i][j].owner_right = false;
+			squares[i][j].owner_down = false;
+			squares[i][j].owner_left = false;
 		}
 	}
 }
@@ -181,7 +188,7 @@ void ed_set_square_pos()
 	}
 }
 
-#define DEFAULT_SQUARE_SIZE 20
+
 int ed_init()
 {
 	// set playable area
@@ -254,16 +261,16 @@ void ed_gen_random()
 	int max_w = ed_grid_w - 1;
 	int max_h = ed_grid_h - 1;
 
-	// activate center squares for starting point
-	squares[ed_grid_h / 2][ed_grid_w / 2].active = TRUE;
-	squares[ed_grid_h / 2 + 1][ed_grid_w / 2].active = TRUE;
-	squares[ed_grid_h / 2 - 1][ed_grid_w / 2].active = TRUE;
-	squares[ed_grid_h / 2][ed_grid_w / 2 + 1].active = TRUE;
-	squares[ed_grid_h / 2][ed_grid_w / 2 - 1].active = TRUE;
-	squares[ed_grid_h / 2 + 1][ed_grid_w / 2 - 1].active = TRUE;
-	squares[ed_grid_h / 2 - 1][ed_grid_w / 2 + 1].active = TRUE;
-	squares[ed_grid_h / 2 + 1][ed_grid_w / 2 + 1].active = TRUE;
-	squares[ed_grid_h / 2 - 1][ed_grid_w / 2 - 1].active = TRUE;
+	// activate center squares as starting point
+	squares[ed_grid_h / 2][ed_grid_w / 2].active = true;
+	squares[ed_grid_h / 2 + 1][ed_grid_w / 2].active = true;
+	squares[ed_grid_h / 2 - 1][ed_grid_w / 2].active = true;
+	squares[ed_grid_h / 2][ed_grid_w / 2 + 1].active = true;
+	squares[ed_grid_h / 2][ed_grid_w / 2 - 1].active = true;
+	squares[ed_grid_h / 2 + 1][ed_grid_w / 2 - 1].active = true;
+	squares[ed_grid_h / 2 - 1][ed_grid_w / 2 + 1].active = true;
+	squares[ed_grid_h / 2 + 1][ed_grid_w / 2 + 1].active = true;
+	squares[ed_grid_h / 2 - 1][ed_grid_w / 2 - 1].active = true;
 
 	for (int i = 0; i < RAND; i++) {
 		rand_w = get_random_number(max_w);
@@ -276,7 +283,7 @@ void ed_gen_random()
 				squares[rand_h - 1][rand_w].active ||
 				squares[rand_h][rand_w + 1].active || 
 				squares[rand_h][rand_w - 1].active) {
-			squares[rand_h][rand_w].active = TRUE;
+			squares[rand_h][rand_w].active = true;
 		}
 	}
 	

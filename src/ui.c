@@ -34,15 +34,15 @@ int ui_scrollbar_check(scrollbar_t*);
 ui_new_button
 
 Allocate memory, create surface, set position.
-Button is added at the tail of the familly node.
+Button is added at the tail of the list of "head_node".
 Return a pointer to the created button.
 ====================
 */
 button_s* ui_new_button(int x, int y, int w, int h, int min_w, int max_w, 
 		int align, char *text, void func(), int three_d, int gradient,
-		button_s **node)
+		button_s **head_node)
 {
-	button_s **node2 = node;
+	button_s **new_node = head_node;
 	int alfa = 255;
 	int text_x = 0;
 	int nor_w;
@@ -105,12 +105,12 @@ button_s* ui_new_button(int x, int y, int w, int h, int min_w, int max_w,
 			button_font.data, color.text);
 
 	// Add to button list
-	while (*node2) {
-		node2 = &(*node2)->next;
+	while (*new_node) {
+		new_node = &(*new_node)->next;
 	}
-	*node2 = button;
+	*new_node = button;
 
-	return *node2;
+	return *new_node;
 }
 
 
@@ -122,9 +122,9 @@ Return true and store a pointer in "ui_pressed_button"
 if a button is under the mouse.
 ====================
 */
-int ui_button_check_click(button_s **button_type)
+int ui_button_check_click(button_s **head_node)
 {
-	button_s *button = *button_type;
+	button_s *button = *head_node;
 
 	while (button) {
 		if ((input.mouse_y < button->y2) && 
@@ -132,7 +132,7 @@ int ui_button_check_click(button_s **button_type)
 				(input.mouse_y > button->y1) && 
 				(input.mouse_x > button->x1)) {
 			ui_pressed_button = button;
-			input.mouse_button_left = FALSE;
+			input.mouse_button_left = false;
 			return 1;
 		} else {
 			button = button->next;
@@ -143,7 +143,7 @@ int ui_button_check_click(button_s **button_type)
 
 /* 
 ====================
-ui_button_check_click
+ui_singlebutton_check_click
 
 Return true if "button" is under the mouse
 ====================
@@ -162,15 +162,15 @@ int ui_singlebutton_check_click(button_s *button)
 
 /* 
 ====================
-ui_button_check_click
+ui_button_check_pos
 
 Return a pointer to the button under the mouse.
 ====================
 */
-button_s* ui_button_check_pos(button_s **button_type)
+button_s* ui_button_check_pos(button_s **head_node)
 {
-	button_s *button = *button_type;
-	static const int offset = 1; // remove hole between buttons
+	button_s *button = *head_node;
+	static const int offset = 1; // remove "hole" between buttons
 
 	while (button) {
 		if ((input.mouse_y < button->y2 + offset) && 
@@ -190,7 +190,7 @@ button_s* ui_button_check_pos(button_s **button_type)
 ====================
 ui_button_function
 
-Called by get_input() to execute the function of the button.
+Execute the function of the pressed button.
 ====================
 */
 void ui_button_function()
@@ -210,7 +210,7 @@ void ui_button_function()
 
 void ui_button_close_window()
 {
-	active_window = active_window->last_window;
+	active_window = active_window->last_window; // TODO new system
 }
 
 
@@ -224,7 +224,7 @@ void ui_button_drag_window()
 void ui_new_message(char* text)
 {
 	int w;
-	ui_message.active = TRUE;
+	ui_message.active = true;
 	ui_message.time = MESSAGE_TIME;
 	strncpy(ui_message.text, text, LONG_STRING_LENGTH - 1);
 	w = strlen(ui_message.text) * button_font.w + (UI_BAR_PADDING * 2);
@@ -250,7 +250,7 @@ void ui_display_message()
 
 	--ui_message.time;
 	if (!ui_message.time) 
-		ui_message.active = FALSE;
+		ui_message.active = false;
 }
 
 
@@ -362,7 +362,7 @@ int ui_scrollbar_check(scrollbar_t *scrollbar)
 	int mouse_pos;
 	
 	if (!input.mouse_button_left) {
-		scrollbar->dragging_handle = FALSE;
+		scrollbar->dragging_handle = false;
 		ui_dragged_scrollbar = NULL;
 		return 0;
 	}
@@ -400,7 +400,7 @@ int ui_scrollbar_check(scrollbar_t *scrollbar)
 
 	} else if(ui_singlebutton_check_click(&scrollbar->handle)) {
 		// scrollbar now dragged
-		scrollbar->dragging_handle = TRUE;
+		scrollbar->dragging_handle = true;
 		ui_dragged_scrollbar = scrollbar;
 		// keep position of the mouse when clicked for drag
 		if(scrollbar->orientation == HORIZONTAL) {
@@ -464,7 +464,7 @@ void ui_new_widget_list_box(int x1, int y1, int x2, int y2,
 	list_box->scrollbar.handle_max_h = (list_box->scrollbar.y2 - SCROLLBAR_SIZE) - 
 			(list_box->scrollbar.y1 + SCROLLBAR_SIZE);
 	
-	list_box->scrollbar.dragging_handle = FALSE;
+	list_box->scrollbar.dragging_handle = false;
 
 	// arrows button
 	list_box->scrollbar.arrow1.surface = gui_surface.arrow_up;

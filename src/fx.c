@@ -21,33 +21,26 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "fx.h"
 
+#include "client.h"
 #include "common.h"
 #include "editor.h"
 #include "game.h"
 #include "input.h"
 #include "main.h"
+#include "net.h"
 
 
 void fx_new_transition(void (*func)(), int step, int type)
 {
-	fx_transition_s *fx = NULL;
-
-	switch (type) {
-	case FX_PLAYER_CHANGE:
-		fx = &fx_transition[FX_PLAYER_CHANGE];
-		break;
-
-	case FX_FADE:
-		fx = &fx_transition[FX_FADE];
-	}
-
-	fx->active = TRUE;
+	fx_transition_s *fx = &fx_transition[type];
+	fx->active = true;
 	fx->max_step = step;
 	fx->current_step = step;
-	fx->halfway = FALSE;
+	fx->halfway = false;
 	fx->fx_type = type;
 	fx->func = func;
 }
+
 
 /* 
 ====================
@@ -68,14 +61,14 @@ static void fx_do_transition()
 		} else continue;
 		
 		if ((fx->halfway) && (fx->current_step == fx->max_step)) {
-			fx->active = FALSE;
+			fx->active = false;
 			return;
 		}
 
 		if (fx->current_step == 0) {
 			if (*fx->func != NULL) 
 				fx->func();
-			fx->halfway = TRUE;
+			fx->halfway = true;
 		}
 
 		if (fx->halfway) {
@@ -83,6 +76,7 @@ static void fx_do_transition()
 		} else --fx->current_step;
 	}
 }
+
 
 /* 
 ====================
@@ -94,11 +88,12 @@ Find empty slot to insert new glowing segment
 static void fx_new_glow_segment()
 {
 	for (int i = 0; i < MAX_GLOWING_SEGMENT; i++) {
-		if (!seg_glow[i].square) {
+		if (!seg_glow[i].square) { // find space for new glow
 			seg_glow[i].square = seg_glow_current.square;
 			seg_glow[i].pos = seg_glow_current.pos;
 			seg_glow[i].glow_level = 0;
 			seg_glow[i].player = seg_glow_current.player;
+
 			switch (seg_glow_current.pos) {
 			case UP:
 				seg_glow[i].x1 = seg_glow_current.square->x1;
@@ -127,13 +122,18 @@ static void fx_new_glow_segment()
 				seg_glow[i].x2 = seg_glow_current.square->x1;
 				seg_glow[i].y2 = seg_glow_current.square->y2;
 				break;
+
+			default:
+				return;
 			}
+			
 			return; // segment added
 		}
 	}
 }
 
-static void fx_glow_closest_segment()
+
+static void fx_find_closest_segment()
 {	
 	int current_dist, shortest_dist, closest_seg;
 
@@ -175,14 +175,14 @@ static void fx_glow_closest_segment()
 		shortest_dist = current_dist;
 		closest_seg = LEFT;
 	}
-
+	
 	// segment currently glowing
 	switch (closest_seg) {
 	case UP:
 		if (squares[pos_y][pos_x].owner_up == NONE) {
 			seg_glow_current.square = &squares[pos_y][pos_x];
 			seg_glow_current.pos = UP;
-			seg_glow_current.player = player_turn;
+			seg_glow_current.player = local_player.turn;
 		} else seg_glow_current.square = NULL;
 		break;
 
@@ -190,7 +190,7 @@ static void fx_glow_closest_segment()
 		if (squares[pos_y][pos_x].owner_right == NONE) {
 			seg_glow_current.square = &squares[pos_y][pos_x];
 			seg_glow_current.pos = RIGHT;
-			seg_glow_current.player = player_turn;
+			seg_glow_current.player = local_player.turn;
 		} else seg_glow_current.square = NULL;
 		break;
 
@@ -198,7 +198,7 @@ static void fx_glow_closest_segment()
 		if (squares[pos_y][pos_x].owner_down == NONE) {
 			seg_glow_current.square = &squares[pos_y][pos_x];
 			seg_glow_current.pos = DOWN;
-			seg_glow_current.player = player_turn;
+			seg_glow_current.player = local_player.turn;
 		} else seg_glow_current.square = NULL;
 		break;
 	
@@ -206,10 +206,16 @@ static void fx_glow_closest_segment()
 		if (squares[pos_y][pos_x].owner_left == NONE) {
 			seg_glow_current.square = &squares[pos_y][pos_x];
 			seg_glow_current.pos = LEFT;
-			seg_glow_current.player = player_turn;
+			seg_glow_current.player = local_player.turn;
 		} else seg_glow_current.square = NULL;
 		break;
+	
+	default:
+		return;
 	}
+
+	seg_glow_current.x = pos_x;
+	seg_glow_current.y = pos_y;
 }
 
 
@@ -219,7 +225,7 @@ static const int dec_glow_rate = 20;
 static void fx_glow_segment()
 {
 	bool new_segment = true;
-
+	
 	for (int i = 0; i < MAX_GLOWING_SEGMENT; i++) {
 		if (seg_glow[i].square) {
 			// increase glow level of closest segment
@@ -244,20 +250,46 @@ static void fx_glow_segment()
 		}
 	}
 	/* Closest segment was not glowing already */
-	if (new_segment && seg_glow_current.square) {
-		if (seg_glow_current.square->active) 
-			fx_new_glow_segment();
+	if (new_segment && seg_glow_current.square && 
+			seg_glow_current.square->active) {
+		fx_new_glow_segment();
 	}
 }
+
 
 void fx_main()
 {
 	fx_do_transition();
 }
 
+
 void fx_game()
 {	
-	fx_glow_closest_segment();
+	if (net_game) {
+		if (local_player.player_n == local_player.turn) {
+			fx_find_closest_segment();
+			if (seg_glow_current.square) {
+				if (seg_glow_current.square->active) {
+					net_write_int(G_SEG_GLOW_BYTE, 3, seg_glow_current.x,
+						seg_glow_current.y, seg_glow_current.pos);
+				}
+			}
+		}
+	} else fx_find_closest_segment();
+	
 	fx_glow_segment();
 }
+
+
+void fx_net_glow(int x, int y)
+{
+	if (x < g_min_x || x >= g_max_x) return;
+	if (y < g_min_y || y >= g_max_y) return;
+	if (!squares[y][x].active) return;
+
+	seg_glow_current.player = local_player.turn;
+	seg_glow_current.square = &squares[y][x];
+}
+
+
 

@@ -24,45 +24,55 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "shared.h"
 
-// max no. of glow managed
+
+// glowing segment managed
 #define MAX_GLOWING_SEGMENT 10
+// transition type
+#define NUM_OF_TRANSITION 2 // TODO dynamic
 
 
+// fx effects
 enum {
 	FX_FADE,
 	FX_PLAYER_CHANGE,
 };
 
-#define NUM_OF_TRANSITION 2
+
 enum {
 	TRANSITION_FADE,
 	TRANSITION_SWITCH_PLAYER,
 	TRANSITION_NEW_POINT, // TODO
 };
+
+
 typedef struct fx_transition_s {
-	int active;
+	bool active;
+	bool halfway;
 	int current_step;
 	int max_step;
-	int halfway;
 	int fx_type;
 	void (*func)();
 } fx_transition_s;
 fx_transition_s fx_transition[NUM_OF_TRANSITION];
 
+
 typedef struct seg_glow_s {
 	square_s *square;
+	int x, y;
 	int pos;
 	int glow_level;
 	int player;
-	int x1, y1, x2, y2;
+	int x1, y1, x2, y2; // pixel pos
 } seg_glow_s;
 seg_glow_s seg_glow[MAX_GLOWING_SEGMENT];
-seg_glow_s seg_glow_current;
+// segment under the mouse
+seg_glow_s seg_glow_current; // TODO pointer ?
 
 
-void fx_new_transition(void (*func)(), int, int);
-void fx_game();
-void fx_main();
+void fx_new_transition(void (*func)(void), int, int);
+void fx_net_glow(int x, int y);
+void fx_game(void);
+void fx_main(void);
 
 
 #endif

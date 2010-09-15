@@ -73,7 +73,7 @@ text_s text;
 
 typedef struct button_s {
 	SDL_Surface *surface;
-	int selected;
+	bool selected;
 	int x1, y1, x2, y2, w, h;
 	int textOffsetX, textOffsetY;
 	void (*func)();
@@ -89,10 +89,10 @@ typedef struct font_s {
 } font_s;
 
 typedef struct message_s {
-	int active;
+	bool active;
 	int time;
-	char text[ LONG_STRING_LENGTH ];
 	int x1, y1, x2, y2;
+	char text[ LONG_STRING_LENGTH ];
 } message_s;
 message_s ui_message;
 
@@ -106,7 +106,7 @@ typedef struct scrollbar_t {
 	int orientation; // HORIZONTAL/VERTICAL 
 	int x1, y1, x2, y2;
 	int handle_max_w, handle_max_h;
-	int dragging_handle;
+	bool dragging_handle;
 	button_s handle, arrow1, arrow2;
 	float handle_pos;
 	float ratio;
@@ -173,20 +173,20 @@ void ui_display_window(void);
 void ui_display_message(void);
 void ui_new_message(char*);
 void ui_button_function(void);
-int ui_button_check_click(button_s **);
+int ui_button_check_click(button_s **head_node);
 void ui_button_close_window(void);
 void ui_button_drag_window(void);
-void ui_new_widget_list_box(int, int, int, int, 
-		string_list_t*, widget_t**);
-void ui_new_widget_plain_text(char*, char*, char*, int, int,
-		colorRGB_t, widget_t**);
+void ui_new_widget_list_box(int x1, int y1, int x2, int y2, 
+		string_list_t *strlist, widget_t **widget_head_node);
+void ui_new_widget_plain_text(char *text1, char *text2, char *text3, 
+		int x1, int y1, colorRGB_t color, widget_t **widget_head_node);
 void ui_scrollbar_update_size(int, int, scrollbar_t*);
-button_s* ui_new_button(int, int, int, int, int, int, int, char*, 
-		void func(), int, int, button_s **);
-button_s* ui_button_check_pos(button_s **);
+button_s* ui_new_button(int x, int y, int w, int h, int min_w, int max_w, 
+		int align, char *text, void func(void), int three_d, int gradient,
+		button_s **node);
+button_s* ui_button_check_pos(button_s **head_node);
 
 
-// variable
 char ui_language[ SMALL_STRING_LENGTH ];
 
 button_s *ui_pressed_button;

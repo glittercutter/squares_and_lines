@@ -30,11 +30,13 @@ void sv_button_close_window()
 	ui_button_close_window();
 }
 
+
 void lanhost_start_host()
 {
 	if (!net_init_server())
 		active_window = &host_window;
 }
+
 
 void sv_init_ui()
 {

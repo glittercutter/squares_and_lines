@@ -43,7 +43,7 @@ void parse_get_default(struct var_info_s* var_info, int tab_length)
 	int r, g, b;
 	
 	for (int i = 0; i < tab_length; i++) {
-		if (var_info[i].init != TRUE) {
+		if (!var_info[i].init) {
 			DEBUG(printf("parse: getting default value for: %s -> ", 
 					var_info[i].str[ VAR_NAME_POS ]));
 
@@ -138,7 +138,7 @@ void parse_read(struct var_info_s* var_info, int tab_length, char* filename)
 						(**tmp_color).g = g;
 						(**tmp_color).b = b;
 
-						var_info[i].init = TRUE;
+						var_info[i].init = true;
 					}
 					break;
 				}
@@ -157,21 +157,21 @@ void parse_read(struct var_info_s* var_info, int tab_length, char* filename)
 						tmp_int = (int **)&var_info[i].ptr;
 						**tmp_int = (int)num_value;
 
-						var_info[i].init = TRUE;
+						var_info[i].init = true;
 						break;
 					
 					case FLOAT_T:
 						tmp_float = (float **)&var_info[i].ptr;
 						**tmp_float = (float)num_value;
 
-						var_info[i].init = TRUE;
+						var_info[i].init = true;
 						break;
 
 					case DOUBLE_T:
 						tmp_double = (double **)&var_info[i].ptr;
 						**tmp_double = num_value;
 
-						var_info[i].init = TRUE;
+						var_info[i].init = true;
 						break;
 					}
 					break;
@@ -189,7 +189,7 @@ void parse_read(struct var_info_s* var_info, int tab_length, char* filename)
 					if (var_info[i].type == STRING_T) {
 						tmp_char = (char **)&var_info[i].ptr;
 						strncpy(*tmp_char, string_value, STRING_LENGTH -1);
-						var_info[i].init = TRUE;
+						var_info[i].init = true;
 					}
 					break;
 				}

@@ -24,7 +24,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "shared.h"
 
-int init();
+
+int init(void);
 
 
 #endif

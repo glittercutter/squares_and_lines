@@ -41,6 +41,8 @@ srv_list_s *srv_list;
 
 typedef struct local_player_s {
 	int id;
+	int turn;
+	int player_n;
 	char name[32];
 	bool connected;
 	Uint32 ack_packet_n;
@@ -54,11 +56,9 @@ typedef struct local_player_s {
 local_player_s local_player;
 
 
-// variable
 string_list_t host_list;
 
 
-// function
 void lanclient_start_client(void);
 void cl_init_ui(void);
 void cl_add_lan_srv(int byte_readed, UDPpacket *p);

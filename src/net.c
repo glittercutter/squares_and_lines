@@ -24,6 +24,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "client.h"
 #include "common.h"
 #include "editor.h"
+#include "game.h"
+#include "fx.h"
 #include "server.h"
 
 
@@ -34,8 +36,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define BROADCAST_PORT 2091
 #define HEADER_SIZE 2
 
-static bool net_is_server = false;
-static bool net_is_client = false;
 
 static TCPsocket main_tcp_socket;
 static UDPsocket main_udp_socket;
@@ -45,11 +45,10 @@ static IPaddress main_udp_ip;
 static SDLNet_SocketSet tcp_socket_set;
 static SDLNet_SocketSet udp_socket_set;
 /* Maximum number of connection in master server socket set */
-static int msv_max_connection = 50;
+static int srv_max_connection = 50;
 
 static pthread_t udp_listen_th;
 static pthread_t tcp_listen_th;
-// static pthread_t packet_send_th;
 
 void msv_send_message(client_s*, char*);
 void cl_send_message(char*);
@@ -118,8 +117,8 @@ int net_init_server()
 		SDLNet_UDP_Close(main_udp_socket);
 		return 1;
 	}
-	tcp_socket_set = SDLNet_AllocSocketSet(msv_max_connection);
-	udp_socket_set = SDLNet_AllocSocketSet(msv_max_connection);
+	tcp_socket_set = SDLNet_AllocSocketSet(srv_max_connection);
+	udp_socket_set = SDLNet_AllocSocketSet(srv_max_connection);
 	SDLNet_UDP_AddSocket(udp_socket_set, main_udp_socket);
 
 	// init local player packet
@@ -138,6 +137,8 @@ int net_init_server()
 
 	srv.max_nplayer = 2;
 	srv.nplayer = 1;
+	local_player.player_n = srv.nplayer;
+	local_player.turn = srv.nplayer;
 
 	net_is_server = true;
 	net_game = true;
@@ -288,6 +289,9 @@ int srv_accept_request(client_s *cl)
 	// Port number we opened for the client
 	SDLNet_Write16(port, &udp_out_p->data[byte_writed]);
 	byte_writed += 2;
+	// player no.
+	SDLNet_Write32(cl->player_n, &udp_out_p->data[byte_writed]);
+	byte_writed += 4;
 	
 	udp_out_p->data[byte_writed++] = 0x00;
 
@@ -394,7 +398,8 @@ void srv_new_client(int byte_readed)
 	new_client->recev_packet_n = 0;
 	new_client->recev_packet_ack_sent = false;
 	new_client->new_packet_buffer_size = 0;
-	
+	new_client->player_n = srv.nplayer + 1;
+
 	if (srv_accept_request(new_client)) {
 		printf("Error connecting to client\n");
 		SDLNet_UDP_Close(new_client->udp_socket);
@@ -435,6 +440,7 @@ void srv_new_client(int byte_readed)
 		eprint("pthread_mutex_init\n");
 	
 	++srv.nplayer;
+	printf("player no:%d\n", new_client->player_n);
 }
 
 
@@ -525,6 +531,10 @@ void cl_make_connection(int byte_readed)
 		return;
 	}
 	SDLNet_TCP_AddSocket(tcp_socket_set, main_tcp_socket);
+	
+	// read player number the server gave us
+	local_player.player_n = SDLNet_Read32(&udp_in_p->data[byte_readed]);
+	byte_readed += 4;
 
 	printf("Connected\n");
 	printf("Username: %s\n", local_player.name);
@@ -643,6 +653,8 @@ void srv_send_info(int byte_readed)
 void srv_parse_game_packet(int byte_readed, client_s *cl)
 {
 	int packet_size;
+	int x, y;
+	int side;
 
 	while (udp_in_p->data[byte_readed] != 0x00) {
 		printf("byte_readed: %d\n", byte_readed);
@@ -663,6 +675,28 @@ void srv_parse_game_packet(int byte_readed, client_s *cl)
 			printf("resent packet\n");
 			byte_readed += 8; // (packet number and lenght)
 			break;
+
+		/* GAME */
+		case G_SEG_GLOW_BYTE:
+			x = SDLNet_Read32(&udp_in_p->data[byte_readed]);
+			byte_readed += 4;
+			y = SDLNet_Read32(&udp_in_p->data[byte_readed]);
+			byte_readed += 4;
+			seg_glow_current.pos = SDLNet_Read32(&udp_in_p->data[byte_readed]);
+			byte_readed += 4;
+			fx_net_glow(x, y);
+			break;
+
+		case G_ADD_SEG_BYTE:
+			x = SDLNet_Read32(&udp_in_p->data[byte_readed]);
+			byte_readed += 4;
+			y = SDLNet_Read32(&udp_in_p->data[byte_readed]);
+			byte_readed += 4;
+			side = SDLNet_Read32(&udp_in_p->data[byte_readed]);
+			byte_readed += 4;
+			g_add_segment(x, y, side);
+			break;
+
 
 		case PACKET_ACK_BYTE:
 			srv_rm_acked_packet(SDLNet_Read32(&udp_in_p->data[byte_readed]), 
@@ -696,6 +730,9 @@ void srv_parse_game_packet(int byte_readed, client_s *cl)
 void cl_parse_game_packet(int byte_readed)
 {
 	int packet_size;
+	int state;
+	int x, y;
+	int side;
 	
 	while (udp_in_p->data[byte_readed] != 0x00) {
 		switch (udp_in_p->data[byte_readed++]) {
@@ -724,6 +761,35 @@ void cl_parse_game_packet(int byte_readed)
 				local_player.recev_packet_ack_sent = true;
 			}
 			break;
+		
+		/* GAME */
+		case G_SEG_GLOW_BYTE:
+			x = SDLNet_Read32(&udp_in_p->data[byte_readed]);
+			byte_readed += 4;
+			y = SDLNet_Read32(&udp_in_p->data[byte_readed]);
+			byte_readed += 4;
+			seg_glow_current.pos = SDLNet_Read32(&udp_in_p->data[byte_readed]);
+			byte_readed += 4;
+			fx_net_glow(x, y);
+			break;
+
+		case G_ADD_SEG_BYTE:
+			x = SDLNet_Read32(&udp_in_p->data[byte_readed]);
+			byte_readed += 4;
+			y = SDLNet_Read32(&udp_in_p->data[byte_readed]);
+			byte_readed += 4;
+			side = SDLNet_Read32(&udp_in_p->data[byte_readed]);
+			byte_readed += 4;
+			g_add_segment(x, y, side);
+			break;
+
+		case G_PLAYER_TURN_BYTE:
+			local_player.turn = SDLNet_Read32(&udp_in_p->data[byte_readed]);
+			byte_readed += 4;
+			printf("player no:%d, player turn:%d\n",local_player.player_n, local_player.turn);
+			fx_new_transition(NULL, 5, FX_PLAYER_CHANGE);
+			break;
+
 
 		/* EDITOR */
 		case ED_ADD_SQUARE_BYTE:
@@ -737,9 +803,22 @@ void cl_parse_game_packet(int byte_readed)
 			byte_readed += 8;
 			break;
 
+		case STATE_CHANGE_BYTE:
+			state = SDLNet_Read32(&udp_in_p->data[byte_readed]);
+			byte_readed += 4;
+			switch (state) {
+			case GAME:
+				g_change_state();
+				break;
+			case EDITOR:
+				ed_change_state();
+				break;
+			}
+			break;
+
 		default:
 			printf("packet parsing: header not recognized\n");
-			return;;
+			return;
 		}
 	}
 }
@@ -853,6 +932,9 @@ void cl_parse_udp_packet()
 		byte_readed += strlen((char *)&udp_in_p->data[byte_readed]) + 1;
 		cl_make_connection(byte_readed);
 		break;
+	
+	default:
+		break;
 	}
 }
 
@@ -963,6 +1045,8 @@ void srv_parse_tcp_packet(client_s *cl, byte *buffer)
 		srv_rm_client(cl);
 		break;
 
+	default:
+		break;
 	}
 }
 
@@ -1474,17 +1558,28 @@ void srv_rm_acked_packet(Uint32 packet_n, client_s *cl)
 }
 
 
-void net_write_vector(byte id_byte, int x, int y)
+void net_write_int(byte id_byte, int count, ...)
 {
+	int arg;
+	va_list ap;
+	va_start(ap, count);
+	arg = va_arg(ap, int);
+	
 	pthread_mutex_lock(&udp_new_buffer_mutex);
-	
+
 	udp_new_buffer[udp_new_buffer_writed++] = id_byte;
-	SDLNet_Write32(x, &udp_new_buffer[udp_new_buffer_writed]);
-	udp_new_buffer_writed += 4;
-	SDLNet_Write32(y, &udp_new_buffer[udp_new_buffer_writed]);
-	udp_new_buffer_writed += 4;
-	
+	for (int i = 0; i < count; arg = va_arg(ap, int), ++i) {
+		SDLNet_Write32(arg, &udp_new_buffer[udp_new_buffer_writed]);
+		udp_new_buffer_writed += 4;
+	}
+
 	pthread_mutex_unlock(&udp_new_buffer_mutex);
+}
+
+
+void net_write_sync_square()
+{
+	
 }
 
 

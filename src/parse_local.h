@@ -28,7 +28,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "ui.h"
 
 
-// type
+// type parsed
 enum {
 	INT_T,
 	FLOAT_T,
@@ -38,11 +38,19 @@ enum {
 	DSTRING
 };
 
+
+//
+// configurable variable
+//
+// varname, 
+// pointer to the var, 
+// parsing type, 
+// is the value readed from the file? load default otherwise
 struct var_info_s {
 	const char** str;
 	const void* ptr;
 	const int type;
-	int init;
+	bool init;
 };
 
 

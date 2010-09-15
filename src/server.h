@@ -34,34 +34,40 @@ typedef struct srv_s {
 } srv_s;
 srv_s srv;
 
+
 typedef struct client_s {
 	IPaddress ip;
 	IPaddress *tcp_ip;
 	TCPsocket tcp_socket;
 	UDPsocket udp_socket;
+
 	char username[32];
+	int player_n;
+	
 	bool connected;
+	
 	string_list_s *list;
 	Uint32 ack_packet_n;
 	Uint32 recev_packet_n;
 	bool recev_packet_ack_sent;
+	
 	pthread_mutex_t new_packet_buffer_mutex;
 	int new_packet_buffer_size;
 	byte new_packet_buffer[PACKET_LENGHT];
+	
 	unack_packet_s *unack_packet_mem;
 	unack_packet_s *unack_packet_head;
 	unack_packet_s *unack_packet_tail;
 	unack_packet_s *unack_packet_next;
+	
 	struct client_s *next;
 } client_s;
 client_s *client;
 
 
-// variable
 string_list_t client_list;
 
 
-// function
 void lanhost_start_host(void);
 void sv_init_ui(void);
 

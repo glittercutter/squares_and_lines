@@ -46,6 +46,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define RUNNING 1
 #define STOPPED 0
 
+// define byte type
 typedef unsigned char byte;
 
 #define WINDOW_TITLE "crucially square"
@@ -74,6 +75,8 @@ enum {
 	QUIT
 };
 
+
+// TODO move to game.h
 // square owner
 enum {
 	NONE,
@@ -109,6 +112,7 @@ typedef struct colorRGB_t {
 	int r, g, b;
 } colorRGB_t;
 
+
 typedef struct color_s {
 	colorRGB_t square_owner[4];
 	colorRGB_t ed_outline;
@@ -121,8 +125,10 @@ color_s color;
 
 
 typedef struct square_s {
-	int active;
+	bool active;
+	
 	int owner;
+
 	int x1, y1;
 	int x2, y2;
 
@@ -138,12 +144,13 @@ typedef struct square_s {
 square_s **squares;
 
 
-// variables
 SDL_Surface *screen;
+
 int gamestate;
 int display_width;
 int display_height;
 int display_fullscreen;
+
 pthread_mutex_t list_box_mutex;
 
 

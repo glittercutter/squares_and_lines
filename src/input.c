@@ -34,15 +34,15 @@ void get_input()
 		case SDL_MOUSEBUTTONDOWN:
 			switch(event.button.button) {
 			case SDL_BUTTON_LEFT:
-				input.mouse_button_left = TRUE;
+				input.mouse_button_left = true;
 				return;
 
 			case SDL_BUTTON_RIGHT:
-				input.mouse_button_right = TRUE;
+				input.mouse_button_right = true;
 				break;
 
 			case SDL_BUTTON_MIDDLE:
-				input.mouse_button_middle = TRUE;
+				input.mouse_button_middle = true;
 				break;
 			}
 			break;
@@ -55,6 +55,7 @@ void get_input()
 		case SDL_MOUSEBUTTONUP:
 			switch(event.button.button) {
 			case SDL_BUTTON_LEFT:
+				if (active_dropmenu) active_dropmenu = NULL;
 				if (ui_pressed_button) ui_button_function();
 				input.mouse_button_left = FALSE;
 				break;
