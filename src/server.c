@@ -279,7 +279,7 @@ int srv_accept_request(client_s *cl)
 	// write connection answer bytes
 	udp_out_p->data[byte_writed++] = NET_SRV_CONNECT;
 	// write connection accepted bytes
-	udp_out_p->data[byte_writed++] = NET_REFUSE;
+	udp_out_p->data[byte_writed++] = NET_ACCEPT;
 
 	// Application ID
 	strcpy((char *)&udp_out_p->data[byte_writed], "udp_sdltest");
@@ -351,7 +351,7 @@ void srv_refuse_request(char *reason)
 	// write connection answer bytes
 	udp_out_p->data[byte_writed++] = NET_SRV_CONNECT;
 	// write connection refused bytes
-	udp_out_p->data[byte_writed++] = NET_ACCEPT;
+	udp_out_p->data[byte_writed++] = NET_REFUSE;
 
 	// Application ID
 	strcpy((char *)&udp_out_p->data[byte_writed], "udp_sdltest");

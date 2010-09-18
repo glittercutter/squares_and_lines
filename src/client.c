@@ -638,7 +638,7 @@ void cl_parse_udp_packet()
 	
 	// server connection request response
 	case NET_SRV_CONNECT:
-		if ((udp_in_p->data[byte_readed]) == NET_ACCEPT) {
+		if ((udp_in_p->data[byte_readed]) == NET_REFUSE) {
 			++byte_readed;
 			if (strcmp((char *)&udp_in_p->data[byte_readed], "udp_sdltest"))
 				break;
@@ -646,7 +646,7 @@ void cl_parse_udp_packet()
 			ui_new_message((char *)&udp_in_p->data[byte_readed]);
 			break;
 		}
-		if ((udp_in_p->data[byte_readed]) != NET_REFUSE)
+		if ((udp_in_p->data[byte_readed]) != NET_ACCEPT)
 			break;
 		++byte_readed;
 		if (strcmp((char *)&udp_in_p->data[byte_readed], "udp_sdltest"))
