@@ -276,9 +276,9 @@ int srv_accept_request(client_s *cl)
 	
 	// write id header
 	udp_out_p->data[byte_writed++] = NET_GLOBAL_HEADER;
-	// write connection answer bytes
+	// write connection answer byte
 	udp_out_p->data[byte_writed++] = NET_SRV_CONNECT;
-	// write connection accepted bytes
+	// write connection accepted byte
 	udp_out_p->data[byte_writed++] = NET_ACCEPT;
 
 	// Application ID
@@ -348,9 +348,9 @@ void srv_refuse_request(char *reason)
 	
 	// write id header
 	udp_out_p->data[byte_writed++] = NET_GLOBAL_HEADER;
-	// write connection answer bytes
+	// write connection answer byte
 	udp_out_p->data[byte_writed++] = NET_SRV_CONNECT;
-	// write connection refused bytes
+	// write connection refused byte
 	udp_out_p->data[byte_writed++] = NET_REFUSE;
 
 	// Application ID
@@ -380,7 +380,8 @@ void srv_new_client(int byte_readed)
 	client_s **tmp_client = &client;
 	client_s *new_client;
 	unack_packet_s **tmp_unack_packet;
-
+	
+	// refuse connection if the server is full
 	if (srv.nplayer >= srv.max_nplayer) {
 		srv_refuse_request(text.srv_full);
 		return;
