@@ -278,6 +278,7 @@ void fx_game()
 	} else fx_find_closest_segment();
 	
 	fx_glow_segment();
+	seg_glow_current.square = NULL; // for net play
 }
 
 

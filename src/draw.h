@@ -26,27 +26,23 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "ui.h"
 
 
-// buffer for dynamic text drawing
-char draw_txt_buf[200];
-
-
 void sdl_draw_button(button_s *button);
 SDL_Surface* sdl_create_surface(int w, int h);
 void sdl_render(void);
 void sdl_draw_text_solid2(int, int, char*, TTF_Font*, colorRGB_t);
 void sdl_draw_text_blended2(SDL_Surface*, int, int, char*, TTF_Font*, colorRGB_t);
-void sdl_draw_line2(int, int, int, int, colorRGB_t);
-void sdl_draw_line3(SDL_Surface*, int, int, int, int, colorRGB_t);
-void sdl_draw_box2(int, int, int, int, colorRGB_t);
-void sdl_draw_rect2(SDL_Surface*, int, int, int, int, colorRGB_t);
+void sdl_draw_line_screen(int, int, int, int, colorRGB_t);
+void sdl_draw_line_surface(SDL_Surface*, int, int, int, int, colorRGB_t);
+void sdl_draw_box_screen(int, int, int, int, colorRGB_t);
+void sdl_draw_rect_surface(SDL_Surface*, int, int, int, int, colorRGB_t);
 void sdl_draw_editor(void);
 void sdl_draw_game(void);
 void sdl_draw_main_fx(void);
 void sdl_draw_menu(void);
 void sdl_draw_widget_list_box(widget_list_box_t*);
+void sdl_draw_fx_3d(int x1, int y1, int x2, int y2);
 void sdl_create_gui_graphic(void);
-void sdl_create_button_gradient_effect(SDL_Surface*);
-void sdl_draw_3d_fx(int x1, int y1, int x2, int y2);
+void sdl_draw_gradient_effect_surface(SDL_Surface*);
 
 
 #endif

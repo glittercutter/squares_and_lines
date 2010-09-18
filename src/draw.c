@@ -111,42 +111,44 @@ void sdl_draw_text_blended2(SDL_Surface *surface, int x, int y, char *text,
 	SDL_FreeSurface(textSurface);
 }
 
+
 /* Primitive
 ==============
 */
-void sdl_draw_line2(int x1, int y1, int x2, int y2, colorRGB_t color)
+void sdl_draw_line_screen(int x1, int y1, int x2, int y2, colorRGB_t color)
 {
 	int a = 255;
 	lineRGBA(screen, x1, y1, x2, y2, color.r, color.g, color.b, a);
 }
-void sdl_draw_line3(SDL_Surface *surface, int x1, int y1, int x2, int y2,
+
+void sdl_draw_line_surface(SDL_Surface *surface, int x1, int y1, int x2, int y2,
 		colorRGB_t color)
 {
 	int a = 200;
 	lineRGBA(surface, x1, y1, x2, y2, color.r, color.g, color.b, a);
 }
 
-void sdl_draw_rect2(SDL_Surface *surface, int x1, int y1, int x2, int y2,
+void sdl_draw_rect_surface(SDL_Surface *surface, int x1, int y1, int x2, int y2,
 		colorRGB_t color)
 {
 	int a = 255;
 	rectangleRGBA(surface, x1, y1, x2, y2, color.r, color.g, color.b, a);
 }
 
-void sdl_draw_box2(int x1, int y1, int x2, int y2, colorRGB_t color)
+void sdl_draw_box_screen(int x1, int y1, int x2, int y2, colorRGB_t color)
 {
 	int a = 255;
 	boxRGBA(screen, x1, y1, x2, y2, color.r, color.g, color.b, a);
 }
 
-void sdl_draw_triangle(SDL_Surface *surface, int x1, int y1, int x2, int y2,
+void sdl_draw_triangle_surface(SDL_Surface *surface, int x1, int y1, int x2, int y2,
 	   	int x3, int y3, colorRGB_t color)
 {
 	int a = 255;
 	filledTrigonRGBA(surface, x1, y1, x2, y2, x3, y3, 
 			color.r, color.g, color.b, a);
 }
-/* Primitive end
+/* Primitive END
 ==============
 */
 
@@ -159,7 +161,7 @@ void sdl_draw_glow_line(int x1, int y1, int x2, int y2,
 }
 
 
-void sdl_draw_3d_fx(int x1, int y1, int x2, int y2)
+void sdl_draw_fx_3d(int x1, int y1, int x2, int y2)
 {
 
 	lineRGBA(screen, x1, y1, x2, y1, 
@@ -172,7 +174,7 @@ void sdl_draw_3d_fx(int x1, int y1, int x2, int y2)
 			50, 50, 50, 255);
 }
 
-void sdl_draw_3d_fx_inv(int x1, int y1, int x2, int y2)
+void sdl_draw_fx_3d_inv(int x1, int y1, int x2, int y2)
 {
 
 	lineRGBA(screen, x1, y1, x2, y1, 
@@ -203,7 +205,7 @@ static void sdl_draw_ed_grid()
 	y1 = ed_start_y;
 
 	for (int i = 0; i <= ed_grid_h; i++) {
-		sdl_draw_line2(x1, y1, x2, y1, color.ed_grid);
+		sdl_draw_line_screen(x1, y1, x2, y1, color.ed_grid);
 		y1 += ed_square_size;
 	}
 
@@ -211,7 +213,7 @@ static void sdl_draw_ed_grid()
 	y2 = ed_start_y + (ed_grid_h * ed_square_size);
 
 	for (int i = 0; i <= ed_grid_w; i++) {
-		sdl_draw_line2(x1, y1, x1, y2, color.ed_grid);
+		sdl_draw_line_screen(x1, y1, x1, y2, color.ed_grid);
 		x1 += ed_square_size;
 	}
 }
@@ -273,60 +275,60 @@ static void sdl_draw_game_squares()
 		for (int j = 0; j < ed_grid_w; j++) {
 			if (squares[i][j].active) {
 				/* Draw non owned square's background */
-				if (!squares[i][j].owner) sdl_draw_box2(squares[i][j].x1, 
+				if (!squares[i][j].owner) sdl_draw_box_screen(squares[i][j].x1, 
 						squares[i][j].y1,squares[i][j].x2, squares[i][j].y2, 
 						color.button_highlight);
 				/* Draw square border */
 				// top
-				sdl_draw_line2(squares[i][j].x1, squares[i][j].y1,
+				sdl_draw_line_screen(squares[i][j].x1, squares[i][j].y1,
 						squares[i][j].x2, squares[i][j].y1, 
 						color.square_owner[squares[i][j].owner_up]);
 				// right
-				sdl_draw_line2(squares[i][j].x2, squares[i][j].y1,
+				sdl_draw_line_screen(squares[i][j].x2, squares[i][j].y1,
 						squares[i][j].x2, squares[i][j].y2, 
 						color.square_owner[squares[i][j].owner_right]);
 				// bottom
-				sdl_draw_line2(squares[i][j].x1, squares[i][j].y2,
+				sdl_draw_line_screen(squares[i][j].x1, squares[i][j].y2,
 						squares[i][j].x2, squares[i][j].y2,
 						color.square_owner[squares[i][j].owner_down]);
 				// left
-				sdl_draw_line2(squares[i][j].x1, squares[i][j].y1,
+				sdl_draw_line_screen(squares[i][j].x1, squares[i][j].y1,
 						squares[i][j].x1, squares[i][j].y2, 
 						color.square_owner[squares[i][j].owner_left]);
 
 				if (THICKNESS > 1) {
 					// top
-					sdl_draw_line2(squares[i][j].x1, squares[i][j].y1 - THICKNESS,
+					sdl_draw_line_screen(squares[i][j].x1, squares[i][j].y1 - THICKNESS,
 							squares[i][j].x2, squares[i][j].y1 - THICKNESS, 
 							color.square_owner[squares[i][j].owner_up]);
-					sdl_draw_line2(squares[i][j].x1, squares[i][j].y1 + THICKNESS,
+					sdl_draw_line_screen(squares[i][j].x1, squares[i][j].y1 + THICKNESS,
 							squares[i][j].x2, squares[i][j].y1 + THICKNESS, 
 							color.square_owner[squares[i][j].owner_up]);
 					// right
-					sdl_draw_line2(squares[i][j].x2 - THICKNESS, squares[i][j].y1,
+					sdl_draw_line_screen(squares[i][j].x2 - THICKNESS, squares[i][j].y1,
 							squares[i][j].x2 - THICKNESS, squares[i][j].y2, 
 							color.square_owner[squares[i][j].owner_right]);
-					sdl_draw_line2(squares[i][j].x2 + THICKNESS, squares[i][j].y1,
+					sdl_draw_line_screen(squares[i][j].x2 + THICKNESS, squares[i][j].y1,
 							squares[i][j].x2 + THICKNESS, squares[i][j].y2, 
 							color.square_owner[squares[i][j].owner_right]);
 					// bottom
-					sdl_draw_line2(squares[i][j].x1, squares[i][j].y2 - THICKNESS,
+					sdl_draw_line_screen(squares[i][j].x1, squares[i][j].y2 - THICKNESS,
 							squares[i][j].x2, squares[i][j].y2 - THICKNESS,
 							color.square_owner[squares[i][j].owner_down]);
-					sdl_draw_line2(squares[i][j].x1, squares[i][j].y2 + THICKNESS,
+					sdl_draw_line_screen(squares[i][j].x1, squares[i][j].y2 + THICKNESS,
 							squares[i][j].x2, squares[i][j].y2 + THICKNESS,
 							color.square_owner[squares[i][j].owner_down]);
 					// left				
-					sdl_draw_line2(squares[i][j].x1 - THICKNESS, squares[i][j].y1,
+					sdl_draw_line_screen(squares[i][j].x1 - THICKNESS, squares[i][j].y1,
 							squares[i][j].x1 - THICKNESS, squares[i][j].y2, 
 							color.square_owner[squares[i][j].owner_left]);
-					sdl_draw_line2(squares[i][j].x1 + THICKNESS, squares[i][j].y1,
+					sdl_draw_line_screen(squares[i][j].x1 + THICKNESS, squares[i][j].y1,
 							squares[i][j].x1 + THICKNESS, squares[i][j].y2, 
 							color.square_owner[squares[i][j].owner_left]);
 				}
 				/* Fill owned square with owner color */
 				if (squares[i][j].owner) {
-					sdl_draw_box2(squares[i][j].x1, squares[i][j].y1,
+					sdl_draw_box_screen(squares[i][j].x1, squares[i][j].y1,
 						squares[i][j].x2, squares[i][j].y2, 
 							color.square_owner[squares[i][j].owner]);
 				}
@@ -342,29 +344,29 @@ static void sdl_draw_ed_squares()
 		for (int j = 0; j < ed_grid_w; j++) {
 			if (squares[i][j].active) {
 				// filling
-				sdl_draw_box2(squares[i][j].x1, squares[i][j].y1,
+				sdl_draw_box_screen(squares[i][j].x1, squares[i][j].y1,
 						squares[i][j].x2, squares[i][j].y2, 
 						color.button_highlight);
 				// outline
 				// top
 				if ((i == 0) || (!squares[i - 1][j].active)) {
-					sdl_draw_line2(squares[i][j].x1, squares[i][j].y1,
+					sdl_draw_line_screen(squares[i][j].x1, squares[i][j].y1,
 						squares[i][j].x2, squares[i][j].y1, color.ed_outline);
 				}
 				// right
 				if ((j == ed_grid_w - 1) || (!squares[i][j + 1].active)) {	
-					sdl_draw_line2(squares[i][j].x2, squares[i][j].y1,
+					sdl_draw_line_screen(squares[i][j].x2, squares[i][j].y1,
 						squares[i][j].x2, squares[i][j].y2, color.ed_outline);
 				}
 				
 				// bottom
 				if ((i == ed_grid_h - 1) || (!squares[i + 1][j].active)) {
-					sdl_draw_line2(squares[i][j].x1, squares[i][j].y2,
+					sdl_draw_line_screen(squares[i][j].x1, squares[i][j].y2,
 						squares[i][j].x2, squares[i][j].y2, color.ed_outline);
 				}
 				// left
 				if ((j == 0) || (!squares[i][j - 1].active)) {	
-					sdl_draw_line2(squares[i][j].x1, squares[i][j].y1,
+					sdl_draw_line_screen(squares[i][j].x1, squares[i][j].y1,
 						squares[i][j].x1, squares[i][j].y2, color.ed_outline);
 				}
 			}
@@ -378,12 +380,12 @@ static void sdl_draw_ed_squares()
 
 /* 
 ====================
-sdl_draw_fade_fx
+sdl_draw_fx_fade
 
 Fading screen transition
 ====================
 */
-static void sdl_draw_fade_fx()
+static void sdl_draw_fx_fade()
 {
 	int fade_level = 255 - (fx_transition[FX_FADE].current_step * 
 			(255 / fx_transition[FX_FADE].max_step));
@@ -508,7 +510,7 @@ void sdl_draw_main_fx()
 		if (fx_transition[i].active) {
 			switch (fx_transition[i].fx_type) {
 				case FX_FADE:
-					sdl_draw_fade_fx();
+					sdl_draw_fx_fade();
 				break;
 			}
 		}
@@ -553,10 +555,10 @@ void sdl_draw_widget_scrollbar(scrollbar_t *scrollbar)
 	
 	// draw scrollbar background
 	if (scrollbar->orientation == HORIZONTAL) {
-		sdl_draw_box2(scrollbar->x1 + SCROLLBAR_SIZE, scrollbar->y1, 
+		sdl_draw_box_screen(scrollbar->x1 + SCROLLBAR_SIZE, scrollbar->y1, 
 				scrollbar->x2 - SCROLLBAR_SIZE, scrollbar->y2, color.text);
 	} else {
-		sdl_draw_box2(scrollbar->x1, scrollbar->y1 + SCROLLBAR_SIZE, 
+		sdl_draw_box_screen(scrollbar->x1, scrollbar->y1 + SCROLLBAR_SIZE, 
 				scrollbar->x2 - 1, scrollbar->y2 - SCROLLBAR_SIZE, color.text);
 	}
 	
@@ -565,7 +567,7 @@ void sdl_draw_widget_scrollbar(scrollbar_t *scrollbar)
 	sdl_draw_button(&scrollbar->arrow2);
 
 	// draw handle
-	sdl_draw_box2(scrollbar->handle.x1, scrollbar->handle.y1, 
+	sdl_draw_box_screen(scrollbar->handle.x1, scrollbar->handle.y1, 
 			scrollbar->handle.x2, scrollbar->handle.y2, 
 			color.topbar);
 
@@ -578,7 +580,7 @@ void sdl_draw_widget_scrollbar(scrollbar_t *scrollbar)
 			handle_center_x + 2, handle_center_y + 3, 50, 50, 50, 255);
 	
 	// 3d effect
-// 	sdl_draw_3d_fx(scrollbar->handle.x1, scrollbar->handle.y1,
+// 	sdl_draw_fx_3d(scrollbar->handle.x1, scrollbar->handle.y1,
 // 			scrollbar->handle.x2 - 1, scrollbar->handle.y2);
 }
 
@@ -601,16 +603,16 @@ void sdl_draw_widget_list_box(widget_list_box_t *list_box)
 	int offset_viewable_element = list_box->scrollbar.offset + 
 			list_box->viewable_element;
 
-	sdl_draw_box2(list_box->x1, list_box->y1, list_box->x2 
+	sdl_draw_box_screen(list_box->x1, list_box->y1, list_box->x2 
 			- SCROLLBAR_SIZE, list_box->y2, color.button_highlight);
 	sdl_draw_widget_scrollbar(&list_box->scrollbar);
-	sdl_draw_3d_fx_inv(list_box->x1 - 1, list_box->y1 - button_font.h - 1,
+	sdl_draw_fx_3d_inv(list_box->x1 - 1, list_box->y1 - button_font.h - 1,
 			list_box->x2, list_box->y2 + 1);
 
 	for (int i = list_box->scrollbar.offset; (*list != NULL) &&
 			(i < offset_viewable_element); i++) {
 		if (list_box->selected_row == i) {
-			sdl_draw_box2(x, y, list_box->x2 - SCROLLBAR_SIZE - 1, y + 
+			sdl_draw_box_screen(x, y, list_box->x2 - SCROLLBAR_SIZE - 1, y + 
 					button_font.h, color.topbar);
 		}
 
@@ -628,7 +630,7 @@ void sdl_draw_widget_list_box(widget_list_box_t *list_box)
 	pthread_mutex_unlock(&list_box_mutex);
 }
 
-void sdl_create_button_3d_effect(SDL_Surface *surface)
+void sdl_draw_3d_effect_surface(SDL_Surface *surface)
 {
 	lineRGBA(surface, 0, 0, surface->w - 1, 0, 
 			200, 200, 200, 200);
@@ -642,7 +644,7 @@ void sdl_create_button_3d_effect(SDL_Surface *surface)
 }
 
 #define GRADIENT_EFFECT 100
-void sdl_create_button_gradient_effect(SDL_Surface *surface)
+void sdl_draw_gradient_effect_surface(SDL_Surface *surface)
 {
 	float increment = GRADIENT_EFFECT / (float)(surface->h - 1);
 	float alpha = GRADIENT_EFFECT;
@@ -661,33 +663,33 @@ void sdl_create_gui_graphic(void)
 	boxRGBA(gui_surface.arrow_up, 0, 0, gui_surface.arrow_up->w, 
 			gui_surface.arrow_up->w, color.topbar.r, color.topbar.g, 
 			color.topbar.b, 255);
-	sdl_create_button_gradient_effect(gui_surface.arrow_up);
-	sdl_draw_triangle(gui_surface.arrow_up, 
+	sdl_draw_gradient_effect_surface(gui_surface.arrow_up);
+	sdl_draw_triangle_surface(gui_surface.arrow_up, 
 			gui_surface.arrow_up->w * 0.4f, gui_surface.arrow_up->w * 0.2f, 
 			gui_surface.arrow_up->w * 0.2f, gui_surface.arrow_up->w * 0.6f,
 			gui_surface.arrow_up->w * 0.6f, gui_surface.arrow_up->w * 0.6f,
 			color.button_highlight);
-	sdl_create_button_3d_effect(gui_surface.arrow_up);
+	sdl_draw_3d_effect_surface(gui_surface.arrow_up);
 
 	gui_surface.arrow_down = sdl_create_surface(SCROLLBAR_SIZE + 1,
 			SCROLLBAR_SIZE + 1);
 	boxRGBA(gui_surface.arrow_down, 0, 0, gui_surface.arrow_down->w, 
 			gui_surface.arrow_down->w, color.topbar.r, color.topbar.g, 
 			color.topbar.b, 255);
-	sdl_create_button_gradient_effect(gui_surface.arrow_down);	
-	sdl_draw_triangle(gui_surface.arrow_down, 
+	sdl_draw_gradient_effect_surface(gui_surface.arrow_down);	
+	sdl_draw_triangle_surface(gui_surface.arrow_down, 
 			gui_surface.arrow_down->w * 0.25f, gui_surface.arrow_down->w * 0.25f,
 			gui_surface.arrow_down->w * 0.6f, gui_surface.arrow_down->w * 0.2f,
 			gui_surface.arrow_down->w * 0.4f, gui_surface.arrow_down->w * 0.6f, 
 			color.button_highlight);
-	sdl_create_button_3d_effect(gui_surface.arrow_down);
+	sdl_draw_3d_effect_surface(gui_surface.arrow_down);
 
 	int topbar_height = button_font.size + UI_BAR_PADDING;
 	gui_surface.gradient = sdl_create_surface(topbar_height, topbar_height);
 	boxRGBA(gui_surface.gradient, 0, 0, gui_surface.gradient->w, 
 			gui_surface.gradient->w, color.topbar.r, color.topbar.g, 
 			color.topbar.b, 255);
-	sdl_create_button_gradient_effect(gui_surface.gradient);
+	sdl_draw_gradient_effect_surface(gui_surface.gradient);
 
 }
 

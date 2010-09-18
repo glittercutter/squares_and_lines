@@ -49,13 +49,6 @@ void sdl_cleanup()
 
 static void sdl_init()
 {
-	if (SDL_Init(SDL_INIT_VIDEO) != 0 )
-		eprint("Unable to initialize SDL: %s\n", SDL_GetError());
-}
-
-
-static void sdl_init_video()
-{
 	if (display_fullscreen) {
 		screen = SDL_SetVideoMode(display_width, display_height, 0, //
 				SDL_ANYFORMAT|SDL_SWSURFACE|SDL_FULLSCREEN);
@@ -65,13 +58,13 @@ static void sdl_init_video()
 	}
 
 	if (SDL_Init(SDL_INIT_VIDEO) < 0 )
-		eprint("Unable to initialize video: %s\n", SDL_GetError());
+		eprint("Unable to initialize SDL: %s\n", SDL_GetError());
 
 	SDL_WM_SetCaption(WINDOW_TITLE, 0 ); // set window name
 }
 
 
-static void sdl_load_font(font_s *font)
+static void load_font(font_s *font)
 {
 	font->data = (TTF_Font *)TTF_OpenFont(font->name, font->size);
 	if (!font->data) {
@@ -91,8 +84,8 @@ void ui_init()
 	m_init_ui(); // other ui are based on this one
 	ed_init_ui();
 	g_init_ui();
-	sv_init_ui();
-	cl_init_ui();
+	srv_ui_init();
+	cl_ui_init();
 }
 
 
@@ -102,12 +95,11 @@ int init()
 	load_lang();
 	
 	sdl_init();
-	sdl_init_video();
 	
 	// fonts
 	if (TTF_Init()==-1) 
 		eprint("TTF_Init: %s\n", TTF_GetError());
-	sdl_load_font(&button_font);
+	load_font(&button_font);
 
 	/* Initialize SDL_net */
 	if (SDLNet_Init() < 0) 

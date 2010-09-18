@@ -55,14 +55,18 @@ typedef struct local_player_s {
 } local_player_s;
 local_player_s local_player;
 
-
 string_list_t host_list;
 
 
-void lanclient_start_client(void);
-void cl_init_ui(void);
-void cl_add_lan_srv(int byte_readed, UDPpacket *p);
-void cl_button_close_window(void);
+void cl_ui_button_open_window(void);
+void cl_ui_button_close_window(void);
+void cl_ui_init(void);
+
+void cl_parse_srv_info(int byte_readed, UDPpacket *p);
+void cl_request_connection(void);
+void cl_request_lan_server(void);
+int cl_init(void);
+void cl_close(void);
 
 
 #endif

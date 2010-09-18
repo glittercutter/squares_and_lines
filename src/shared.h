@@ -59,7 +59,7 @@ typedef unsigned char byte;
 #define STRING_LENGTH 50
 #define SMALL_STRING_LENGTH 20
 
-#ifdef NDEBUG
+#ifdef DNDEBUG
 #define DEBUG(debug_cmd)
 #else
 #define DEBUG(debug_cmd) debug_cmd

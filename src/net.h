@@ -26,6 +26,22 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #define PACKET_LENGHT 512
 #define UNACK_PACKET_STORAGE_SIZE 60
+#define PACKET_SEND_RATE 40 // milliseconds
+
+#define NET_GLOBAL_HEADER 0x2f
+#define NET_ACCEPT 0xa0
+#define NET_REFUSE 0xb0
+
+
+#define NET_SRV_GAME 0x84
+#define NET_SRV_MESSAGE 0x83
+#define NET_SRV_INFO 0x82
+#define NET_SRV_CONNECT 0x81
+#define NET_CL_GAME 0x04
+#define NET_CL_MESSAGE 0x03
+#define NET_CL_INFO 0x02
+#define NET_CL_CONNECT 0x01
+
 
 #define PACKET_ACK_BYTE 0x11
 #define RESENT_BYTE 0x12
@@ -35,6 +51,13 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define G_SEG_GLOW_BYTE 0x71
 #define G_ADD_SEG_BYTE 0x72
 #define G_PLAYER_TURN_BYTE 0x73
+
+#define MAX_PORT 65535
+#define BROADCAST_ADDRESS "255.255.255.255"
+// #define BROADCAST_ADDRESS "modemcable003.44-200-24.mc.videotron.ca"
+#define BROADCAST_PORT 2091
+#define HEADER_SIZE 2
+
 
 //
 // net.c
@@ -53,20 +76,24 @@ bool net_game;
 
 UDPpacket *udp_out_p;
 UDPpacket *udp_in_p;
+pthread_t udp_listen_th;
+pthread_t tcp_listen_th;
+TCPsocket main_tcp_socket;
+UDPsocket main_udp_socket;
+IPaddress main_tcp_ip;
+IPaddress main_udp_ip;
+SDLNet_SocketSet tcp_socket_set;
+SDLNet_SocketSet udp_socket_set;
 
 byte udp_new_buffer[PACKET_LENGHT];
 int udp_new_buffer_writed;
 pthread_mutex_t udp_new_buffer_mutex;
 
 
-void cl_request_connection(void);
-void request_local_srv(void);
-int net_init_server(void);
-int net_init_client(void);
-void net_write_vector(byte id_byte, int x, int y);
+int net_test_packet_loss(void);
 void net_write_int(byte id_byte, int count, ...);
-void net_write_state_change(int state);
 void net_write_sync_square(void);
+
 
 //
 // net_z.c

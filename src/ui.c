@@ -24,7 +24,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "draw.h"
 #include "input.h"
 
+
+// text drawing buffer
 char draw_txt_buf[200];
+
 
 int ui_scrollbar_check(scrollbar_t*);
 
@@ -74,7 +77,7 @@ button_s* ui_new_button(int x, int y, int w, int h, int min_w, int max_w,
 
 	// draw gradient
 	if (gradient) 
-		sdl_create_button_gradient_effect(button->surface);
+		sdl_draw_gradient_effect_surface(button->surface);
 
 	// draw 3d effect
 	if (three_d) {
@@ -241,9 +244,9 @@ void ui_display_message()
 	if (!ui_message.active) 
 		return;
 
-	sdl_draw_box2(ui_message.x1, ui_message.y1, ui_message.x2, 
+	sdl_draw_box_screen(ui_message.x1, ui_message.y1, ui_message.x2, 
 			ui_message.y2, color.topbar);
-	sdl_draw_rect2(screen, ui_message.x1, ui_message.y1, ui_message.x2, 
+	sdl_draw_rect_surface(screen, ui_message.x1, ui_message.y1, ui_message.x2, 
 			ui_message.y2, color.button_highlight);
 	sdl_draw_text_solid2(ui_message.x1 + UI_BAR_PADDING, ui_message.y1, 
 			ui_message.text, button_font.data, color.text);
@@ -280,11 +283,11 @@ void ui_display_window()
 	widget_t *widget_node = active_window->widget;
 
 	// draw background
-	sdl_draw_box2(active_window->x1, active_window->y1, active_window->x2,
+	sdl_draw_box_screen(active_window->x1, active_window->y1, active_window->x2,
 			active_window->y2, color.topbar);
 
 	// draw 3d effect
-	sdl_draw_3d_fx(active_window->x1, active_window->y1, active_window->x2,
+	sdl_draw_fx_3d(active_window->x1, active_window->y1, active_window->x2,
 			active_window->y2);
 
 	if (active_window->widget) {

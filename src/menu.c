@@ -66,12 +66,12 @@ void m_open_multiplayer()
 
 void m_button_host_game()
 {
-	lanhost_start_host();
+	srv_ui_button_open_window();
 }
 
 void m_button_join_game()
 {
-	lanclient_start_client();
+	cl_ui_button_open_window();
 }
 
 

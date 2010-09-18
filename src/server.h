@@ -23,6 +23,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define __SERVER_H_
 
 #include "shared.h"
+
 #include "net.h"
 #include "ui.h"
 
@@ -64,12 +65,15 @@ typedef struct client_s {
 } client_s;
 client_s *client;
 
-
 string_list_t client_list;
 
 
-void lanhost_start_host(void);
-void sv_init_ui(void);
+void srv_ui_button_open_window(void);
+void srv_ui_init(void);
+
+int srv_init(void);
+void srv_close();
+
 
 
 #endif

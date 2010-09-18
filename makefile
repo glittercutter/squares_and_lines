@@ -13,13 +13,13 @@ LFLAGS = -pipe `sdl-config --cflags --libs` -lSDL -lSDL_gfx -lSDL_ttf -lSDL_net 
 # used to display message
 DEBUG_INFO =
 
-ifdef NDEBUG
-	CFLAGS += -D NDEBUG -O6 -ffast-math -funroll-loops \
+ifdef DNDEBUG
+	CFLAGS += -D DNDEBUG -O6 -ffast-math -funroll-loops \
 		-fomit-frame-pointer -fexpensive-optimizations
 else
 	CFLAGS += -g -pg
 	LFLAGS += -g -pg
-	DEBUG_INFO += @echo " - Define 'NDEBUG=1' in argument for release build"
+	DEBUG_INFO += @echo " - Define 'DNDEBUG=1' in argument for release build"
 endif
 
 CC = gcc
