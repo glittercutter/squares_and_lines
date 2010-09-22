@@ -47,6 +47,7 @@ typedef struct text_s {
 	char multiplayer[ STRING_LENGTH ];
 	char host_game[ STRING_LENGTH ];
 	char join_game[ STRING_LENGTH ];
+	char disconnect[ STRING_LENGTH ];
 
 	char score[ STRING_LENGTH ];
 	char player[ STRING_LENGTH ];
@@ -168,25 +169,6 @@ typedef struct gui_surface_s {
 gui_surface_s gui_surface;
 
 
-// function
-void ui_display_window(void);
-void ui_display_message(void);
-void ui_new_message(char*);
-void ui_button_function(void);
-int ui_button_check_click(button_s **head_node);
-void ui_button_close_window(void);
-void ui_button_drag_window(void);
-void ui_new_widget_list_box(int x1, int y1, int x2, int y2, 
-		string_list_t *strlist, widget_t **widget_head_node);
-void ui_new_widget_plain_text(char *text1, char *text2, char *text3, 
-		int x1, int y1, colorRGB_t color, widget_t **widget_head_node);
-void ui_scrollbar_update_size(int, int, scrollbar_t*);
-button_s* ui_new_button(int x, int y, int w, int h, int min_w, int max_w, 
-		int align, char *text, void func(void), int three_d, int gradient,
-		button_s **node);
-button_s* ui_button_check_pos(button_s **head_node);
-
-
 char ui_language[ SMALL_STRING_LENGTH ];
 
 button_s *ui_pressed_button;
@@ -206,9 +188,27 @@ button_s *active_dropmenu_parent;
 window_s host_window;
 window_s client_window;
 window_s *active_window;
-window_s *open_window[10]; // max opened windows TODO
+// window_s *open_window[10]; // max opened windows TODO
 
 scrollbar_t *ui_dragged_scrollbar;
+
+
+void ui_display_window(void);
+void ui_display_message(void);
+void ui_new_message(char* fmt, ...);
+void ui_button_function(void);
+int ui_button_check_click(button_s **head_node);
+void ui_button_close_window(void);
+void ui_button_drag_window(void);
+void ui_new_widget_list_box(int x1, int y1, int x2, int y2, 
+		string_list_t *strlist, widget_t **widget_head_node);
+void ui_new_widget_plain_text(char *text1, char *text2, char *text3, 
+		int x1, int y1, colorRGB_t color, widget_t **widget_head_node);
+void ui_scrollbar_update_size(int, int, scrollbar_t*);
+button_s* ui_new_button(int x, int y, int w, int h, int min_w, int max_w, 
+		int align, char *text, void func(void), int three_d, int gradient,
+		button_s **node);
+button_s* ui_button_check_pos(button_s **head_node);
 
 
 #endif

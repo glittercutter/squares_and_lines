@@ -24,7 +24,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "shared.h"
 #include "parse_public.h"
+
 #include "editor.h"
+#include "game.h"
 #include "ui.h"
 
 
@@ -56,50 +58,92 @@ struct var_info_s {
 
 // Config
 // =========================================================================
-//												  {"name", "default value"}
-static const char* display_width_str[]			= {"display_width", "640"};
-static const char* display_height_str[]			= {"display_height", "480"};
-static const char* display_fullscreen_str[]		= {"display_fullscreen", "0"};
+//
+//	{"name", "default value"}
 
-static const char* button_font_name_str[]		= {"button_font_name", "font/EnvyCodeR.ttf"};
-static const char* button_font_size_str[]		= {"button_font_size", "10"};
+static const char* display_width_str[] =
+	{"display_width", "640"};
+static const char* display_height_str[] =
+	{"display_height", "480"};
+static const char* display_fullscreen_str[]	=
+	{"display_fullscreen", "0"};
 
-static const char* ui_language_str[]			= {"language", "lang/en"};
-static const char* ed_square_size_str[]			= {"ed_square_size", "20"};
+static const char* button_font_name_str[] =
+	{"button_font_name", "font/EnvyCodeR.ttf"};
+static const char* button_font_size_str[] =
+	{"button_font_size", "12"};
+static const char* color_button_highlight_str[]	= 
+	{"button_highlight_color", "50, 51, 50"};
 
-static const char* color_own_player0_str[]		= {"color_own_player0", "140, 170, 222"};
-static const char* color_own_player1_str[]		= {"color_own_player1", "148, 178, 107"};
-static const char* color_own_outline_str[]		= {"color_own_outline", "200, 200, 200"};
-static const char* color_own_none_str[]			= {"color_own_none", "90, 101, 115"};
-static const char* color_ed_outline_str[]		= {"color_ed_outline", "200, 200, 200"};
-static const char* color_ed_grid_str[]			= {"color_ed_grid", "90, 101, 115"};
-static const char* color_text_str[]				= {"color_text", "200, 200, 200"};
-static const char* color_topbar_str[]			= {"color_topbar", "90, 101, 115"};
-static const char* color_button_highlight_str[]	= {"color_button_highlight", "33, 40, 41"};
+static const char* ui_language_str[] =
+	{"language", "lang/en"};
+
+static const char* ed_square_size_str[] =
+	{"editor_square_size", "20"};
+static const char* g_line_thickness_str[] =
+	{"game_line_thickness", "1"};
+
+static const char* color_own_player0_str[] =
+	{"color_game_player0", "66, 162, 206"};
+static const char* color_own_player1_str[] =
+	{"color_game_player1", "206, 49, 0"};
+static const char* color_own_outline_str[] =
+	{"color_game_outline", "156, 206, 255"};
+static const char* color_own_none_str[]	=
+	{"color_game_none", "156, 154, 156"};
+
+static const char* color_ed_outline_str[] =
+	{"color_editor_outline", "156, 206, 255"};
+static const char* color_ed_grid_str[] =
+	{"color_editor_grid", "99, 101, 99"};
+
+static const char* color_text_str[]	=
+	{"color_txt_normal", "200, 200, 200"};
+static const char* color_txt_current_player_str[] = 
+	{"color_txt_current_player", "0, 0, 0"};
+
+static const char* color_topbar_str[] = 
+	{"color_gui", "99, 101, 99"};
+// 	{"color_gui", "100, 3, 0"};
+static const char* color_gui_3d_dark_str[] = 
+	{"color_gui_3d_dark", "0, 0, 0"};
+// 	{"color_gui", "90, 101, 115"};
+static const char* color_gui_3d_light_str[] = 
+	{"color_gui_3d_light", "200, 200, 200"};
+
+
 
 
 static struct var_info_s global_config_info[] = {
 	
-	//	NAME						VAR (ptr)					TYPE
-	{	display_width_str,			&display_width,				INT_T		},
-	{	display_height_str,			&display_height,			INT_T		},
-	{	display_fullscreen_str,		&display_fullscreen,		INT_T		},
-	{	ed_square_size_str,			&ed_square_size,			INT_T		},
+	//	NAME						VAR (ptr)							TYPE
+	{ display_width_str,			&display_width,						INT_T		},
+	{ display_height_str,			&display_height,					INT_T		},
+	{ display_fullscreen_str,		&display_fullscreen,				INT_T		},
+	
+	{ ed_square_size_str,			&ed_square_size,					INT_T		},
+	{ g_line_thickness_str,			&g_line_thickness,					INT_T		},
 
-	{	button_font_name_str,		&button_font.name,			STRING_T	},
-	{	button_font_size_str,		&button_font.size,			INT_T		},
+	{ button_font_name_str,			&button_font.name,					STRING_T	},
+	{ button_font_size_str,			&button_font.size,					INT_T		},
+	{ color_button_highlight_str,	&color.button_highlight,			COLOR_T		},
 
-	{	ui_language_str,			&ui_language,				STRING_T	},
+	{ ui_language_str,				&ui_language,						STRING_T	},
 
-	{	color_own_player0_str,		&color.square_owner[PLAYER_1],		COLOR_T		},
-	{	color_own_player1_str,		&color.square_owner[PLAYER_0],		COLOR_T		},
-	{	color_own_outline_str,		&color.square_owner[OUTLINE],		COLOR_T		},
-	{	color_own_none_str,			&color.square_owner[NONE],			COLOR_T		},
-	{	color_ed_outline_str,		&color.ed_outline,					COLOR_T		},
-	{	color_ed_grid_str,			&color.ed_grid,						COLOR_T		},
-	{	color_text_str,				&color.text,						COLOR_T		},
-	{	color_topbar_str,			&color.topbar,						COLOR_T		},
-	{	color_button_highlight_str,	&color.button_highlight,			COLOR_T		},
+	{ color_own_player0_str,		&color.square_owner[PLAYER_1],		COLOR_T		},
+	{ color_own_player1_str,		&color.square_owner[PLAYER_0],		COLOR_T		},
+	{ color_own_outline_str,		&color.square_owner[OUTLINE],		COLOR_T		},
+	{ color_own_none_str,			&color.square_owner[NONE],			COLOR_T		},
+	
+	{ color_ed_outline_str,			&color.ed_outline,					COLOR_T		},
+	{ color_ed_grid_str,			&color.ed_grid,						COLOR_T		},
+	
+	{ color_text_str,				&color.text,						COLOR_T		},
+	{ color_txt_current_player_str,	&color.txt_current_player,			COLOR_T		},
+
+	{ color_topbar_str,				&color.topbar,						COLOR_T		},
+	{ color_gui_3d_dark_str,		&color.gui_3d_dark,					COLOR_T		},
+	{ color_gui_3d_light_str,		&color.gui_3d_light,				COLOR_T		},
 
 
 };
@@ -109,21 +153,22 @@ static struct var_info_s global_config_info[] = {
 // Language
 // =========================================================================
 //
-static const char* lang_play_str[]				= {"play", NULL};
-static const char* lang_quit_str[]				= {"quit", NULL};
-static const char* lang_main_menu_str[]			= {"main_menu", NULL};
-static const char* lang_option_str[]			= {"option", NULL};
-static const char* lang_new_game_str[]			= {"new_game", NULL};
+static const char* lang_play_str[]				= {"play", "Play"};
+static const char* lang_quit_str[]				= {"quit", "Quit"};
+static const char* lang_main_menu_str[]			= {"main_menu", "Menu"};
+static const char* lang_option_str[]			= {"option", "Option"};
+static const char* lang_new_game_str[]			= {"new_game", "New game"};
 
 static const char* lang_multiplayer_str[]		= {"multiplayer", "Multiplayer"};
-static const char* lang_host_game_str[]			= {"host_game", NULL};
-static const char* lang_join_game_str[]			= {"join_game", NULL};
+static const char* lang_host_game_str[]			= {"host_game", "Host game"};
+static const char* lang_join_game_str[]			= {"join_game", "Join game"};
+static const char* lang_disconnect_str[]		= {"disconnect", "Disconnect"};
 
-static const char* lang_random_str[]			= {"random", NULL};
-static const char* lang_score_str[]				= {"score", NULL};
-static const char* lang_player_str[]			= {"player", NULL};
-static const char* lang_win_str[]				= {"win", NULL};
-static const char* lang_no_win_str[]			= {"no_win", NULL};
+static const char* lang_random_str[]			= {"random", "Random"};
+static const char* lang_score_str[]				= {"score", "Score"};
+static const char* lang_player_str[]			= {"player", "Player"};
+static const char* lang_win_str[]				= {"win", "win"};
+static const char* lang_no_win_str[]			= {"no_win", "Draw!"};
 
 static const char* lang_lbox_server_str[]		= {"lbox_server", "Server"};
 static const char* lang_lbox_ping_str[]			= {"lbox_ping", "Ping"};
@@ -150,7 +195,8 @@ static struct var_info_s lang_info[] = {
 	{	lang_multiplayer_str,		&text.multiplayer,			STRING_T		},
 	{	lang_host_game_str,			&text.host_game,			STRING_T		},
 	{	lang_join_game_str,			&text.join_game,			STRING_T		},
-	
+	{	lang_disconnect_str,		&text.disconnect,			STRING_T		},
+
 	{	lang_random_str,			&text.random,				STRING_T		},
 	{	lang_score_str,				&text.score,				STRING_T		},
 	{	lang_player_str,			&text.player,				STRING_T		},

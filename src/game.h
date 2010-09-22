@@ -41,6 +41,7 @@ int g_min_x, g_max_x;
 int g_min_y, g_max_y;
 int g_square_size;
 int g_offset_x, g_offset_y;
+int g_line_thickness;
 
 
 void g_change_state(void);

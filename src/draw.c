@@ -52,6 +52,22 @@ SDL_Surface* sdl_create_surface(int w, int h)
 }
 
 
+void sdl_draw_surface_screen(SDL_Surface *surface, int x, int y) 
+{
+	SDL_Rect src, dst;
+	
+	src.x = 0;
+	src.y = 0;
+	dst.w = src.w = surface->w;
+	dst.h = src.h = surface->h;	
+	dst.x = x;
+	dst.y = y;
+	
+	SDL_BlitSurface(surface, &src, screen, &dst);
+}
+
+
+
 void sdl_draw_surface(SDL_Surface *srcimg, int sx, int sy, int sw, int sh,
 		SDL_Surface *dstimg, int dx, int dy, int alpha) 
 {
@@ -78,7 +94,8 @@ Draw to screen.
 ==============
 */
 
-void sdl_draw_text_solid2(int x, int y, char *text, TTF_Font *font, colorRGB_t color)
+void sdl_draw_text_solid2(int x, int y, char *text, TTF_Font *font, 
+		colorRGB_t color)
 {
 	SDL_Color sdl_color = { color.r, color.g, color.b };
 	SDL_Surface* textSurface = TTF_RenderText_Solid(font, text, sdl_color);
@@ -141,8 +158,9 @@ void sdl_draw_box_screen(int x1, int y1, int x2, int y2, colorRGB_t color)
 	boxRGBA(screen, x1, y1, x2, y2, color.r, color.g, color.b, a);
 }
 
-void sdl_draw_triangle_surface(SDL_Surface *surface, int x1, int y1, int x2, int y2,
-	   	int x3, int y3, colorRGB_t color)
+void sdl_draw_triangle_surface(
+		SDL_Surface *surface, int x1, int y1, int x2, int y2,
+		int x3, int y3, colorRGB_t color)
 {
 	int a = 255;
 	filledTrigonRGBA(surface, x1, y1, x2, y2, x3, y3, 
@@ -218,126 +236,6 @@ static void sdl_draw_ed_grid()
 	}
 }
 
-/*
-==============
-sdl_draw_game_info
-
-Draw players score
-==============
-*/
-static void sdl_draw_game_info()
-{
-	char string[30];
-	int offset = display_width - TEXT_MARGIN;
-	colorRGB_t tmp_color;
-
-	if (local_player.turn == PLAYER_1) {
-		tmp_color.r = 0;
-		tmp_color.g = 0;
-		tmp_color.b = 0;
-	} else {
-		tmp_color.r = color.square_owner[PLAYER_1].r;
-		tmp_color.g = color.square_owner[PLAYER_1].g;
-		tmp_color.b = color.square_owner[PLAYER_1].b;
-	}
-
-	sprintf(string, "%s 2 : %d", text.player, player[1].score);
-	offset -= button_font.w * (strlen(string));
-	sdl_draw_text_solid2(offset, -1, string, button_font.data, tmp_color);
-	player[1].score_text_pos_x = offset;
-
-	if (local_player.turn == PLAYER_0) {
-		tmp_color.r = 0;
-		tmp_color.g = 0;
-		tmp_color.b = 0;
-	} else {
-		tmp_color.r = color.square_owner[PLAYER_0].r;
-		tmp_color.g = color.square_owner[PLAYER_0].g;
-		tmp_color.b = color.square_owner[PLAYER_0].b;
-	}
-
-	sprintf(string, "%s 1 : %d", text.player, player[0].score);
-	offset -= button_font.w * (strlen(string)) + TEXT_MARGIN + TEXT_MARGIN;
-	sdl_draw_text_solid2(offset, -1, string, button_font.data, tmp_color);
-	player[0].score_text_pos_x = offset;
-
-
-	sprintf(string, "%s -", text.score);
-	offset -= button_font.w * (strlen(string)) + TEXT_MARGIN + TEXT_MARGIN;
-	sdl_draw_text_solid2(offset, -1, string, button_font.data, color.text);
-}
-
-
-static void sdl_draw_game_squares()
-{
-#define THICKNESS 1
-	for (int i = 0; i < ed_grid_h; i++) {		
-		for (int j = 0; j < ed_grid_w; j++) {
-			if (squares[i][j].active) {
-				/* Draw non owned square's background */
-				if (!squares[i][j].owner) sdl_draw_box_screen(squares[i][j].x1, 
-						squares[i][j].y1,squares[i][j].x2, squares[i][j].y2, 
-						color.button_highlight);
-				/* Draw square border */
-				// top
-				sdl_draw_line_screen(squares[i][j].x1, squares[i][j].y1,
-						squares[i][j].x2, squares[i][j].y1, 
-						color.square_owner[squares[i][j].owner_up]);
-				// right
-				sdl_draw_line_screen(squares[i][j].x2, squares[i][j].y1,
-						squares[i][j].x2, squares[i][j].y2, 
-						color.square_owner[squares[i][j].owner_right]);
-				// bottom
-				sdl_draw_line_screen(squares[i][j].x1, squares[i][j].y2,
-						squares[i][j].x2, squares[i][j].y2,
-						color.square_owner[squares[i][j].owner_down]);
-				// left
-				sdl_draw_line_screen(squares[i][j].x1, squares[i][j].y1,
-						squares[i][j].x1, squares[i][j].y2, 
-						color.square_owner[squares[i][j].owner_left]);
-
-				if (THICKNESS > 1) {
-					// top
-					sdl_draw_line_screen(squares[i][j].x1, squares[i][j].y1 - THICKNESS,
-							squares[i][j].x2, squares[i][j].y1 - THICKNESS, 
-							color.square_owner[squares[i][j].owner_up]);
-					sdl_draw_line_screen(squares[i][j].x1, squares[i][j].y1 + THICKNESS,
-							squares[i][j].x2, squares[i][j].y1 + THICKNESS, 
-							color.square_owner[squares[i][j].owner_up]);
-					// right
-					sdl_draw_line_screen(squares[i][j].x2 - THICKNESS, squares[i][j].y1,
-							squares[i][j].x2 - THICKNESS, squares[i][j].y2, 
-							color.square_owner[squares[i][j].owner_right]);
-					sdl_draw_line_screen(squares[i][j].x2 + THICKNESS, squares[i][j].y1,
-							squares[i][j].x2 + THICKNESS, squares[i][j].y2, 
-							color.square_owner[squares[i][j].owner_right]);
-					// bottom
-					sdl_draw_line_screen(squares[i][j].x1, squares[i][j].y2 - THICKNESS,
-							squares[i][j].x2, squares[i][j].y2 - THICKNESS,
-							color.square_owner[squares[i][j].owner_down]);
-					sdl_draw_line_screen(squares[i][j].x1, squares[i][j].y2 + THICKNESS,
-							squares[i][j].x2, squares[i][j].y2 + THICKNESS,
-							color.square_owner[squares[i][j].owner_down]);
-					// left				
-					sdl_draw_line_screen(squares[i][j].x1 - THICKNESS, squares[i][j].y1,
-							squares[i][j].x1 - THICKNESS, squares[i][j].y2, 
-							color.square_owner[squares[i][j].owner_left]);
-					sdl_draw_line_screen(squares[i][j].x1 + THICKNESS, squares[i][j].y1,
-							squares[i][j].x1 + THICKNESS, squares[i][j].y2, 
-							color.square_owner[squares[i][j].owner_left]);
-				}
-				/* Fill owned square with owner color */
-				if (squares[i][j].owner) {
-					sdl_draw_box_screen(squares[i][j].x1, squares[i][j].y1,
-						squares[i][j].x2, squares[i][j].y2, 
-							color.square_owner[squares[i][j].owner]);
-				}
-				
-			}
-		}
-	}
-}
-
 static void sdl_draw_ed_squares()
 {
 	for (int i = 0; i < ed_grid_h; i++) {		
@@ -374,10 +272,91 @@ static void sdl_draw_ed_squares()
 	}
 }
 
+
+static void sdl_draw_game_squares()
+{
+	const int line_thickness = 1;
+
+	for (int i = 0; i < ed_grid_h; i++) {		
+		for (int j = 0; j < ed_grid_w; j++) {
+			if (squares[i][j].active) {
+				/* Draw background of unowned squares */
+				if (squares[i][j].owner == NONE)
+						sdl_draw_box_screen(squares[i][j].x1, 
+						squares[i][j].y1,squares[i][j].x2, squares[i][j].y2, 
+						color.button_highlight);
+				/* Draw square border */
+				// top
+				sdl_draw_line_screen(squares[i][j].x1, squares[i][j].y1,
+						squares[i][j].x2, squares[i][j].y1, 
+						color.square_owner[squares[i][j].owner_up]);
+				// right
+				sdl_draw_line_screen(squares[i][j].x2, squares[i][j].y1,
+						squares[i][j].x2, squares[i][j].y2, 
+						color.square_owner[squares[i][j].owner_right]);
+				// bottom
+				sdl_draw_line_screen(squares[i][j].x1, squares[i][j].y2,
+						squares[i][j].x2, squares[i][j].y2,
+						color.square_owner[squares[i][j].owner_down]);
+				// left
+				sdl_draw_line_screen(squares[i][j].x1, squares[i][j].y1,
+						squares[i][j].x1, squares[i][j].y2, 
+						color.square_owner[squares[i][j].owner_left]);
+
+				if (line_thickness > 1) {
+					// top
+					sdl_draw_line_screen(
+							squares[i][j].x1, squares[i][j].y1 - line_thickness,
+							squares[i][j].x2, squares[i][j].y1 - line_thickness, 
+							color.square_owner[squares[i][j].owner_up]);
+					sdl_draw_line_screen(
+							squares[i][j].x1, squares[i][j].y1 + line_thickness,
+							squares[i][j].x2, squares[i][j].y1 + line_thickness, 
+							color.square_owner[squares[i][j].owner_up]);
+					// right
+					sdl_draw_line_screen(
+							squares[i][j].x2 - line_thickness, squares[i][j].y1,
+							squares[i][j].x2 - line_thickness, squares[i][j].y2, 
+							color.square_owner[squares[i][j].owner_right]);
+					sdl_draw_line_screen(
+							squares[i][j].x2 + line_thickness, squares[i][j].y1,
+							squares[i][j].x2 + line_thickness, squares[i][j].y2, 
+							color.square_owner[squares[i][j].owner_right]);
+					// bottom
+					sdl_draw_line_screen(
+							squares[i][j].x1, squares[i][j].y2 - line_thickness,
+							squares[i][j].x2, squares[i][j].y2 - line_thickness,
+							color.square_owner[squares[i][j].owner_down]);
+					sdl_draw_line_screen(
+							squares[i][j].x1, squares[i][j].y2 + line_thickness,
+							squares[i][j].x2, squares[i][j].y2 + line_thickness,
+							color.square_owner[squares[i][j].owner_down]);
+					// left				
+					sdl_draw_line_screen(
+							squares[i][j].x1 - line_thickness, squares[i][j].y1,
+							squares[i][j].x1 - line_thickness, squares[i][j].y2, 
+							color.square_owner[squares[i][j].owner_left]);
+					sdl_draw_line_screen(
+							squares[i][j].x1 + line_thickness, squares[i][j].y1,
+							squares[i][j].x1 + line_thickness, squares[i][j].y2, 
+							color.square_owner[squares[i][j].owner_left]);
+				}
+				/* Fill owned square with owner color (draw over the lines)*/
+				if (squares[i][j].owner != NONE) {
+						sdl_draw_box_screen(squares[i][j].x1, squares[i][j].y1,
+						squares[i][j].x2, squares[i][j].y2, 
+						color.square_owner[squares[i][j].owner]);
+				}
+				
+			}
+		}
+	}
+}
+
+
 // =======================================
 // FX
 // =======================================
-
 /* 
 ====================
 sdl_draw_fx_fade
@@ -391,6 +370,48 @@ static void sdl_draw_fx_fade()
 			(255 / fx_transition[FX_FADE].max_step));
 	boxRGBA(screen, 0, 0, display_width, display_height, 0, 0, 0, fade_level);
 }
+
+
+/*
+==============
+sdl_draw_game_info
+
+==============
+*/
+static void sdl_draw_game_info()
+{
+	char string[LONG_STRING_LENGTH];
+	int offset = display_width - TEXT_MARGIN;
+	colorRGB_t tmp_color;
+
+	if (local_player.turn == PLAYER_1) {
+		tmp_color = color.txt_current_player;
+	} else {
+		tmp_color = color.square_owner[PLAYER_1];
+	}
+
+	sprintf(string, "%s 2 : %d", text.player, player[1].score);
+	offset -= button_font.w * (strlen(string));
+	sdl_draw_text_solid2(offset, -1, string, button_font.data, tmp_color);
+	player[1].score_text_pos_x = offset;
+
+	if (local_player.turn == PLAYER_0) {
+		tmp_color = color.txt_current_player;
+	} else {
+		tmp_color = color.square_owner[PLAYER_0];
+	}
+
+	sprintf(string, "%s 1 : %d", text.player, player[0].score);
+	offset -= button_font.w * (strlen(string)) + TEXT_MARGIN + TEXT_MARGIN;
+	sdl_draw_text_solid2(offset, -1, string, button_font.data, tmp_color);
+	player[0].score_text_pos_x = offset;
+
+
+	sprintf(string, "%s -", text.score);
+	offset -= button_font.w * (strlen(string)) + TEXT_MARGIN + TEXT_MARGIN;
+	sdl_draw_text_solid2(offset, -1, string, button_font.data, color.text);
+}
+
 
 /* 
 ====================
@@ -413,7 +434,7 @@ static void sdl_draw_current_player_box()
 		
 		}
 		// animate the box
-		if (local_player.turn - 1 == 1) {
+		if (local_player.turn == 1) {
 			x1 = player[1].score_text_pos_x - TEXT_MARGIN +
 					((fx_transition[FX_PLAYER_CHANGE].max_step -
 					fx_transition[FX_PLAYER_CHANGE].current_step) * 
@@ -462,7 +483,7 @@ static void sdl_draw_current_player_box()
 no_animation: /* Prevent flashing between state */
 		
 		// static box
-		if (local_player.turn - 1 == 1) {
+		if (local_player.turn == 1) {
 			boxRGBA(screen, player[1].score_text_pos_x - TEXT_MARGIN, 0,
 					display_width, button_topbar->h - 1, 
 					color.square_owner[PLAYER_1].r, 
@@ -505,7 +526,6 @@ void sdl_draw_game_fx()
 
 void sdl_draw_main_fx()
 {
-	// transition
 	for (int i = 0; i < NUM_OF_TRANSITION; i++) {
 		if (fx_transition[i].active) {
 			switch (fx_transition[i].fx_type) {
@@ -525,24 +545,21 @@ void sdl_draw_button(button_s *button)
 {
 	while (button != NULL) {
 		if (button == ui_pressed_button) {
-			sdl_draw_surface(button->surface, 0, 0, button->w, button->h,
-					screen, button->x1, button->y1, 255);
+			sdl_draw_surface_screen(button->surface, button->x1, button->y1);
 			boxRGBA(screen, button->x1, button->y1, button->x2 - 1, button->y2 - 1, 
 					color.button_highlight.r, 
 					color.button_highlight.g, 
 					color.button_highlight.b, 70);
 
 		} else if (button == ui_highlight_button) {
-			sdl_draw_surface(button->surface, 0, 0, button->w, button->h,
-					screen, button->x1, button->y1, 255);
+			sdl_draw_surface_screen(button->surface, button->x1, button->y1);
 			boxRGBA(screen, button->x1, button->y1, button->x2 - 1, button->y2 - 1,
 					color.button_highlight.r, 
 					color.button_highlight.g, 
 					color.button_highlight.b, 50);
 
 		} else {
-			sdl_draw_surface(button->surface, 0, 0, button->w, button->h, screen,
-					button->x1, button->y1, 255);	
+			sdl_draw_surface_screen(button->surface, button->x1, button->y1);	
 		}
 		button = button->next;
 	}
@@ -572,10 +589,10 @@ void sdl_draw_widget_scrollbar(scrollbar_t *scrollbar)
 			color.topbar);
 
 	// center lines
-	lineRGBA(screen, handle_center_x - 2, handle_center_y
-			,handle_center_x + 2, handle_center_y, 50, 50, 50, 255);
-	lineRGBA(screen, handle_center_x - 2, handle_center_y - 3
-			,handle_center_x + 2, handle_center_y - 3, 50, 50, 50, 255);
+	lineRGBA(screen, handle_center_x - 2, handle_center_y,
+			handle_center_x + 2, handle_center_y, 50, 50, 50, 255);
+	lineRGBA(screen, handle_center_x - 2, handle_center_y - 3,
+			handle_center_x + 2, handle_center_y - 3, 50, 50, 50, 255);
 	lineRGBA(screen, handle_center_x - 2, handle_center_y + 3,
 			handle_center_x + 2, handle_center_y + 3, 50, 50, 50, 255);
 	
@@ -658,6 +675,7 @@ void sdl_draw_gradient_effect_surface(SDL_Surface *surface)
 
 void sdl_create_gui_graphic(void)
 {
+	// scrollbar arrow UP
 	gui_surface.arrow_up = sdl_create_surface(SCROLLBAR_SIZE + 1,
 			SCROLLBAR_SIZE + 1);
 	boxRGBA(gui_surface.arrow_up, 0, 0, gui_surface.arrow_up->w, 
@@ -670,7 +688,8 @@ void sdl_create_gui_graphic(void)
 			gui_surface.arrow_up->w * 0.6f, gui_surface.arrow_up->w * 0.6f,
 			color.button_highlight);
 	sdl_draw_3d_effect_surface(gui_surface.arrow_up);
-
+	
+	// scrollbar arrow UP
 	gui_surface.arrow_down = sdl_create_surface(SCROLLBAR_SIZE + 1,
 			SCROLLBAR_SIZE + 1);
 	boxRGBA(gui_surface.arrow_down, 0, 0, gui_surface.arrow_down->w, 
@@ -683,7 +702,8 @@ void sdl_create_gui_graphic(void)
 			gui_surface.arrow_down->w * 0.4f, gui_surface.arrow_down->w * 0.6f, 
 			color.button_highlight);
 	sdl_draw_3d_effect_surface(gui_surface.arrow_down);
-
+	
+	// topbar gradient surface
 	int topbar_height = button_font.size + UI_BAR_PADDING;
 	gui_surface.gradient = sdl_create_surface(topbar_height, topbar_height);
 	boxRGBA(gui_surface.gradient, 0, 0, gui_surface.gradient->w, 

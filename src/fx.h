@@ -59,7 +59,7 @@ fx_transition_s fx_transition[NUM_OF_TRANSITION];
 typedef struct seg_glow_s {
 	square_s *square;
 	int x, y;
-	int pos;
+	int side;
 	int glow_level;
 	int player;
 	int x1, y1, x2, y2; // pixel pos

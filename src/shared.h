@@ -79,10 +79,10 @@ enum {
 // TODO move to game.h
 // square owner
 enum {
-	NONE,
 	PLAYER_0,
 	PLAYER_1,
 	OUTLINE,
+	NONE,
 };
 
 // square boundary
@@ -115,11 +115,16 @@ typedef struct colorRGB_t {
 
 typedef struct color_s {
 	colorRGB_t square_owner[4];
+	colorRGB_t square_background;
+	colorRGB_t game_empty;
 	colorRGB_t ed_outline;
 	colorRGB_t ed_grid;
 	colorRGB_t text;
 	colorRGB_t topbar;
+	colorRGB_t gui_3d_dark;
+	colorRGB_t gui_3d_light;
 	colorRGB_t button_highlight;
+	colorRGB_t txt_current_player;
 } color_s;
 color_s color;
 

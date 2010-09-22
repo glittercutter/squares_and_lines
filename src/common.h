@@ -4,6 +4,7 @@
 #include "shared.h"
 
 
+int get_fps(void);
 void eprint(const char *fmt, ...); 
 int get_random_number(int);
 int ipow(int, int);

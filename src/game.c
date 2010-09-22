@@ -49,8 +49,8 @@ void g_change_state()
 	gamestate = GAME;
 
 	if (net_is_server) {
-		net_write_int(STATE_CHANGE_BYTE, 1, GAME);
 		net_write_sync_square();
+		net_write_int(STATE_CHANGE_BYTE, 1, GAME);
 	}
 }
 
@@ -68,11 +68,11 @@ void g_end()
 
 	if (player[0].score == player[1].score) {
 		snprintf(string, STRING_LENGTH - 1, "%s !", text.no_win);
-		winning_player = 0;
+		winning_player = NONE;
 	} else {
 		if (player[0].score > player[1].score) {
-			winning_player = 1;
-		} else winning_player = 2;
+			winning_player = PLAYER_0;
+		} else winning_player = PLAYER_1;
 		snprintf(string, STRING_LENGTH - 1, "%s %d %s !", text.player, 
 				winning_player, text.win);
 	}
@@ -93,7 +93,7 @@ static void g_check_complete_square(square_s *square)
 	// current player own the square
 	square->owner = local_player.turn;
 
-	++player[local_player.turn - 1].score;
+	++player[local_player.turn].score;
 	--squares_remaining;
 
 	if (!squares_remaining) g_end();
@@ -104,8 +104,8 @@ static void g_check_complete_square(square_s *square)
 ====================
 g_add_segment
 
-x and y are -1 for local input,
-coordinate from net are given otherwise
+pos_x and pos_y are "-1" for local input,
+otherwise they are coordinate from net
 ====================
 */
 void g_add_segment(int pos_x, int pos_y, int side)
@@ -162,7 +162,8 @@ void g_add_segment(int pos_x, int pos_y, int side)
 		}
 	}
 
-	if (net_is_server || (local_player.turn == local_player.player_n))
+	if (net_is_server || 
+			(net_is_client && (local_player.turn == local_player.player_n)))
 		net_write_int(G_ADD_SEG_BYTE, 3, pos_x, pos_y, side);
 
 	switch (side) {
@@ -212,10 +213,11 @@ void g_add_segment(int pos_x, int pos_y, int side)
 	if (!net_game || net_is_server) {
 		// game ended
 		if (!squares_remaining) {
-			if (local_player.turn == 0) return; // no winner
+			if (local_player.turn == NONE) return; // no winner
 			// move current player moving square to winning player
 			if (local_player.turn != winning_player) {
 				local_player.turn = winning_player;
+
 				fx_new_transition(NULL, 5, FX_PLAYER_CHANGE);
 			}
 			return;
@@ -226,8 +228,10 @@ void g_add_segment(int pos_x, int pos_y, int side)
 		} else {
 			local_player.turn = PLAYER_0;
 		}
-		local_player.turn = local_player.turn;
-		net_write_int(G_PLAYER_TURN_BYTE, 1, local_player.turn);
+
+		if (net_is_server)
+			net_write_int(G_PLAYER_TURN_BYTE, 1, local_player.turn);
+		
 		fx_new_transition(NULL, 5, FX_PLAYER_CHANGE);
 	}
 }
@@ -301,11 +305,8 @@ static int g_init_square()
 				if (i > g_max_y) g_max_y = i;
 				if (j < g_min_x) g_min_x = j;
 				if (j > g_max_x) g_max_x = j;
-
 			}
-
 		}
-
 	}
 	
 	// not enough active square

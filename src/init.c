@@ -33,14 +33,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "ui.h"
 
 
-/* 
-====================
-sdl_cleanup
-
-Called by SDL at the end of the program.
-====================
-*/
-void sdl_cleanup()
+void do_at_exit()
 {
 	TTF_Quit();
 	SDL_Quit();
@@ -51,10 +44,10 @@ static void sdl_init()
 {
 	if (display_fullscreen) {
 		screen = SDL_SetVideoMode(display_width, display_height, 0, //
-				SDL_ANYFORMAT|SDL_SWSURFACE|SDL_FULLSCREEN);
+				SDL_ANYFORMAT | SDL_SWSURFACE | SDL_FULLSCREEN);
 	} else {
 		screen = SDL_SetVideoMode(display_width, display_height, 0, //
-				SDL_ANYFORMAT|SDL_SWSURFACE);
+				SDL_ANYFORMAT | SDL_SWSURFACE);
 	}
 
 	if (SDL_Init(SDL_INIT_VIDEO) < 0 )
@@ -97,19 +90,21 @@ int init()
 	sdl_init();
 	
 	// fonts
-	if (TTF_Init()==-1) 
+	if (TTF_Init()) 
 		eprint("TTF_Init: %s\n", TTF_GetError());
 	load_font(&button_font);
 
 	/* Initialize SDL_net */
-	if (SDLNet_Init() < 0) 
+	if (SDLNet_Init()) 
 		eprint("SDLNet_Init: %s\n", SDLNet_GetError());
-	/* Allocate memory for the packet */
-	if (!(udp_in_p = SDLNet_AllocPacket(512)))
+	
+	/* Allocate memory for packet */
+	if (!(udp_in_p = SDLNet_AllocPacket(PACKET_LENGHT)))
 		eprint("SDLNet_AllocPacket: %s\n", SDLNet_GetError());
-	if (!(udp_out_p = SDLNet_AllocPacket(512)))
+	if (!(udp_out_p = SDLNet_AllocPacket(PACKET_LENGHT)))
 		eprint("SDLNet_AllocPacket: %s\n", SDLNet_GetError());
 	
+	/* Networking mutex */
 	if (pthread_mutex_init(&list_box_mutex, NULL))
 		eprint("pthread_mutex_init\n");
 	if (pthread_mutex_init(&udp_new_buffer_mutex, NULL))
@@ -121,8 +116,8 @@ int init()
 	ed_init();
 	gamestate = EDITOR;
 
-	/* sdl call this function at exit */
-	atexit(sdl_cleanup);
+	/* Function called at exit */
+	atexit(do_at_exit);
 
 	return 0;
 }

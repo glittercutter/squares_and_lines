@@ -38,6 +38,7 @@ void ed_init_ui(void);
 int ed_init(void);
 void ed_net_add_square(int x, int y);
 void ed_net_rm_square(int x, int y);
+void ed_clear_squares(void);
 
 
 #endif

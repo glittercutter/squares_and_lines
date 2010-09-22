@@ -94,21 +94,26 @@ void cl_ui_init()
 	ui_new_widget_plain_text(text.txt_player_name_is, local_player.name, "", x, y,
 			color.text, &client_window.widget);	
 	
-	// configure button
+	// buttons
 	min_w = 80;
-	w = strlen(text.configure) * button_font.w + UI_BAR_PADDING;
-	x = host_window.x2 - min_w - (UI_BAR_PADDING * 4);
-	y = host_window.y1 + h + (UI_BAR_PADDING * 2);
-	ui_new_button(x, y, w, h, min_w, max_w, ALIGN_CENTER,
-			text.configure, *cl_ui_button_close_window, 1, 1, 
-			&client_window.button);
+// 	x = host_window.x1 + (UI_BAR_PADDING * 4);
+// 	y = host_window.y1 + h + (UI_BAR_PADDING * 2);
+
+	y += h * 2;
+
+// 	// configure button
+// 	w = strlen(text.configure) * button_font.w + UI_BAR_PADDING;
+// 	ui_new_button(x, y, w, h, min_w, max_w, ALIGN_CENTER,
+// 			text.configure, *cl_ui_button_close_window, 1, 1, 
+// 			&client_window.button);
+
 	// join button
 	w = strlen(text.join) * button_font.w + UI_BAR_PADDING;
 	y += h + (UI_BAR_PADDING);
 	ui_new_button(x, y, w, h, min_w, max_w, ALIGN_CENTER,
 			text.join, *cl_request_connection, 1, 1, 
 			&client_window.button);	
-	// update
+	// update button
 	w = strlen(text.update) * button_font.w + UI_BAR_PADDING;
 	y += h + (UI_BAR_PADDING);
 	ui_new_button(x, y, w, h, min_w, max_w, ALIGN_CENTER,
@@ -513,7 +518,7 @@ void cl_parse_game_packet(int byte_readed)
 	
 	if (byte_readed >= PACKET_LENGHT) return;
 
-	while (udp_in_p->data[byte_readed] != 0x00) {
+	while (udp_in_p->data[byte_readed] != NET_NULL) {
 		switch (udp_in_p->data[byte_readed++]) {
 		case RESENT_BYTE:
 			if (SDLNet_Read32(&udp_in_p->data[byte_readed]) <= 
@@ -534,7 +539,7 @@ void cl_parse_game_packet(int byte_readed)
 			cl_rm_acked_packet(SDLNet_Read32(&udp_in_p->data[byte_readed]));
 			byte_readed += 4;
 			// don't send ack if the received packet contain only an ack
-			if (udp_in_p->data[byte_readed] == 0x00) {
+			if (udp_in_p->data[byte_readed] == NET_NULL) {
 				local_player.recev_packet_ack_sent = true;
 			}
 			break;
@@ -545,7 +550,7 @@ void cl_parse_game_packet(int byte_readed)
 			byte_readed += 4;
 			y = SDLNet_Read32(&udp_in_p->data[byte_readed]);
 			byte_readed += 4;
-			seg_glow_current.pos = SDLNet_Read32(&udp_in_p->data[byte_readed]);
+			seg_glow_current.side = SDLNet_Read32(&udp_in_p->data[byte_readed]);
 			byte_readed += 4;
 			fx_net_glow(x, y);
 			break;
@@ -590,6 +595,10 @@ void cl_parse_game_packet(int byte_readed)
 				ed_change_state();
 				break;
 			}
+			break;
+
+		case NET_SYNC_SQUARES:
+			ed_clear_squares();
 			break;
 
 		default:
@@ -643,6 +652,7 @@ void cl_parse_udp_packet()
 			if (strcmp((char *)&udp_in_p->data[byte_readed], "udp_sdltest"))
 				break;
 			byte_readed += strlen((char *)&udp_in_p->data[byte_readed]) + 1;
+			// display reason for being refused
 			ui_new_message((char *)&udp_in_p->data[byte_readed]);
 			break;
 		}
@@ -670,13 +680,13 @@ void cl_parse_tcp_packet(byte *buffer)
 	if (buffer[byte_readed++] != NET_GLOBAL_HEADER) return;
 	
 	switch (buffer[byte_readed++]) {
-	// chat message from server "8300"
+	// chat message from server
 	case NET_SRV_MESSAGE:
 // 		message_printf("%s\n", (char *)&buffer[HEADER_SIZE]);
 		break;
 	
-	// server is disconnecting "8000"
-	case 0x80:
+	// server is disconnecting
+	case NET_SRV_DISCONNECT:
 		printf("cl: Server disconnected.\n");
 		cl_close();
 		break;
@@ -775,7 +785,7 @@ void cl_send_game_packet(void)
 		pthread_mutex_unlock(&udp_new_buffer_mutex);
 	}
 	// terminate packet
-	udp_out_p->data[byte_writed++] = 0x00;
+	udp_out_p->data[byte_writed++] = NET_NULL;
 
 	udp_out_p->len = byte_writed;
 	udp_out_p->address = main_udp_ip;

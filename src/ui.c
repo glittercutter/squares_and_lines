@@ -82,12 +82,17 @@ button_s* ui_new_button(int x, int y, int w, int h, int min_w, int max_w,
 	// draw 3d effect
 	if (three_d) {
 		rectangleRGBA(button->surface, 0, 0, button->w - 1, button->h - 1, 
-				color.button_highlight.r, color.button_highlight.g, 
-				color.button_highlight.b, 150);
-		lineRGBA(button->surface, 1, 0, button->w - 2, 0, color.ed_outline.r, 
-				color.ed_outline.g, color.ed_outline.b, 200);
-		lineRGBA(button->surface, 0, 0, 0, button->h, color.ed_outline.r, 
-				color.ed_outline.g, color.ed_outline.b, 200);
+				color.gui_3d_dark.r, 
+				color.gui_3d_dark.g, 
+				color.gui_3d_dark.b, 150);
+		lineRGBA(button->surface, 1, 0, button->w - 2, 0, 
+				color.gui_3d_light.r, 
+				color.gui_3d_light.g, 
+				color.gui_3d_light.b, 200);
+		lineRGBA(button->surface, 0, 0, 0, button->h, 
+				color.gui_3d_light.r, 
+				color.gui_3d_light.g, 
+				color.gui_3d_light.b, 200);
 	}
 
 	// draw text
@@ -224,12 +229,19 @@ void ui_button_drag_window()
 
 
 #define MESSAGE_TIME 50
-void ui_new_message(char* text)
+void ui_new_message(char* fmt, ...)
 {
 	int w;
+	va_list ap;
+	char buf[512];
+	
+	va_start(ap, fmt);
+	vsnprintf(buf, sizeof buf, fmt, ap);
+	va_end(ap);
+	
 	ui_message.active = true;
 	ui_message.time = MESSAGE_TIME;
-	strncpy(ui_message.text, text, LONG_STRING_LENGTH - 1);
+	strncpy(ui_message.text, buf, LONG_STRING_LENGTH - 1);
 	w = strlen(ui_message.text) * button_font.w + (UI_BAR_PADDING * 2);
 
 	ui_message.x1 = (display_width - w) / 2;

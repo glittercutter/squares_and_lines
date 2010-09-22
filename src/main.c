@@ -21,6 +21,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "main.h"
 
+#include "common.h"
 #include "editor.h"
 #include "draw.h"
 #include "fx.h"
@@ -55,24 +56,34 @@ int main(int argc, char **argv)
 			}
 		}
 
-		// Draw
-		// TODO frame skip
-		switch (gamestate) {
-		case GAME:
-			sdl_draw_game();
-			break;
-		
-		case EDITOR:
-			sdl_draw_editor();
-		}	
-		
-		ui_display_window();
-		ui_display_message();
-		sdl_draw_menu();
-		sdl_draw_main_fx();
+		// Dont draw anything if we dont have focus.
+		if (SDL_GetAppState() != 
+				(SDL_APPACTIVE | SDL_APPMOUSEFOCUS | SDL_APPINPUTFOCUS)) {
+			// idle
+			SDL_Delay(MAX_FPS);
 
-// 		printf("fps: %d\n", get_fps());
-		sdl_render();
+		} else {
+			// Draw
+			// TODO frame skip
+			switch (gamestate) {
+			case GAME:
+				sdl_draw_game();
+				break;
+			
+			case EDITOR:
+				sdl_draw_editor();
+			}
+			
+			ui_display_window();
+			ui_display_message();
+			sdl_draw_menu();
+			sdl_draw_main_fx();
+
+// 			printf("\rfps: %d", get_fps()); fflush(stdout);
+			
+			sdl_render();	
+		}
+
 	}
 
 	save_config();

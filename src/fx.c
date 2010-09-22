@@ -90,11 +90,11 @@ static void fx_new_glow_segment()
 	for (int i = 0; i < MAX_GLOWING_SEGMENT; i++) {
 		if (!seg_glow[i].square) { // find space for new glow
 			seg_glow[i].square = seg_glow_current.square;
-			seg_glow[i].pos = seg_glow_current.pos;
+			seg_glow[i].side = seg_glow_current.side;
 			seg_glow[i].glow_level = 0;
 			seg_glow[i].player = seg_glow_current.player;
 
-			switch (seg_glow_current.pos) {
+			switch (seg_glow_current.side) {
 			case UP:
 				seg_glow[i].x1 = seg_glow_current.square->x1;
 				seg_glow[i].y1 = seg_glow_current.square->y1;
@@ -181,7 +181,7 @@ static void fx_find_closest_segment()
 	case UP:
 		if (squares[pos_y][pos_x].owner_up == NONE) {
 			seg_glow_current.square = &squares[pos_y][pos_x];
-			seg_glow_current.pos = UP;
+			seg_glow_current.side = UP;
 			seg_glow_current.player = local_player.turn;
 		} else seg_glow_current.square = NULL;
 		break;
@@ -189,7 +189,7 @@ static void fx_find_closest_segment()
 	case RIGHT:
 		if (squares[pos_y][pos_x].owner_right == NONE) {
 			seg_glow_current.square = &squares[pos_y][pos_x];
-			seg_glow_current.pos = RIGHT;
+			seg_glow_current.side = RIGHT;
 			seg_glow_current.player = local_player.turn;
 		} else seg_glow_current.square = NULL;
 		break;
@@ -197,7 +197,7 @@ static void fx_find_closest_segment()
 	case DOWN:
 		if (squares[pos_y][pos_x].owner_down == NONE) {
 			seg_glow_current.square = &squares[pos_y][pos_x];
-			seg_glow_current.pos = DOWN;
+			seg_glow_current.side = DOWN;
 			seg_glow_current.player = local_player.turn;
 		} else seg_glow_current.square = NULL;
 		break;
@@ -205,7 +205,7 @@ static void fx_find_closest_segment()
 	case LEFT:
 		if (squares[pos_y][pos_x].owner_left == NONE) {
 			seg_glow_current.square = &squares[pos_y][pos_x];
-			seg_glow_current.pos = LEFT;
+			seg_glow_current.side = LEFT;
 			seg_glow_current.player = local_player.turn;
 		} else seg_glow_current.square = NULL;
 		break;
@@ -219,18 +219,17 @@ static void fx_find_closest_segment()
 }
 
 
-static const int inc_glow_rate = 150;
-static const int dec_glow_rate = 20;
-
 static void fx_glow_segment()
 {
+	const int inc_glow_rate = 150;
+	const int dec_glow_rate = 20;	
 	bool new_segment = true;
 	
 	for (int i = 0; i < MAX_GLOWING_SEGMENT; i++) {
 		if (seg_glow[i].square) {
 			// increase glow level of closest segment
 			if (seg_glow_current.square == seg_glow[i].square && 
-					seg_glow_current.pos == seg_glow[i].pos) {
+					seg_glow_current.side == seg_glow[i].side) {
 
 				if (seg_glow[i].glow_level < 255) {
 					seg_glow[i].glow_level += inc_glow_rate;
@@ -266,19 +265,22 @@ void fx_main()
 void fx_game()
 {	
 	if (net_game) {
+		seg_glow_current.square = NULL; // for net play. TODO->timer
+
 		if (local_player.player_n == local_player.turn) {
 			fx_find_closest_segment();
 			if (seg_glow_current.square) {
 				if (seg_glow_current.square->active) {
 					net_write_int(G_SEG_GLOW_BYTE, 3, seg_glow_current.x,
-						seg_glow_current.y, seg_glow_current.pos);
+						seg_glow_current.y, seg_glow_current.side);
 				}
 			}
 		}
-	} else fx_find_closest_segment();
-	
+	} else {
+		fx_find_closest_segment();
+	}
+
 	fx_glow_segment();
-	seg_glow_current.square = NULL; // for net play
 }
 
 

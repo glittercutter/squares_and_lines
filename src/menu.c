@@ -143,6 +143,10 @@ void m_init_ui()
 	last_button = ui_new_button(x, y, w, h, min_w, max_w, ALIGN_LEFT,
 			text.join_game, *m_button_join_game, 0, 0, &button_dropmenu_multiplayer);
 
+	x = last_button->x1; y = last_button->y2;
+	w = strlen(text.disconnect) * button_font.w + UI_BAR_PADDING;
+	last_button = ui_new_button(x, y, w, h, min_w, max_w, ALIGN_LEFT,
+			text.disconnect, *disconnect, 0, 0, &button_dropmenu_multiplayer);
 }
 
 

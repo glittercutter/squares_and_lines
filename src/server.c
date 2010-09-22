@@ -98,13 +98,13 @@ void srv_ui_init()
 	ui_new_widget_plain_text(text.txt_srv_name_is, srv.name, "", x, y,
 			color.text, &host_window.widget);
 	
-	// configure button
-	min_w = 80;
-	w = strlen(text.configure) * button_font.w + UI_BAR_PADDING;
-	x = host_window.x2 - min_w - (UI_BAR_PADDING * 4);
-	y = host_window.y1 + h + (UI_BAR_PADDING * 2);
-	ui_new_button(x, y, w, h, min_w, max_w, ALIGN_CENTER, text.configure, 
-			*srv_ui_button_close_window, 1, 1, &host_window.close_button);
+// 	// configure button
+// 	min_w = 80;
+// 	w = strlen(text.configure) * button_font.w + UI_BAR_PADDING;
+// 	x = host_window.x2 - min_w - (UI_BAR_PADDING * 4);
+// 	y = host_window.y1 + h + (UI_BAR_PADDING * 2);
+// 	ui_new_button(x, y, w, h, min_w, max_w, ALIGN_CENTER, text.configure, 
+// 			*srv_ui_button_close_window, 1, 1, &host_window.close_button);
 
 
 	ui_new_widget_list_box(host_window.x1 + (UI_BAR_PADDING * 2), 
@@ -162,7 +162,7 @@ int srv_init()
 	/* UDP - Open a socket on a known port */
 	if (!(main_udp_socket = SDLNet_UDP_Open(server_port))) {
 		fprintf(stderr, "SDLNet_UDP_Open: %s\n", SDLNet_GetError());
-		fprintf(stderr, "Master server can't open port: %d.\n", server_port);
+		ui_new_message("Server can't open port: %d.\n", server_port);
 		SDLNet_UDP_Close(main_udp_socket);
 		return 1;
 	}
@@ -200,7 +200,7 @@ int srv_init()
 
 	srv.max_nplayer = 2;
 	srv.nplayer = 1;
-	local_player.player_n = srv.nplayer;
+	local_player.player_n = srv.nplayer - 1;
 	local_player.turn = srv.nplayer;
 
 	net_is_server = true;
@@ -301,8 +301,8 @@ int srv_accept_request(client_s *cl)
 	SDLNet_Write32(cl->player_n, &udp_out_p->data[byte_writed]);
 	byte_writed += 4;
 	
-	// terninate packet
-	udp_out_p->data[byte_writed++] = 0x00;
+	// terminate packet
+	udp_out_p->data[byte_writed++] = NET_NULL;
 
 	udp_out_p->address = cl->ip;
 	udp_out_p->len = byte_writed;
@@ -327,9 +327,11 @@ int srv_accept_request(client_s *cl)
 			SDLNet_UDP_AddSocket(udp_socket_set, cl->udp_socket);
 			cl->connected = true;
 			DEBUG(printf("srv: Connected.\n"));	
+			net_write_sync_square();
 			return 0;
 		}
 	}
+
 	return 1; // error
 }
 
@@ -415,7 +417,7 @@ void srv_new_client(int byte_readed)
 	new_client->recev_packet_n = 0;
 	new_client->recev_packet_ack_sent = false;
 	new_client->new_packet_buffer_size = 0;
-	new_client->player_n = srv.nplayer + 1;
+	new_client->player_n = srv.nplayer;
 
 	if (srv_accept_request(new_client)) {
 		printf("srv: Error connecting to client\n");
@@ -581,7 +583,7 @@ void srv_parse_game_packet(int byte_readed, client_s *cl)
 	int x, y;
 	int side;
 
-	while (udp_in_p->data[byte_readed] != 0x00) {
+	while (udp_in_p->data[byte_readed] != NET_NULL) {
 		switch (udp_in_p->data[byte_readed++]) {
 		case RESENT_BYTE:
 			if (SDLNet_Read32(&udp_in_p->data[byte_readed]) <= 
@@ -605,7 +607,7 @@ void srv_parse_game_packet(int byte_readed, client_s *cl)
 			byte_readed += 4;
 			y = SDLNet_Read32(&udp_in_p->data[byte_readed]);
 			byte_readed += 4;
-			seg_glow_current.pos = SDLNet_Read32(&udp_in_p->data[byte_readed]);
+			seg_glow_current.side = SDLNet_Read32(&udp_in_p->data[byte_readed]);
 			byte_readed += 4;
 			fx_net_glow(x, y);
 			break;
@@ -626,7 +628,7 @@ void srv_parse_game_packet(int byte_readed, client_s *cl)
 					cl);
 			byte_readed += 4;
 			// don't send ack if the received packet contain only an ack
-			if (udp_in_p->data[byte_readed] == 0x00) {
+			if (udp_in_p->data[byte_readed] == NET_NULL) {
 				cl->recev_packet_ack_sent = true;
 			}
 			break;
@@ -642,7 +644,11 @@ void srv_parse_game_packet(int byte_readed, client_s *cl)
 					SDLNet_Read32(&udp_in_p->data[byte_readed + 4]));
 			byte_readed += 8;
 			break;
-
+		
+		case NET_SYNC_SQUARES:
+			ed_clear_squares();
+			break;
+		
 		default:
 			return;
 		}
@@ -662,7 +668,7 @@ void srv_parse_udp_packet(client_s *cl)
 	// game packet from client
 	case NET_CL_GAME:
 		packet_n = SDLNet_Read32(&udp_in_p->data[byte_readed]);
-		if (!cl) return;
+		if (!cl) return; // filter old packet on connection
 		if (packet_n < cl->recev_packet_n) {
 			DEBUG(printf("srv: unordered packet\n"));
 			break;
@@ -762,13 +768,13 @@ void srv_parse_tcp_packet(client_s *cl, byte *buffer)
 	if (buffer[byte_readed++] != NET_GLOBAL_HEADER) return;
 	
 	switch (buffer[byte_readed++]) {
-	// chat message from client "0300"
+	// chat message from client
 	case NET_CL_MESSAGE:
 		// message
 		break;
 	
-	// client is disconnecting "0000"
-	case 0x00:
+	// client is disconnecting
+	case NET_CL_DISCONNECT:
 		srv_rm_client(cl);
 		break;
 
@@ -839,7 +845,11 @@ void srv_send_game_packet()
 	udp_out_p->data[byte_writed++] = NET_SRV_GAME;
 
 	++packet_n;
-	cl = &client;
+	
+	if (!(*cl)) {
+		udp_new_buffer_writed = 0;
+		return;
+	}
 	
 	while (*cl) {
 		if (((*cl)->recev_packet_ack_sent) && 
@@ -923,7 +933,7 @@ void srv_send_game_packet()
 			pthread_mutex_unlock(&udp_new_buffer_mutex);
 		}
 		// terminate packet
-		udp_out_p->data[byte_writed++] = 0x00;
+		udp_out_p->data[byte_writed++] = NET_NULL;
 		
 		udp_out_p->len = byte_writed;
 		udp_out_p->address = (*cl)->ip;

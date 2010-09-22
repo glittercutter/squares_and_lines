@@ -86,7 +86,10 @@ void ed_net_rm_square(int x, int y)
 
 void ed_button_play()
 {
-	if (net_is_client) return;
+	if (net_is_client) {
+		ui_new_message("Wait for server to launch the game or disconnect");
+		return;
+	}
 	fx_new_transition(*g_change_state, 3, FX_FADE);
 }
 
@@ -160,11 +163,11 @@ void ed_clear_squares()
 	for (int i = 0; i < ed_grid_h; i++) {
 		for (int j = 0; j < ed_grid_w; j++) {
 			squares[i][j].active = false;
-			squares[i][j].owner = false;
-			squares[i][j].owner_up = false;
-			squares[i][j].owner_right = false;
-			squares[i][j].owner_down = false;
-			squares[i][j].owner_left = false;
+			squares[i][j].owner = NONE;
+			squares[i][j].owner_up = NONE;
+			squares[i][j].owner_right = NONE;
+			squares[i][j].owner_down = NONE;
+			squares[i][j].owner_left = NONE;
 		}
 	}
 }
@@ -286,6 +289,8 @@ void ed_gen_random()
 			squares[rand_h][rand_w].active = true;
 		}
 	}
+	if (net_game)
+		net_write_sync_square();
 	
 }
 
