@@ -244,7 +244,7 @@ static void sdl_draw_ed_squares()
 				// filling
 				sdl_draw_box_screen(squares[i][j].x1, squares[i][j].y1,
 						squares[i][j].x2, squares[i][j].y2, 
-						color.button_highlight);
+						color.square_background);
 				// outline
 				// top
 				if ((i == 0) || (!squares[i - 1][j].active)) {
@@ -275,8 +275,6 @@ static void sdl_draw_ed_squares()
 
 static void sdl_draw_game_squares()
 {
-	const int line_thickness = 1;
-
 	for (int i = 0; i < ed_grid_h; i++) {		
 		for (int j = 0; j < ed_grid_w; j++) {
 			if (squares[i][j].active) {
@@ -284,7 +282,7 @@ static void sdl_draw_game_squares()
 				if (squares[i][j].owner == NONE)
 						sdl_draw_box_screen(squares[i][j].x1, 
 						squares[i][j].y1,squares[i][j].x2, squares[i][j].y2, 
-						color.button_highlight);
+						color.square_background);
 				/* Draw square border */
 				// top
 				sdl_draw_line_screen(squares[i][j].x1, squares[i][j].y1,
@@ -303,42 +301,42 @@ static void sdl_draw_game_squares()
 						squares[i][j].x1, squares[i][j].y2, 
 						color.square_owner[squares[i][j].owner_left]);
 
-				if (line_thickness > 1) {
+				if (g_line_thickness > 1) {
 					// top
 					sdl_draw_line_screen(
-							squares[i][j].x1, squares[i][j].y1 - line_thickness,
-							squares[i][j].x2, squares[i][j].y1 - line_thickness, 
+							squares[i][j].x1, squares[i][j].y1 - g_line_thickness,
+							squares[i][j].x2, squares[i][j].y1 - g_line_thickness, 
 							color.square_owner[squares[i][j].owner_up]);
 					sdl_draw_line_screen(
-							squares[i][j].x1, squares[i][j].y1 + line_thickness,
-							squares[i][j].x2, squares[i][j].y1 + line_thickness, 
+							squares[i][j].x1, squares[i][j].y1 + g_line_thickness,
+							squares[i][j].x2, squares[i][j].y1 + g_line_thickness, 
 							color.square_owner[squares[i][j].owner_up]);
 					// right
 					sdl_draw_line_screen(
-							squares[i][j].x2 - line_thickness, squares[i][j].y1,
-							squares[i][j].x2 - line_thickness, squares[i][j].y2, 
+							squares[i][j].x2 - g_line_thickness, squares[i][j].y1,
+							squares[i][j].x2 - g_line_thickness, squares[i][j].y2, 
 							color.square_owner[squares[i][j].owner_right]);
 					sdl_draw_line_screen(
-							squares[i][j].x2 + line_thickness, squares[i][j].y1,
-							squares[i][j].x2 + line_thickness, squares[i][j].y2, 
+							squares[i][j].x2 + g_line_thickness, squares[i][j].y1,
+							squares[i][j].x2 + g_line_thickness, squares[i][j].y2, 
 							color.square_owner[squares[i][j].owner_right]);
 					// bottom
 					sdl_draw_line_screen(
-							squares[i][j].x1, squares[i][j].y2 - line_thickness,
-							squares[i][j].x2, squares[i][j].y2 - line_thickness,
+							squares[i][j].x1, squares[i][j].y2 - g_line_thickness,
+							squares[i][j].x2, squares[i][j].y2 - g_line_thickness,
 							color.square_owner[squares[i][j].owner_down]);
 					sdl_draw_line_screen(
-							squares[i][j].x1, squares[i][j].y2 + line_thickness,
-							squares[i][j].x2, squares[i][j].y2 + line_thickness,
+							squares[i][j].x1, squares[i][j].y2 + g_line_thickness,
+							squares[i][j].x2, squares[i][j].y2 + g_line_thickness,
 							color.square_owner[squares[i][j].owner_down]);
 					// left				
 					sdl_draw_line_screen(
-							squares[i][j].x1 - line_thickness, squares[i][j].y1,
-							squares[i][j].x1 - line_thickness, squares[i][j].y2, 
+							squares[i][j].x1 - g_line_thickness, squares[i][j].y1,
+							squares[i][j].x1 - g_line_thickness, squares[i][j].y2, 
 							color.square_owner[squares[i][j].owner_left]);
 					sdl_draw_line_screen(
-							squares[i][j].x1 + line_thickness, squares[i][j].y1,
-							squares[i][j].x1 + line_thickness, squares[i][j].y2, 
+							squares[i][j].x1 + g_line_thickness, squares[i][j].y1,
+							squares[i][j].x1 + g_line_thickness, squares[i][j].y2, 
 							color.square_owner[squares[i][j].owner_left]);
 				}
 				/* Fill owned square with owner color (draw over the lines)*/
@@ -390,7 +388,11 @@ static void sdl_draw_game_info()
 		tmp_color = color.square_owner[PLAYER_1];
 	}
 
-	sprintf(string, "%s 2 : %d", text.player, player[1].score);
+	if (net_game) { 
+		snprintf(string, sizeof string - 1, "%s : %d", player[1].name, player[1].score);
+	} else {
+		snprintf(string, sizeof string - 1, "%s 2 : %d", text.player, player[1].score);
+	}
 	offset -= button_font.w * (strlen(string));
 	sdl_draw_text_solid2(offset, -1, string, button_font.data, tmp_color);
 	player[1].score_text_pos_x = offset;
@@ -401,7 +403,11 @@ static void sdl_draw_game_info()
 		tmp_color = color.square_owner[PLAYER_0];
 	}
 
-	sprintf(string, "%s 1 : %d", text.player, player[0].score);
+	if (net_game) {	
+		snprintf(string, sizeof string - 1, "%s : %d", player[0].name, player[0].score);
+	} else {
+		snprintf(string, sizeof string - 1, "%s 1 : %d", text.player, player[0].score);
+	}
 	offset -= button_font.w * (strlen(string)) + TEXT_MARGIN + TEXT_MARGIN;
 	sdl_draw_text_solid2(offset, -1, string, button_font.data, tmp_color);
 	player[0].score_text_pos_x = offset;

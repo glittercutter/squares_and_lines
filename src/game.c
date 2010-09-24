@@ -31,17 +31,18 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "main.h"
 #include "menu.h"
 #include "net.h"
+#include "server.h"
 #include "ui.h"
 
 
 /* 
 ====================
-g_change_state
+set_gamestate_GAME
 
 Start a new game
 ====================
 */
-void g_change_state()
+void set_gamestate_GAME()
 {
 	if (g_init()) 
 		return; // return to the editor if game init failed
@@ -50,6 +51,7 @@ void g_change_state()
 
 	if (net_is_server) {
 		net_write_sync_square();
+		srv_sync_player_name();
 		net_write_int(STATE_CHANGE_BYTE, 1, GAME);
 	}
 }
@@ -72,12 +74,20 @@ void g_end()
 	} else {
 		if (player[0].score > player[1].score) {
 			winning_player = PLAYER_0;
-		} else winning_player = PLAYER_1;
-		snprintf(string, STRING_LENGTH - 1, "%s %d %s !", text.player, 
-				winning_player, text.win);
+		} else {
+			winning_player = PLAYER_1;
+		}
+		if (net_game) {
+			// show player name
+			snprintf(string, STRING_LENGTH - 1, "%s %s !",
+					player[winning_player].name, text.win);
+		} else {
+			snprintf(string, STRING_LENGTH - 1, "%s %d %s !", text.player, 
+					winning_player, text.win);
+		}
 	}
 	ui_new_message(string);
-	fx_new_transition(ed_change_state, 8, FX_FADE);
+	fx_new_transition(set_gamestate_EDITOR, 8, FX_FADE);
 }
 
 
@@ -246,6 +256,11 @@ void game_main()
 	}
 	
 	fx_game();
+
+	if (net_is_server && !client && gamestate == GAME) {
+		ui_new_message("No client connected!");
+		set_gamestate_EDITOR();
+	}
 }
 
 
@@ -260,7 +275,7 @@ void g_init_ui()
 // 	x = 0; y = 0;
 // 	w = strlen(text.edit) * button_font.w + UI_BAR_PADDING;
 // 	ui_new_button(x, y, w, h, min_w, max_w, ALIGN_CENTER, text.edit,
-// 			*ed_change_state, &button_game);
+// 			*set_gamestate_EDITOR, &button_game);
 }
 
 
@@ -311,7 +326,7 @@ static int g_init_square()
 	
 	// not enough active square
 	if ((g_max_x - g_min_x <= 1) || (g_max_y - g_min_y <= 1)) {
-		ui_new_message("not enough square!");
+		ui_new_message("select more square!");
 		return 1;
 	}
 

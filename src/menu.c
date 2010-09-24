@@ -49,12 +49,16 @@ void m_open_option()
 
 void m_button_new_game()
 {
-	fx_new_transition(*ed_change_state, 3, FX_FADE);
+	if (net_is_client) {
+		ui_new_message("Only the server can do this!");
+		return;
+	}
+	fx_new_transition(*set_gamestate_EDITOR, 3, FX_FADE);
 }
 
 void m_button_quit()
 {
-	fx_new_transition(*change_state_quit, 3, FX_FADE);
+	fx_new_transition(*set_gamestate_QUIT, 3, FX_FADE);
 }
 
 // multiplayer

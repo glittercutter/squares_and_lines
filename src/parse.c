@@ -23,11 +23,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "parse_local.h"
 
 
-// value position in array
-#define VAR_NAME_POS 0
-#define DEFAULT_VALUE_POS 1
-
-
 /* 
 ====================
 parse_get_default

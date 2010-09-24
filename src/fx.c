@@ -221,7 +221,7 @@ static void fx_find_closest_segment()
 
 static void fx_glow_segment()
 {
-	const int inc_glow_rate = 150;
+	const int inc_glow_rate = 200;
 	const int dec_glow_rate = 20;	
 	bool new_segment = true;
 	
@@ -265,8 +265,6 @@ void fx_main()
 void fx_game()
 {	
 	if (net_game) {
-		seg_glow_current.square = NULL; // for net play. TODO->timer
-
 		if (local_player.player_n == local_player.turn) {
 			fx_find_closest_segment();
 			if (seg_glow_current.square) {
@@ -281,6 +279,7 @@ void fx_game()
 	}
 
 	fx_glow_segment();
+	seg_glow_current.square = NULL; // for net play. TODO->timer
 }
 
 

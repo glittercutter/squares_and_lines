@@ -58,7 +58,8 @@ int main(int argc, char **argv)
 
 		// Dont draw anything if we dont have focus.
 		if (SDL_GetAppState() != 
-				(SDL_APPACTIVE | SDL_APPMOUSEFOCUS | SDL_APPINPUTFOCUS)) {
+				(SDL_APPACTIVE | SDL_APPMOUSEFOCUS | SDL_APPINPUTFOCUS) &&
+				display_allow_idle) {
 			// idle
 			SDL_Delay(MAX_FPS);
 
@@ -91,7 +92,7 @@ int main(int argc, char **argv)
 }
 
 
-void change_state_quit()
+void set_gamestate_QUIT()
 {
 	gamestate = QUIT;
 }

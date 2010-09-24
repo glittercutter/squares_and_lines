@@ -40,6 +40,11 @@ enum {
 	DSTRING
 };
 
+// position in var_info_s.str array
+enum {
+	VAR_NAME_POS = 0,
+	DEFAULT_VALUE_POS = 1
+};
 
 //
 // configurable variable
@@ -67,6 +72,8 @@ static const char* display_height_str[] =
 	{"display_height", "480"};
 static const char* display_fullscreen_str[]	=
 	{"display_fullscreen", "0"};
+static const char* display_allow_idle_str[]	=
+	{"display_allow_idle", "1"};
 
 static const char* button_font_name_str[] =
 	{"button_font_name", "font/EnvyCodeR.ttf"};
@@ -88,12 +95,14 @@ static const char* color_own_player0_str[] =
 static const char* color_own_player1_str[] =
 	{"color_game_player1", "206, 49, 0"};
 static const char* color_own_outline_str[] =
-	{"color_game_outline", "156, 206, 255"};
+	{"color_game_outline", "145, 150, 145"};
 static const char* color_own_none_str[]	=
-	{"color_game_none", "156, 154, 156"};
+	{"color_game_none", "50, 51, 50"};
+static const char* color_square_background_str[]	=
+	{"color_game_square_background", "99, 101, 99"};
 
 static const char* color_ed_outline_str[] =
-	{"color_editor_outline", "156, 206, 255"};
+	{"color_editor_outline", "145, 155, 145"};
 static const char* color_ed_grid_str[] =
 	{"color_editor_grid", "99, 101, 99"};
 
@@ -120,6 +129,7 @@ static struct var_info_s global_config_info[] = {
 	{ display_width_str,			&display_width,						INT_T		},
 	{ display_height_str,			&display_height,					INT_T		},
 	{ display_fullscreen_str,		&display_fullscreen,				INT_T		},
+	{ display_allow_idle_str,		&display_allow_idle,				INT_T		},
 	
 	{ ed_square_size_str,			&ed_square_size,					INT_T		},
 	{ g_line_thickness_str,			&g_line_thickness,					INT_T		},
@@ -134,6 +144,7 @@ static struct var_info_s global_config_info[] = {
 	{ color_own_player1_str,		&color.square_owner[PLAYER_0],		COLOR_T		},
 	{ color_own_outline_str,		&color.square_owner[OUTLINE],		COLOR_T		},
 	{ color_own_none_str,			&color.square_owner[NONE],			COLOR_T		},
+	{ color_square_background_str,	&color.square_background,			COLOR_T		},
 	
 	{ color_ed_outline_str,			&color.ed_outline,					COLOR_T		},
 	{ color_ed_grid_str,			&color.ed_grid,						COLOR_T		},

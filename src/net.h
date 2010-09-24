@@ -30,6 +30,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #define NET_GLOBAL_HEADER 0x2a
 #define NET_SYNC_SQUARES 0x2b
+#define NET_SYNC_PLAYER_NAME 0x2c
 #define NET_ACCEPT 0xa0
 #define NET_REFUSE 0xb0
 #define NET_NULL 0x00
@@ -96,8 +97,15 @@ pthread_mutex_t udp_new_buffer_mutex;
 
 int net_test_packet_loss(void);
 void net_write_int(byte id_byte, int count, ...);
+void net_write_string(byte id_byte, char* fmt, ...);
 void net_write_sync_square(void);
 void disconnect(void);
+
+
+//
+// net_irc.c
+//
+
 
 
 //

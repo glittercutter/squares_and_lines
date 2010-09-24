@@ -32,7 +32,7 @@ int ed_start_x;
 int ed_start_y;
 
 
-void ed_change_state(void);
+void set_gamestate_EDITOR(void);
 void editor_main(void);
 void ed_init_ui(void);
 int ed_init(void);

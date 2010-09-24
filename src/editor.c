@@ -90,11 +90,11 @@ void ed_button_play()
 		ui_new_message("Wait for server to launch the game or disconnect");
 		return;
 	}
-	fx_new_transition(*g_change_state, 3, FX_FADE);
+	fx_new_transition(*set_gamestate_GAME, 3, FX_FADE);
 }
 
 
-void ed_change_state()
+void set_gamestate_EDITOR()
 {
 	gamestate = EDITOR;
 	ed_clear_squares();

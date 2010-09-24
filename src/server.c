@@ -155,6 +155,20 @@ int srv_init()
 	if (net_is_server) return 0;
 	if (net_is_client) cl_close();
 	
+	// set player name
+	if (!local_player.name[0])
+		strncpy(local_player.name, getenv("USER"), sizeof local_player.name);
+	
+	// insert name
+	strncpy(player[local_player.player_n].name, local_player.name, 
+		sizeof player[local_player.player_n].name);
+	
+	// set server name
+	if (!srv.name[0]) {
+		strncpy(srv.name, local_player.name, sizeof local_player.name);
+		strncat(srv.name, "'s server", sizeof local_player.name);
+	}
+
 	// Generate server ID to allow multiple server on the same IP
 	if (!srv.id)
 		srv.id = get_random_number(1000000);
@@ -283,16 +297,14 @@ int srv_accept_request(client_s *cl)
 
 	// Application ID
 	strcpy((char *)&udp_out_p->data[byte_writed], "udp_sdltest");
-	byte_writed += strlen((char *)&udp_out_p->data[byte_writed]);
-	strcat((char *)&udp_out_p->data[byte_writed], "\0");
-	byte_writed += 1;
+	byte_writed += strlen("udp_sdltest");
+	udp_out_p->data[byte_writed++] = '\0';
 	
 	// Client username
 	strcpy((char *)&udp_out_p->data[byte_writed], cl->username);
-	byte_writed += strlen((char *)&udp_out_p->data[byte_writed]);
-	strcat((char *)&udp_out_p->data[byte_writed], "\0");
-	byte_writed += 1;
-	
+	byte_writed += strlen(cl->username);
+	udp_out_p->data[byte_writed++] = '\0';
+
 	// Port number we opened for the client
 	SDLNet_Write16(port, &udp_out_p->data[byte_writed]);
 	byte_writed += 2;
@@ -378,30 +390,47 @@ void srv_new_client(int byte_readed)
 {
 	int i = 0;
 	char i_string[10];
-	char tmp_username[20];
+	char tmp_username[32];
 	client_s **tmp_client = &client;
 	client_s *new_client;
 	unack_packet_s **tmp_unack_packet;
 	
-	// refuse connection if the server is full
+	// refuse connection
+	// the server is full
 	if (srv.nplayer >= srv.max_nplayer) {
 		srv_refuse_request(text.srv_full);
+		return;
+	}
+	// game in progress
+	if (gamestate == GAME) {
+		srv_refuse_request("game in progress");
 		return;
 	}
 
 	// get username from the packet
 	strncpy(tmp_username, (char *)&udp_in_p->data[byte_readed],
-			sizeof(tmp_username) - 1);
-	// check if the username is already in the list, if so, it is numbered
+			sizeof(tmp_username));
+
+	// check if name is the same as ours
+	if (!strncmp(local_player.name, tmp_username, sizeof local_player.name - 1)) {
+		++i;
+		snprintf(i_string, sizeof(i_string) - 1, "[%d]", i);
+		strncat(tmp_username, i_string, sizeof(tmp_username));
+	}
+
+	/* check if the username is is the same as another player, 
+		if so, it is numbered */
 	while (*tmp_client) {
-		if (!strcmp((*tmp_client)->username, tmp_username)) {
+		if (!strncmp((*tmp_client)->username, tmp_username, 
+				sizeof local_player.name)) {
 			++i;
 			snprintf(i_string, sizeof(i_string), "[%d]", i);
 			strncpy(tmp_username, (char *)&udp_in_p->data[byte_readed],
 					sizeof(tmp_username) - strlen(i_string));
 			strncat(tmp_username, i_string, sizeof(tmp_username) - 1);
-			tmp_client = &client; // restart the search from the first element
-		
+			// restart the search from the first element
+			tmp_client = &client;
+
 		} else {
 			tmp_client = &(*tmp_client)->next;
 		}
@@ -426,6 +455,10 @@ void srv_new_client(int byte_readed)
 		return;
 	}
 
+	// insert name in player list
+	strncpy(player[new_client->player_n].name, new_client->username,
+			sizeof player[new_client->player_n].name);
+
 	tmp_client = &client;
 	// add client to the end of the list
 	while (*tmp_client) {
@@ -443,7 +476,6 @@ void srv_new_client(int byte_readed)
 			sizeof(unack_packet_s));
 	new_client->unack_packet_head = new_client->unack_packet_mem;
 	tmp_unack_packet = &new_client->unack_packet_head;
-
 	for (int i = 1; i < UNACK_PACKET_STORAGE_SIZE; i++) {
 		(*tmp_unack_packet)->next = 
 				(unack_packet_s *)new_client->unack_packet_head + i;
@@ -963,5 +995,14 @@ void srv_rm_acked_packet(Uint32 packet_n, client_s *cl)
 		cl->unack_packet_tail->next = NULL;
 	}
 }
+
+void srv_sync_player_name()
+{
+	for (int i = 0; i < srv.nplayer; i++) {
+		net_write_string(NET_SYNC_PLAYER_NAME, "%d %s", i, player[i].name);
+	}
+}
+
+
 
 

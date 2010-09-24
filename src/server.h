@@ -72,7 +72,8 @@ void srv_ui_button_open_window(void);
 void srv_ui_init(void);
 
 int srv_init(void);
-void srv_close();
+void srv_close(void);
+void srv_sync_player_name(void);
 
 
 

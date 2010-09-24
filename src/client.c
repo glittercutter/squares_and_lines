@@ -45,6 +45,9 @@ void cl_make_connection(int byte_readed);
 void* cl_tcp_listen(void *is_a_thread);
 void* cl_udp_listen(void *is_a_thread);
 void cl_rm_acked_packet(Uint32 packet_n);
+int cl_get_player_name(char* buf);
+
+
 
 
 void cl_ui_button_open_window()
@@ -312,7 +315,11 @@ int cl_init()
 	
 	if (net_is_client) return 0;
 	if (net_is_server) srv_close();
-	
+
+	// set player name
+	if (!local_player.name[0])
+		strncpy(local_player.name, getenv("USER"), sizeof local_player.name);
+
 	while (42) {
 		/* UDP - Open a socket on avalable port*/
 		if ((main_udp_socket = SDLNet_UDP_Open(++tmp_port)))
@@ -382,9 +389,8 @@ void cl_make_connection(int byte_readed)
 	// read username (in case the host changed it)
 	strncpy(local_player.name, (char *)&udp_in_p->data[byte_readed],
 			sizeof(local_player.name));
-	byte_readed += strlen((char *)&udp_out_p->data[byte_readed]) + 2;
-	// FIXME bug with bytes at the end of string for next read ('2')
-
+	byte_readed += strlen(local_player.name) + 1;
+	
 	// Read the port number the host opened for UDP communication
 	// The port number is already in network byte order
 	memcpy(&main_udp_ip.port, &udp_in_p->data[byte_readed], sizeof(short));
@@ -511,6 +517,7 @@ void cl_request_lan_server()
 
 void cl_parse_game_packet(int byte_readed)
 {
+	// TODO really only need 2 integer...
 	int packet_size;
 	int state;
 	int x, y;
@@ -589,10 +596,10 @@ void cl_parse_game_packet(int byte_readed)
 			byte_readed += 4;
 			switch (state) {
 			case GAME:
-				g_change_state();
+				set_gamestate_GAME();
 				break;
 			case EDITOR:
-				ed_change_state();
+				set_gamestate_EDITOR();
 				break;
 			}
 			break;
@@ -601,6 +608,11 @@ void cl_parse_game_packet(int byte_readed)
 			ed_clear_squares();
 			break;
 
+		case NET_SYNC_PLAYER_NAME:
+			byte_readed += 
+				cl_get_player_name((char*)&udp_in_p->data[byte_readed]);
+			break;
+		
 		default:
 			return;
 		}
@@ -807,6 +819,28 @@ void cl_rm_acked_packet(Uint32 packet_n)
 		local_player.unack_packet_tail = local_player.unack_packet_tail->next;
 		local_player.unack_packet_tail->next = NULL;
 	}
+}
+
+
+/* 
+====================
+cl_get_player_list
+
+Receive player name from the server
+Return the lenght of 'buf'
+====================
+*/
+int cl_get_player_name(char* buf)
+{
+	int buflen = strlen(buf);
+	int player_n = NONE;
+	char name[32];
+
+	if (sscanf(buf, "%d %s", &player_n, name) == 2) {
+		strncpy(player[player_n].name, name, sizeof player[player_n].name);
+	}
+
+	return buflen + 1;
 }
 
 

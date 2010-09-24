@@ -58,27 +58,29 @@ void disconnect()
 {
 	byte buffer[HEADER_SIZE];
 	int byte_writed = 0;
-	client_s *tmp_cl;
+// 	client_s *tmp_cl;
 	
 	buffer[byte_writed++] = NET_GLOBAL_HEADER;
 	
 	if (net_is_server) {
-		buffer[byte_writed++] = NET_SRV_DISCONNECT;
-		buffer[byte_writed++] = NET_NULL;
-		
-		tmp_cl = client;
-		while (tmp_cl)	{
-			if (SDLNet_TCP_Send(tmp_cl->tcp_socket, (void *)buffer, byte_writed) < byte_writed)
-				fprintf(stderr, "SDLNet_TCP_Send: %s\n", SDLNet_GetError());
-			tmp_cl = tmp_cl->next;
-		}
+		srv_close();
+// 		buffer[byte_writed++] = NET_SRV_DISCONNECT;
+// 		buffer[byte_writed++] = NET_NULL;
+// 		
+// 		tmp_cl = client;
+// 		while (tmp_cl)	{
+// 			if (SDLNet_TCP_Send(tmp_cl->tcp_socket, (void *)buffer, byte_writed) < byte_writed)
+// 				fprintf(stderr, "SDLNet_TCP_Send: %s\n", SDLNet_GetError());
+// 			tmp_cl = tmp_cl->next;
+// 		}
 
 	} else if (net_is_client) {
-		buffer[byte_writed++] = NET_CL_DISCONNECT;
-		buffer[byte_writed++] = NET_NULL;
-
-		if (SDLNet_TCP_Send(main_tcp_socket, (void *)buffer, byte_writed) < byte_writed)
-			fprintf(stderr, "SDLNet_TCP_Send: %s\n", SDLNet_GetError());
+		cl_close();
+// 		buffer[byte_writed++] = NET_CL_DISCONNECT;
+// 		buffer[byte_writed++] = NET_NULL;
+// 
+// 		if (SDLNet_TCP_Send(main_tcp_socket, (void *)buffer, byte_writed) < byte_writed)
+// 			fprintf(stderr, "SDLNet_TCP_Send: %s\n", SDLNet_GetError());
 	} else {
 		// wasn't connected
 		return;
@@ -123,6 +125,37 @@ void net_write_int(byte id_byte, int count, ...)
 
 	pthread_mutex_unlock(&udp_new_buffer_mutex);
 	DEBUG(printf("new packet buffer writed = %d\n", udp_new_buffer_writed));
+}
+
+
+void net_write_string(byte id_byte, char* fmt, ...)
+{	
+	int tmp_writed;
+	va_list ap;
+	char buf[512];
+	va_start(ap, fmt);
+	vsnprintf(buf, sizeof buf, fmt, ap);
+	va_end(ap);
+	
+	int buflen = strlen(buf);
+
+	// prevent overflow
+	while (42) {
+		tmp_writed = udp_new_buffer_writed;
+		if (tmp_writed + 1 + buflen < PACKET_LENGHT - 1) {
+			break;
+		} else {
+			SDL_Delay(100);
+		}
+	}
+
+	pthread_mutex_lock(&udp_new_buffer_mutex);
+
+	udp_new_buffer[udp_new_buffer_writed++] = id_byte;
+	strcpy((char*)&udp_new_buffer[udp_new_buffer_writed], buf);
+	udp_new_buffer_writed += buflen + 1;
+
+	pthread_mutex_unlock(&udp_new_buffer_mutex);
 }
 
 

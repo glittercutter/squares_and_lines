@@ -31,6 +31,7 @@ typedef struct player_s player_s;
 struct player_s {
 	int score_text_pos_x;
 	int score;
+	char name[32];
 };
 player_s player[2]; // TODO rewrite
 
@@ -44,7 +45,7 @@ int g_offset_x, g_offset_y;
 int g_line_thickness;
 
 
-void g_change_state(void);
+void set_gamestate_GAME(void);
 void game_main(void);
 void g_init_ui(void);
 int g_init(void);

@@ -93,6 +93,7 @@ enum {
 	LEFT,
 };
 
+
 #define LS_MAX_STRING 5
 typedef struct string_list_s {
 	char *string[LS_MAX_STRING];
@@ -155,6 +156,7 @@ int gamestate;
 int display_width;
 int display_height;
 int display_fullscreen;
+int display_allow_idle;
 
 pthread_mutex_t list_box_mutex;
 

@@ -25,7 +25,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 void eprint(const char *fmt, ...) 
 {
 	va_list ap;
-	char buf[512];;
+	char buf[512];
 	va_start(ap, fmt);
 	vsnprintf(buf, sizeof buf, fmt, ap);
 	va_end(ap);

@@ -21,6 +21,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "input.h"
 
+#include "main.h"
 #include "ui.h"
 
 
@@ -72,7 +73,7 @@ void get_input()
 			
 		case SDL_QUIT:
 			// closing the window exit the program
-			gamestate = QUIT;
+			set_gamestate_QUIT();
 			break;
 				
 		default:

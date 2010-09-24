@@ -25,7 +25,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "shared.h"
 
 
-void change_state_quit(void);
+void set_gamestate_QUIT(void);
 
 
 #endif
