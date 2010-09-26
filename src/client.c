@@ -36,13 +36,13 @@ void cl_clear_srvlist(void);
 void cl_close();
 int cl_init();
 void cl_send_game_packet(void);
-void cl_parse_tcp_packet(byte *buffer);
+// void cl_parse_tcp_packet(byte *buffer);
 void cl_parse_udp_packet(void);
 void cl_parse_game_packet(int byte_readed);
 void cl_request_connection();
 void cl_request_lan_server();
 void cl_make_connection(int byte_readed);
-void* cl_tcp_listen(void *is_a_thread);
+// void* cl_tcp_listen(void *is_a_thread);
 void* cl_udp_listen(void *is_a_thread);
 void cl_rm_acked_packet(Uint32 packet_n);
 int cl_get_player_name(char* buf);
@@ -284,27 +284,27 @@ void* cl_udp_listen(void *is_a_thread)
 }
 
 
-void* cl_tcp_listen(void *is_a_thread)
-{
-	byte buffer[512];
-
-	while (net_is_client) {
-		if (SDLNet_CheckSockets(tcp_socket_set, 1000)) {
-			if (SDLNet_TCP_Recv(main_tcp_socket, buffer, 512) >
-					0) {
-				cl_parse_tcp_packet(buffer);
-
-			} else { 
-				/* Assume the server disconnected */
-				cl_close();
-				DEBUG(printf("cl: Server disconnected\n"));
-				break;
-			}
-			memset(buffer, 0, sizeof(buffer)); // NEEDED?
-		}
-	}
-	pthread_exit(NULL);
-}
+// void* cl_tcp_listen(void *is_a_thread)
+// {
+// 	byte buffer[512];
+// 
+// 	while (net_is_client) {
+// 		if (SDLNet_CheckSockets(tcp_socket_set, 1000)) {
+// 			if (SDLNet_TCP_Recv(main_tcp_socket, buffer, 512) >
+// 					0) {
+// 				cl_parse_tcp_packet(buffer);
+// 
+// 			} else { 
+// 				/* Assume the server disconnected */
+// 				cl_close();
+// 				DEBUG(printf("cl: Server disconnected\n"));
+// 				break;
+// 			}
+// 			memset(buffer, 0, sizeof(buffer)); // NEEDED?
+// 		}
+// 	}
+// 	pthread_exit(NULL);
+// }
 
 
 int cl_init()
@@ -331,7 +331,7 @@ int cl_init()
 			return 1;
 		}
 	}
-	tcp_socket_set = SDLNet_AllocSocketSet(1);
+// 	tcp_socket_set = SDLNet_AllocSocketSet(1);
 	udp_socket_set = SDLNet_AllocSocketSet(1);
 	SDLNet_UDP_AddSocket(udp_socket_set, main_udp_socket);
 
@@ -355,8 +355,8 @@ int cl_init()
 
 	rc = pthread_create(&udp_listen_th, NULL, cl_udp_listen, (void*)rc);
 	pthread_detach(udp_listen_th);
-	rc = pthread_create(&tcp_listen_th, NULL, cl_tcp_listen, (void*)rc);
-	pthread_detach(tcp_listen_th);
+// 	rc = pthread_create(&tcp_listen_th, NULL, cl_tcp_listen, (void*)rc);
+// 	pthread_detach(tcp_listen_th);
 
 	return 0;
 }
@@ -399,14 +399,14 @@ void cl_make_connection(int byte_readed)
 	main_udp_ip.host = udp_in_p->address.host;
 
 	// TCP
-	main_tcp_ip.host = udp_in_p->address.host;
-	SDLNet_Write16(BROADCAST_PORT, &main_tcp_ip.port);
-	if (!(main_tcp_socket = SDLNet_TCP_Open(&main_tcp_ip))) {
-		fprintf(stderr, "SDLNet_TCP_Open: %s\n", SDLNet_GetError());
-		SDLNet_TCP_Close(main_tcp_socket);
-		return;
-	}
-	SDLNet_TCP_AddSocket(tcp_socket_set, main_tcp_socket);
+// 	main_tcp_ip.host = udp_in_p->address.host;
+// 	SDLNet_Write16(BROADCAST_PORT, &main_tcp_ip.port);
+// 	if (!(main_tcp_socket = SDLNet_TCP_Open(&main_tcp_ip))) {
+// 		fprintf(stderr, "SDLNet_TCP_Open: %s\n", SDLNet_GetError());
+// 		SDLNet_TCP_Close(main_tcp_socket);
+// 		return;
+// 	}
+// 	SDLNet_TCP_AddSocket(tcp_socket_set, main_tcp_socket);
 	
 	// read player number the server gave us
 	local_player.player_n = SDLNet_Read32(&udp_in_p->data[byte_readed]);
@@ -685,26 +685,26 @@ void cl_parse_udp_packet()
 
 
 
-void cl_parse_tcp_packet(byte *buffer)
-{
-	int byte_readed = 0;
-
-	if (buffer[byte_readed++] != NET_GLOBAL_HEADER) return;
-	
-	switch (buffer[byte_readed++]) {
-	// chat message from server
-	case NET_SRV_MESSAGE:
-// 		message_printf("%s\n", (char *)&buffer[HEADER_SIZE]);
-		break;
-	
-	// server is disconnecting
-	case NET_SRV_DISCONNECT:
-		printf("cl: Server disconnected.\n");
-		cl_close();
-		break;
-
-	}
-}
+// void cl_parse_tcp_packet(byte *buffer)
+// {
+// 	int byte_readed = 0;
+// 
+// 	if (buffer[byte_readed++] != NET_GLOBAL_HEADER) return;
+// 	
+// 	switch (buffer[byte_readed++]) {
+// 	// chat message from server
+// 	case NET_SRV_MESSAGE:
+// // 		message_printf("%s\n", (char *)&buffer[HEADER_SIZE]);
+// 		break;
+// 	
+// 	// server is disconnecting
+// 	case NET_SRV_DISCONNECT:
+// 		printf("cl: Server disconnected.\n");
+// 		cl_close();
+// 		break;
+// 
+// 	}
+// }
 
 
 void cl_send_game_packet(void)

@@ -45,8 +45,8 @@ void srv_send_info(int byte_readed);
 void srv_parse_game_packet(int byte_readed, client_s *cl);
 void srv_parse_udp_packet(client_s *cl);
 void* srv_udp_listen(void *is_a_thread);
-void srv_parse_tcp_packet(client_s *cl, byte *buffer);
-void* srv_tcp_listen(void *is_a_thread);
+// void srv_parse_tcp_packet(client_s *cl, byte *buffer);
+// void* srv_tcp_listen(void *is_a_thread);
 void srv_send_game_packet();
 void srv_rm_acked_packet(Uint32 packet_n, client_s *cl);
 
@@ -147,7 +147,7 @@ start UDP/TCP threads
 */
 int srv_init()
 {
-	IPaddress server_tcp_ip;
+// 	IPaddress server_tcp_ip;
 	int server_port = BROADCAST_PORT;
 	int rc = 0;
 	unack_packet_s **tmp_unack_packet;
@@ -180,21 +180,21 @@ int srv_init()
 		SDLNet_UDP_Close(main_udp_socket);
 		return 1;
 	}
-	/* TCP - Resolving the host using NULL make network interface to
-	listen. Open on the same known port */
-	if (SDLNet_ResolveHost(&server_tcp_ip, NULL, server_port) < 0) {
-		fprintf(stderr, "SDLNet_ResolveHost: %s\n", SDLNet_GetError());
-		SDLNet_UDP_Close(main_udp_socket);
-		return 1;
-	}
-	/*  TCP - Open a connection with client */
-	if (!(main_tcp_socket = SDLNet_TCP_Open(&server_tcp_ip))) {
-		fprintf(stderr, "SDLNet_TCP_Open: %s\n", SDLNet_GetError());
-		SDLNet_TCP_Close(main_tcp_socket);
-		SDLNet_UDP_Close(main_udp_socket);
-		return 1;
-	}
-	tcp_socket_set = SDLNet_AllocSocketSet(srv_max_connection);
+// 	/* TCP - Resolving the host using NULL make network interface to
+// 	listen. Open on the same known port */
+// 	if (SDLNet_ResolveHost(&server_tcp_ip, NULL, server_port) < 0) {
+// 		fprintf(stderr, "SDLNet_ResolveHost: %s\n", SDLNet_GetError());
+// 		SDLNet_UDP_Close(main_udp_socket);
+// 		return 1;
+// 	}
+// 	/*  TCP - Open a connection with client */
+// 	if (!(main_tcp_socket = SDLNet_TCP_Open(&server_tcp_ip))) {
+// 		fprintf(stderr, "SDLNet_TCP_Open: %s\n", SDLNet_GetError());
+// 		SDLNet_TCP_Close(main_tcp_socket);
+// 		SDLNet_UDP_Close(main_udp_socket);
+// 		return 1;
+// 	}
+// 	tcp_socket_set = SDLNet_AllocSocketSet(srv_max_connection);
 	udp_socket_set = SDLNet_AllocSocketSet(srv_max_connection);
 	SDLNet_UDP_AddSocket(udp_socket_set, main_udp_socket);
 
@@ -222,8 +222,8 @@ int srv_init()
 
 	rc = pthread_create(&udp_listen_th, NULL, srv_udp_listen, (void*)rc);
 	pthread_detach(udp_listen_th);
-	rc = pthread_create(&tcp_listen_th, NULL, srv_tcp_listen, (void*)rc);
-	pthread_detach(tcp_listen_th);
+// 	rc = pthread_create(&tcp_listen_th, NULL, srv_tcp_listen, (void*)rc);
+// 	pthread_detach(tcp_listen_th);
 
 	return 0;
 }
@@ -329,19 +329,20 @@ int srv_accept_request(client_s *cl)
 			i_check = max_ack_wait;
 		}
 		SDL_Delay(10);
-
-		if (!(cl->tcp_socket = SDLNet_TCP_Accept(main_tcp_socket))) {
-			--i_check;
-			continue;
-		}
-		if ((cl->tcp_ip = SDLNet_TCP_GetPeerAddress(cl->tcp_socket))) {
-			SDLNet_TCP_AddSocket(tcp_socket_set, cl->tcp_socket);
+// TODO replace with udp
+// 		if (!(cl->tcp_socket = SDLNet_TCP_Accept(main_tcp_socket))) {
+// 			--i_check;
+// 			continue;
+// 		}
+// 		if ((cl->tcp_ip = SDLNet_TCP_GetPeerAddress(cl->tcp_socket))) {
+// 			SDLNet_TCP_AddSocket(tcp_socket_set, cl->tcp_socket);
 			SDLNet_UDP_AddSocket(udp_socket_set, cl->udp_socket);
 			cl->connected = true;
 			DEBUG(printf("srv: Connected.\n"));	
+SDL_Delay(500);
 			net_write_sync_square();
 			return 0;
-		}
+// 		}
 	}
 
 	return 1; // error
@@ -499,9 +500,9 @@ void srv_rm_client(client_s *cl)
 	client_s **tmp_cl = &client;
 	DEBUG(printf("srv: %s: disconnected\n", cl->username));
 
-	SDLNet_TCP_DelSocket(tcp_socket_set, cl->tcp_socket);
+// 	SDLNet_TCP_DelSocket(tcp_socket_set, cl->tcp_socket);
 	SDLNet_UDP_DelSocket(udp_socket_set, cl->udp_socket);	
-	SDLNet_TCP_Close(cl->tcp_socket);
+// 	SDLNet_TCP_Close(cl->tcp_socket);
 	SDLNet_UDP_Close(cl->udp_socket);
 	
 	rm_string_node(&client_list, cl->list);
@@ -793,75 +794,75 @@ void* srv_udp_listen(void *is_a_thread)
 }
 
 
-void srv_parse_tcp_packet(client_s *cl, byte *buffer)
-{
-	int byte_readed = 0;
+// void srv_parse_tcp_packet(client_s *cl, byte *buffer)
+// {
+// 	int byte_readed = 0;
+// 
+// 	if (buffer[byte_readed++] != NET_GLOBAL_HEADER) return;
+// 	
+// 	switch (buffer[byte_readed++]) {
+// 	// chat message from client
+// 	case NET_CL_MESSAGE:
+// 		// message
+// 		break;
+// 	
+// 	// client is disconnecting
+// 	case NET_CL_DISCONNECT:
+// 		srv_rm_client(cl);
+// 		break;
+// 
+// 	default:
+// 		break;
+// 	}
+// }
 
-	if (buffer[byte_readed++] != NET_GLOBAL_HEADER) return;
-	
-	switch (buffer[byte_readed++]) {
-	// chat message from client
-	case NET_CL_MESSAGE:
-		// message
-		break;
-	
-	// client is disconnecting
-	case NET_CL_DISCONNECT:
-		srv_rm_client(cl);
-		break;
 
-	default:
-		break;
-	}
-}
-
-
-void* srv_tcp_listen(void *is_a_thread)
-{
-	int numready;
-	client_s *checked_client;
-	byte buffer[512];
-
-	while (net_is_server) {
-		numready = SDLNet_CheckSockets(tcp_socket_set, 1000);
-		if (numready == -1) {
-			printf("srv: TCP SDLNet_CheckSockets: %s\n", SDLNet_GetError());
-			//most of the time this is a system error, where perror might help you.
-			perror("srv: TCP SDLNet_CheckSockets");
-
-		} else if (numready && client) {
-			// check all sockets with SDLNet_SocketReady and handle the active ones.
-			checked_client = client;
-			while (checked_client) {
-				if (SDLNet_SocketReady(checked_client->tcp_socket)) {
-					if (checked_client) {
-						if (SDLNet_TCP_Recv(checked_client->tcp_socket, buffer, 512) >
-								0) {
-							srv_parse_tcp_packet(checked_client, buffer);
-							--numready;
-						} else { 
-							/* client probably dislocal_player.connected */
-							srv_rm_client(checked_client);
-							--numready;
-						}
-					}
-				}
-				if (numready) { 
-					checked_client = checked_client->next;
-				} else {
-					break; // dont check other socket
-				}
-			}
-
-			if (numready) {	
-				printf("srv: tcp error\n");
-			}
-			memset(buffer, 0, sizeof(buffer)); // NEEDED?
-		}
-	}
-	pthread_exit(NULL);
-}
-
+// void* srv_tcp_listen(void *is_a_thread)
+// {
+// 	int numready;
+// 	client_s *checked_client;
+// 	byte buffer[512];
+// 
+// 	while (net_is_server) {
+// 		numready = SDLNet_CheckSockets(tcp_socket_set, 1000);
+// 		if (numready == -1) {
+// 			printf("srv: TCP SDLNet_CheckSockets: %s\n", SDLNet_GetError());
+// 			//most of the time this is a system error, where perror might help you.
+// 			perror("srv: TCP SDLNet_CheckSockets");
+// 
+// 		} else if (numready && client) {
+// 			// check all sockets with SDLNet_SocketReady and handle the active ones.
+// 			checked_client = client;
+// 			while (checked_client) {
+// 				if (SDLNet_SocketReady(checked_client->tcp_socket)) {
+// 					if (checked_client) {
+// 						if (SDLNet_TCP_Recv(checked_client->tcp_socket, buffer, 512) >
+// 								0) {
+// 							srv_parse_tcp_packet(checked_client, buffer);
+// 							--numready;
+// 						} else { 
+// 							/* client probably dislocal_player.connected */
+// 							srv_rm_client(checked_client);
+// 							--numready;
+// 						}
+// 					}
+// 				}
+// 				if (numready) { 
+// 					checked_client = checked_client->next;
+// 				} else {
+// 					break; // dont check other socket
+// 				}
+// 			}
+// 
+// 			if (numready) {	
+// 				printf("srv: tcp error\n");
+// 			}
+// 			memset(buffer, 0, sizeof(buffer)); // NEEDED?
+// 		}
+// 	}
+// 	pthread_exit(NULL);
+// }
+// 
 
 #define GAME_PACKET_HEADER_LEN 2
 void srv_send_game_packet()
