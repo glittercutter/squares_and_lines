@@ -1,12 +1,14 @@
-OBJDIR = o
-SRCDIR = src
+OBJDIR = ./o
+SRCDIR = ./src
+
+# Automatic dependency
+DEPS := $(wildcard $(OBJDIR)/*.d)
 
 EXEBASE = c_square
 EXE = $(EXEBASE)
 
-CFLAGS = -Wall -pedantic -Werror -std=c99 -pipe
-LFLAGS = `sdl-config --cflags --libs` SDL.dll SDL_gfx.dll SDL_ttf.dll SDL_net.dll pthreadGCE2.dll
-
+CFLAGS = -Wall -pedantic -Werror -std=c99 -pipe -D WINDOWS
+LFLAGS = -pipe `sdl-config --cflags --libs` SDL.dll SDL_gfx.dll SDL_ttf.dll SDL_net.dll pthreadGCE2.dll zlib1.dll
 
 # windows only
 ICON = win/windows_icon.res
@@ -14,13 +16,13 @@ ICON = win/windows_icon.res
 # used to display message
 DEBUG_INFO =
 
-ifdef NDEBUG
-	CFLAGS += -D NDEBUG -O6 -ffast-math -funroll-loops \
+ifdef DNDEBUG
+	CFLAGS += -D DNDEBUG -O6 -ffast-math -funroll-loops \
 		-fomit-frame-pointer -fexpensive-optimizations
 else
 	CFLAGS += -g -pg
 	LFLAGS += -g -pg
-	DEBUG_INFO += @echo " - Define 'NDEBUG=1' in argument for release build"
+	DEBUG_INFO += @echo " - Define 'DNDEBUG=1' in argument for release build"
 endif
 
 CC = gcc -MD
@@ -39,6 +41,7 @@ create_dir :
 
 #############################################################################
 GAME_OBJ = \
+	$(OBJDIR)/common.o \
 	$(OBJDIR)/client.o \
 	$(OBJDIR)/editor.o \
 	$(OBJDIR)/draw.o \
@@ -48,12 +51,16 @@ GAME_OBJ = \
 	$(OBJDIR)/init.o \
 	$(OBJDIR)/main.o \
 	$(OBJDIR)/menu.o \
+	$(OBJDIR)/net.o \
+	$(OBJDIR)/net_z.o \
 	$(OBJDIR)/parse.o \
 	$(OBJDIR)/server.o \
 	$(OBJDIR)/ui.o \
 
-$(OBJDIR)/editor.o : $(SRCDIR)/editor.c; $(DO_CC)
+
+$(OBJDIR)/common.o : $(SRCDIR)/common.c; $(DO_CC)
 $(OBJDIR)/client.o : $(SRCDIR)/client.c; $(DO_CC)
+$(OBJDIR)/editor.o : $(SRCDIR)/editor.c; $(DO_CC)
 $(OBJDIR)/draw.o : $(SRCDIR)/draw.c; $(DO_CC)
 $(OBJDIR)/fx.o : $(SRCDIR)/fx.c; $(DO_CC)
 $(OBJDIR)/game.o : $(SRCDIR)/game.c; $(DO_CC)
@@ -61,16 +68,21 @@ $(OBJDIR)/input.o : $(SRCDIR)/input.c; $(DO_CC)
 $(OBJDIR)/init.o : $(SRCDIR)/init.c; $(DO_CC)
 $(OBJDIR)/main.o : $(SRCDIR)/main.c; $(DO_CC)
 $(OBJDIR)/menu.o : $(SRCDIR)/menu.c; $(DO_CC)
-$(OBJDIR)/server.o : $(SRCDIR)/server.c; $(DO_CC)
+$(OBJDIR)/net.o : $(SRCDIR)/net.c; $(DO_CC)
+$(OBJDIR)/net_z.o : $(SRCDIR)/net_z.c; $(DO_CC)
 $(OBJDIR)/parse.o : $(SRCDIR)/parse.c; $(DO_CC)
+$(OBJDIR)/server.o : $(SRCDIR)/server.c; $(DO_CC)
 $(OBJDIR)/ui.o : $(SRCDIR)/ui.c; $(DO_CC)
+
 
 
 #############################################################################
 
 OBJ = $(GAME_OBJ)
 
-# linking
+# Automatic dependency
+-include $(DEPS)
+
 $(EXE) : $(OBJ)
 	$(CC) $(OBJ) $(ICON) -o $(EXE) $(LFLAGS)
 	$(DEBUG_INFO)
