@@ -344,14 +344,12 @@ void srv_refuse_request(char *reason)
 	// Application ID
 	strcpy((char *)&udp_out_p->data[byte_writed], "udp_sdltest");
 	byte_writed += strlen((char *)&udp_out_p->data[byte_writed]);
-	strcat((char *)&udp_out_p->data[byte_writed], "\0");
-	byte_writed += 1;
+	strcat((char *)&udp_out_p->data[byte_writed++], "\0");
 	
 	// refused reason string
 	strcpy((char *)&udp_out_p->data[byte_writed], reason);
 	byte_writed += strlen((char *)&udp_out_p->data[byte_writed]);
-	strcat((char *)&udp_out_p->data[byte_writed], "\0");
-	byte_writed += 1;
+	strcat((char *)&udp_out_p->data[byte_writed++], "\0");
 
 	udp_out_p->address = udp_in_p->address;
 	udp_out_p->len = byte_writed;
@@ -370,7 +368,7 @@ void srv_new_client(int byte_readed)
 	unack_packet_s **tmp_unack_packet;
 	
 	// refuse connection
-	// the server is full
+	// server is full
 	if (srv.nplayer >= srv.max_nplayer) {
 		srv_refuse_request(text.srv_full);
 		return;
@@ -381,11 +379,11 @@ void srv_new_client(int byte_readed)
 		return;
 	}
 
-	// get username from the packet
+	// get client name from the packet
 	strncpy(tmp_username, (char *)&udp_in_p->data[byte_readed],
 			sizeof(tmp_username));
 
-	// check if name is the same as ours
+	// check if name is the client as the same name as ours
 	if (!strncmp(local_player.name, tmp_username, sizeof local_player.name - 1)) {
 		++i;
 		snprintf(i_string, sizeof(i_string) - 1, "[%d]", i);
@@ -409,9 +407,11 @@ void srv_new_client(int byte_readed)
 			tmp_client = &(*tmp_client)->next;
 		}
 	}
+
 	DEBUG(printf("srv: Connection request\n"));
 	DEBUG(printf("srv: Username: %s\n", tmp_username));
 
+	// allocate & init client variables
 	new_client = malloc(sizeof(client_s));
 	new_client->next = NULL;
 	new_client->connected = false;
@@ -434,13 +434,14 @@ void srv_new_client(int byte_readed)
 	strncpy(player[new_client->player_n].name, new_client->username,
 			sizeof player[new_client->player_n].name);
 
-	tmp_client = &client;
 	// add client to the end of the list
+	// find the end of list
+	tmp_client = &client;
 	while (*tmp_client) {
 		tmp_client = &(*tmp_client)->next;
 	}
 	*tmp_client = new_client;
-
+	// add node for client
 	new_client->list = add_string_node(&client_list);	
 	new_client->list->string[0] = new_client->username;
 	ui_scrollbar_update_size(strlist_len(client_list.list), 
@@ -458,13 +459,14 @@ void srv_new_client(int byte_readed)
 	}
 	(*tmp_unack_packet)->next = NULL;
 	(*tmp_unack_packet)->active = false;
-	
 	new_client->unack_packet_tail = *tmp_unack_packet;
 	new_client->unack_packet_next = new_client->unack_packet_head;
 
+	// mutex for client packets
 	if (pthread_mutex_init(&new_client->new_packet_buffer_mutex, NULL))
 		eprint("srv: pthread_mutex_init\n");
 	
+	// the server got a new client
 	++srv.nplayer;
 }
 
