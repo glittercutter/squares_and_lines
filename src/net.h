@@ -27,13 +27,18 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define PACKET_LENGHT 512
 #define UNACK_PACKET_STORAGE_SIZE 60
 #define PACKET_SEND_RATE 40 // milliseconds
+#define NET_PING_RATE 1000
+#define NET_PING_TIMEOUT 5000
 
-#define NET_GLOBAL_HEADER 0x2a
-#define NET_SYNC_SQUARES 0x2b
-#define NET_SYNC_PLAYER_NAME 0x2c
-#define NET_ACCEPT 0xa0
-#define NET_REFUSE 0xb0
-#define NET_NULL 0x00
+#define NET_GLOBAL_HEADER 0x30
+#define NET_SYNC_SQUARES 0x31
+#define NET_SYNC_PLAYER_NAME 0x32
+#define NET_ACCEPT 0x31
+#define NET_REFUSE 0x32
+#define NET_NULL 0
+
+#define NET_PING 0xf0
+#define NET_PONG 0xf1
 
 #define NET_SRV_DISCONNECT 0x89
 #define NET_SRV_GAME 0x84
@@ -47,15 +52,15 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define NET_CL_INFO 0x02
 #define NET_CL_CONNECT 0x01
 
-
 #define PACKET_ACK_BYTE 0x11
 #define RESENT_BYTE 0x12
-#define STATE_CHANGE_BYTE 0x21
-#define ED_ADD_SQUARE_BYTE 0x51
-#define ED_RM_SQUARE_BYTE 0x52
-#define G_SEG_GLOW_BYTE 0x71
-#define G_ADD_SEG_BYTE 0x72
-#define G_PLAYER_TURN_BYTE 0x73
+#define STATE_CHANGE_BYTE 0x13
+#define ED_ADD_SQUARE_BYTE 0x14
+#define ED_RM_SQUARE_BYTE 0x15
+#define G_SEG_GLOW_BYTE 0x16
+#define G_ADD_SEG_BYTE 0x17
+#define G_PLAYER_TURN_BYTE 0x18
+
 
 #define MAX_PORT 65535
 #define BROADCAST_ADDRESS "255.255.255.255"
@@ -100,7 +105,8 @@ void net_write_int(byte id_byte, int count, ...);
 void net_write_string(byte id_byte, char* fmt, ...);
 void net_write_sync_square(void);
 void disconnect(void);
-
+int net_read_32(int *start_byte);
+short net_read_16(int *start_byte);
 
 //
 // net_irc.c

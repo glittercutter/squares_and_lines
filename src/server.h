@@ -50,6 +50,7 @@ typedef struct client_s {
 	string_list_s *list;
 	Uint32 ack_packet_n;
 	Uint32 recev_packet_n;
+	Uint32 last_packet_tick;
 	bool recev_packet_ack_sent;
 	
 	pthread_mutex_t new_packet_buffer_mutex;

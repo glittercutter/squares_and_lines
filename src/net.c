@@ -176,4 +176,19 @@ void net_write_sync_square()
 }
 
 
+int net_read_32(int *start_byte)
+{
+	int readed = SDLNet_Read32(&udp_in_p->data[*start_byte]);
+	*start_byte += 4;
+	return readed;
+}
+
+
+short net_read_16(int *start_byte)
+{
+	short readed = SDLNet_Read16(&udp_in_p->data[*start_byte]);
+	*start_byte += 2;
+	return readed;
+}
+
 

@@ -21,6 +21,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "main.h"
 
+#include "client.h"
 #include "common.h"
 #include "editor.h"
 #include "draw.h"
@@ -30,6 +31,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "input.h"
 #include "menu.h"
 #include "parse_public.h"
+#include "server.h"
 #include "ui.h"
 
 
@@ -85,6 +87,13 @@ int main(int argc, char **argv)
 			sdl_render();	
 		}
 
+	}
+	
+	if (net_game) {
+		if (net_is_client)
+			cl_close();
+		else
+			srv_close();
 	}
 
 	save_config();
