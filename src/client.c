@@ -299,13 +299,23 @@ int cl_init()
 	int tmp_port = BROADCAST_PORT;
 	int rc = 0;
 	unack_packet_s **tmp_unack_packet;
+#ifdef WINDOWS
+	DWORD name_len = sizeof local_player.name;
+#endif
 	
 	if (net_is_client) return 0;
 	if (net_is_server) srv_close();
 
 	// set player name
-	if (!local_player.name[0])
+	if (!local_player.name[0]) {
+
+#ifdef WINDOWS
+		GetUserName(local_player.name, &name_len);
+#else
 		strncpy(local_player.name, getenv("USER"), sizeof local_player.name);
+#endif
+
+	}
 
 	while (42) {
 		/* UDP - Open a socket on avalable port*/
@@ -387,6 +397,7 @@ void cl_make_connection(int byte_readed)
 	
 	DEBUG(printf("cl: Connected\n"));
 	DEBUG(printf("cl: Username: %s\n", local_player.name));
+	set_gamestate_EDITOR();
 	local_player.connected = true;
 	cl_ui_button_close_window();
 	ui_new_message(text.cl_connected);
@@ -744,8 +755,9 @@ void cl_send_game_packet(void)
 
 	if ((SDL_GetTicks() - cl_last_packet_tick) > NET_PING_RATE) {
 		if ((SDL_GetTicks() - cl_last_packet_tick) > NET_PING_TIMEOUT) {
-			printf("timeout\n");
+			ui_new_message("Can't reach server, disconnecting\n");
 			cl_close();
+			set_gamestate_EDITOR();
 			return;
 		}
 		printf("sending ping\n");

@@ -34,6 +34,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <pthread.h>
 #include <unistd.h>
 
+#ifdef WINDOWS
+#include <windows.h>
+#endif
+
 #include "SDL/SDL.h"
 #include "SDL/SDL_gfxPrimitives.h"
 #include "SDL/SDL_ttf.h"

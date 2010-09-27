@@ -151,13 +151,21 @@ int srv_init()
 	int server_port = BROADCAST_PORT;
 	int rc = 0;
 	unack_packet_s **tmp_unack_packet;
+#ifdef WINDOWS
+	DWORD name_len = sizeof local_player.name;
+#endif
 
 	if (net_is_server) return 0;
 	if (net_is_client) cl_close();
-	
+
 	// set player name
-	if (!local_player.name[0])
+	if (!local_player.name[0]) {		
+#ifdef WINDOWS
+		GetUserName(local_player.name, &name_len);
+#else
 		strncpy(local_player.name, getenv("USER"), sizeof local_player.name);
+#endif
+	}
 	
 	// insert name
 	strncpy(player[local_player.player_n].name, local_player.name, 
@@ -866,6 +874,12 @@ void srv_send_game_packet()
 
 		if (udp_new_buffer_writed) {
 			pthread_mutex_lock(&udp_new_buffer_mutex);
+			if ((512 - byte_writed) < udp_new_buffer_writed) {
+				printf("write packet overflow, disconnecting client\n");
+				cl = &(*cl)->next;
+				srv_rm_client(*cl);
+				continue;
+			}
 			memcpy(&udp_out_p->data[byte_writed], udp_new_buffer, 
 					udp_new_buffer_writed);
 			byte_writed += udp_new_buffer_writed;
@@ -887,9 +901,11 @@ void srv_send_game_packet()
 
 		if ((SDL_GetTicks() - (*cl)->last_packet_tick) > NET_PING_RATE) {
 			if ((SDL_GetTicks() - (*cl)->last_packet_tick) > NET_PING_TIMEOUT) {
-				ui_new_message("%s timeout", (*cl)->username);
+				printf("%s timeout\n", (*cl)->username);
+// 				cl = &(*cl)->next;
 				srv_rm_client(*cl);
-				continue;
+// 				continue;
+				return;
 			}
 			udp_out_p->data[byte_writed++] = NET_PING;
 		}
