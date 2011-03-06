@@ -4,3 +4,8 @@
 *.swp
 *~
 c_square*
+*.dll
+*.exe
+stderr.txt
+stdout.txt
+win/*

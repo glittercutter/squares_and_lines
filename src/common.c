@@ -224,3 +224,66 @@ int strlist_len(string_list_s *strlist)
 }
 
 
+string_t* new_string(char* new_text)
+{
+	string_t *new_string = malloc(sizeof(string_t));
+	new_string->size = strlen(new_text);
+	new_string->text = malloc(sizeof new_string->size);	
+	new_string->alloc = new_string->size;
+	strcpy(new_string->text, new_text);
+	return new_string;
+}
+
+void string_assign(string_t *str, char *new_text)
+{
+	int new_size = strlen(new_text);
+	if (str->alloc < new_size) {
+		free(str->text);
+	   	str->text = malloc(sizeof new_size);
+		str->alloc = new_size;
+	}
+	strcpy(str->text, new_text);
+	str->size = new_size;
+}
+
+void string_cat(string_t *str, char *cat_text)
+{
+	int new_size = strlen(cat_text) + str->size;	
+	if (str->alloc < new_size) {
+		free(str->text);
+	   	str->text = malloc(sizeof new_size);
+		str->alloc = new_size;
+	}
+	strcat(str->text, cat_text);
+	str->size = new_size;
+}
+
+void string_remove(string_t *str, int from, int to)
+{
+	char tmp_text[str->size];
+	strcpy(tmp_text, str->text);
+	strncpy(str->text, tmp_text, from);
+	strncpy( (char*)&str->text[from], (char*)&tmp_text[to], str->size);
+	str->size -= (to + 1) - from;
+}
+
+
+int string_grab(string_t *str)
+{
+	++str->refcount;
+	return str->refcount;
+}
+
+
+int string_drop(string_t *str)
+{
+	if (!str->refcount) {
+		free(str);
+		return 0;
+	}
+	--str->refcount;
+	return str->refcount;
+}
+
+
+

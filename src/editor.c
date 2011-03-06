@@ -256,7 +256,7 @@ int ed_init()
 	return 0;
 }
 
-#define RAND 200
+#define RAND_MAX_SQUARE 200
 void ed_gen_random()
 {
 	int rand_w;
@@ -275,7 +275,7 @@ void ed_gen_random()
 	squares[ed_grid_h / 2 + 1][ed_grid_w / 2 + 1].active = true;
 	squares[ed_grid_h / 2 - 1][ed_grid_w / 2 - 1].active = true;
 
-	for (int i = 0; i < RAND; i++) {
+	for (int i = 0; i < RAND_MAX_SQUARE; i++) {
 		rand_w = get_random_number(max_w);
 		rand_h = get_random_number(max_h);
 		

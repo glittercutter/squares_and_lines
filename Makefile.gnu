@@ -1,22 +1,23 @@
-OBJDIR = ./o
+OBJDIR = ./o/gnu
 SRCDIR = ./src
 
 # Automatic dependency
 DEPS := $(wildcard $(OBJDIR)/*.d)
 
-EXEBASE = c_square 
-EXE = $(EXEBASE)
+EXE = c_square 
 
 CFLAGS = -Wall -pedantic -Werror -std=c99 -pipe
 LFLAGS = -pipe `sdl-config --cflags --libs` -lSDL -lSDL_gfx -lSDL_ttf -lSDL_net -lpthread
 
-# used to display message
+# used to display message in debug build
 DEBUG_INFO =
 
 ifdef DNDEBUG
+	OBJDIR += "/release"
 	CFLAGS += -D DNDEBUG -O6 -ffast-math -funroll-loops \
 		-fomit-frame-pointer -fexpensive-optimizations
 else
+	OBJDIR += "/debug"
 	CFLAGS += -g -pg
 	LFLAGS += -g -pg
 	DEBUG_INFO += @echo " - Define 'DNDEBUG=1' in argument for release build"
@@ -29,6 +30,7 @@ DO_CC=$(CC) -MD $(CFLAGS) -o $@ -c $<
 # top-level rules
 all : create_dir $(EXE)
 
+# create missing directory
 create_dir :
 	@test -d $(OBJDIR) || mkdir $(OBJDIR)
 
@@ -37,7 +39,7 @@ create_dir :
 #############################################################################
 
 #############################################################################
-GAME_OBJ = \
+OBJ = \
 	$(OBJDIR)/common.o \
 	$(OBJDIR)/client.o \
 	$(OBJDIR)/editor.o \
@@ -74,8 +76,6 @@ $(OBJDIR)/ui.o : $(SRCDIR)/ui.c; $(DO_CC)
 
 
 #############################################################################
-
-OBJ = $(GAME_OBJ)
 
 # Automatic dependency
 -include $(DEPS)

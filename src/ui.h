@@ -150,7 +150,6 @@ typedef struct widget_t {
 
 typedef struct window_s {
 	int x1, y1, x2, y2, w, h;
-// 	widget_t *widget;
 	struct window_s *last_window;
 	widget_t *widget;
 	button_s *close_button;

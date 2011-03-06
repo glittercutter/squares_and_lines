@@ -19,8 +19,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 // client.h -
 
-#ifndef __CLIENT_H__
-#define __CLIENT_H__
+#ifndef CLIENT_H__
+#define CLIENT_H__
 
 #include "shared.h"
 #include "net.h"

@@ -4,6 +4,15 @@
 #include "shared.h"
 
 
+// string
+typedef struct string_t {
+	char *text;
+	int size;
+	int alloc;
+	int refcount;
+} string_t;
+
+
 int get_fps(void);
 void eprint(const char *fmt, ...); 
 int get_random_number(int);
