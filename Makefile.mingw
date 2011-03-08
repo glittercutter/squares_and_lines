@@ -18,7 +18,7 @@ ifeq ($(build_type), debug)
 	BUILD_INFO += @echo "build_type=debug"
 else
 	#OBJDIR += release
-	CFLAGS += -D DNDEBUG -Os
+	CFLAGS += -D DNDEBUG ## -Os ## bug in config table on optimisation
 	LFLAGS += -s
 	BUILD_INFO += @echo "build_type=release"
 endif

@@ -35,13 +35,7 @@ void eprint(const char *fmt, ...)
 	exit(EXIT_FAILURE);
 }
 
-/*
-==========
-get_fps
 
-fps is updated once per second
-==========
-*/
 int get_fps()
 {
 	static int fps = 0, last_tick = 0, frame_counter = 0;
@@ -52,32 +46,18 @@ int get_fps()
 		frame_counter = 0;
 		last_tick = current_tick;
 	} else ++frame_counter;
-	
+		
 	return fps;
 }
 
 
-/* 
-====================
-get_random_number
-
-result change even if called multiple time for a tick
-====================
-*/
 int get_random_number(int max_number)
 {
-	static int last_tick;
-	static int tick_instance = 0;
-	int current_tick = SDL_GetTicks();
-	
-	if (last_tick == current_tick) {
-		++tick_instance;
-		current_tick *= tick_instance; 
-	} else {
-		tick_instance = 0;
-		last_tick = current_tick;
+	static bool init = false;
+	if (!init) {
+		srand(SDL_GetTicks());
+		init = true;
 	}	
-	srand(current_tick);	
 	
 	return rand() % max_number;
 }
