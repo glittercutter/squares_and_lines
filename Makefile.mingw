@@ -1,44 +1,41 @@
-OBJDIR = ./o/mingw
+OBJDIR = ./o/mingw/
 SRCDIR = ./src
 
 # Automatic dependency
 DEPS := $(wildcard $(OBJDIR)/*.d)
 
-EXE = c_square
+BIN = c_square 
 
-CFLAGS = -Wall -pedantic -Werror -std=c99 -pipe -D WINDOWS
-LFLAGS = -pipe `sdl-config --cflags --libs` SDL.dll SDL_gfx.dll SDL_ttf.dll SDL_net.dll pthreadGCE2.dll zlib1.dll
+CFLAGS = -Wall -pedantic -Werror -std=c99 -pipe
+LFLAGS =
+LIBS = `sdl-config --cflags --libs` SDL.dll SDL_gfx.dll SDL_ttf.dll SDL_net.dll pthreadGCE2.dll zlib1.dll
 
-# icon 'Windows only'
-ICON = win/windows_icon.res
-
-# used to display message in debug build
 DEBUG_INFO =
 
-ifdef DNDEBUG
-	CFLAGS += -D DNDEBUG -Os
-	LFLAGS += -s
-else
+ifeq ($(build_type), debug)
 	CFLAGS += -g -pg
 	LFLAGS += -g -pg
-	DEBUG_INFO += @echo " - Define 'DNDEBUG=1' in argument for release build"
+	BUILD_INFO += @echo "build_type=debug"
+else
+	#OBJDIR += release
+	CFLAGS += -D DNDEBUG -Os
+	LFLAGS += -s
+	BUILD_INFO += @echo "build_type=release"
 endif
 
-CC = g++ -MD
-DO_CC=$(CC) $(CFLAGS) -o $@ -c $<
+CC = gcc
+DO_CC=$(CC) -MD $(CFLAGS) -o $@ -c $<
+# -MD flag generate dependency
 
 # top-level rules
-all : create_dir $(EXE)
+all : create_dir $(BIN)
 
 # create missing directory
 create_dir :
 	@test -d $(OBJDIR) || mkdir -p $(OBJDIR)
 
-#############################################################################
-# FILES
-#############################################################################
+# FILES #####################################################################
 
-#############################################################################
 OBJ = \
 	$(OBJDIR)/common.o \
 	$(OBJDIR)/client.o \
@@ -74,16 +71,14 @@ $(OBJDIR)/server.o : $(SRCDIR)/server.c; $(DO_CC)
 $(OBJDIR)/ui.o : $(SRCDIR)/ui.c; $(DO_CC)
 
 
-
 #############################################################################
 
 # Automatic dependency
 -include $(DEPS)
 
-$(EXE) : $(OBJ)
-	$(CC) $(OBJ) $(ICON) -o $(EXE) $(LFLAGS)
-	$(DEBUG_INFO)
+$(BIN) : $(OBJ)
+	$(CC) $(OBJ) -o $(BIN) $(LFLAGS) $(LIBS)
+	$(BUILD_INFO)
 
 clean:
-	rm $(OBJDIR)*.o
-# DO NOT DELETE
+	rm $(OBJDIR)*.o $(OBJDIR)*.d
