@@ -143,8 +143,7 @@ int main(int argc, char **argv)
 		}
 
 		// Dont draw anything if we dont have focus.
-		if ((~SDL_GetAppState() &
-				(SDL_APPACTIVE | SDL_APPINPUTFOCUS | SDL_APPMOUSEFOCUS)) &&
+		if (!(SDL_GetAppState() & ~SDL_APPACTIVE) &&
 				display_allow_idle) {
 			// idle
 			SDL_Delay(MAX_FPS);
