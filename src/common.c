@@ -36,6 +36,21 @@ void eprint(const char *fmt, ...)
 }
 
 
+#ifdef WINDOWS
+/* debugging utility - 'DBGVIEW' from http://www.sysinternals.com/
+   may be used to catch the output (or similar tools). */
+void dbg_printf (const char *fmt, ...)
+{
+    char buffer[4000];
+    va_list arg;
+
+    va_start(arg, fmt);
+    vsprintf(buffer, fmt, arg);
+    OutputDebugString(buffer);
+}
+#endif // WINDOWS
+
+
 int get_fps()
 {
 	static int fps = 0, last_tick = 0, frame_counter = 0;

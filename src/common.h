@@ -23,4 +23,8 @@ void rm_string_node(string_list_t *tmp_node, string_list_s *node);
 void clear_strlist(string_list_t*);
 int strlist_len(string_list_s*);
 
+#ifdef WINDOWS
+void dbg_printf(const char *fmt, ...);
+#endif // WINDOWS
+
 #endif

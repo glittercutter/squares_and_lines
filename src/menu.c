@@ -41,16 +41,13 @@ void m_open_main()
 
 void m_open_option()
 {
-	char string[ LONG_STRING_LENGTH ];
-	snprintf(string, LONG_STRING_LENGTH - 1, 
-			"open the file %s with a text editor !", CONFIG_FILENAME);
-	ui_new_message(string);
+	ui_new_message(text.warning_option);
 }
 
 void m_button_new_game()
 {
 	if (net_is_client) {
-		ui_new_message("Only the server can do this!");
+		ui_new_message(text.warning_only_server);
 		return;
 	}
 	fx_new_transition(*set_gamestate_EDITOR, 3, FX_FADE);

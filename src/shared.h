@@ -60,7 +60,7 @@ typedef unsigned char byte;
 #define LIMIT_FPS 1
 
 #define LONG_STRING_LENGTH 88
-#define STRING_LENGTH 50
+#define STRING_LENGTH 60
 #define SMALL_STRING_LENGTH 20
 
 #ifdef DNDEBUG

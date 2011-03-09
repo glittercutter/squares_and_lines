@@ -418,7 +418,7 @@ client username.
 void cl_request_connection()
 {
 	if (host_list.list_box->selected_row == -1) {
-		ui_new_message("no server selected");
+		ui_new_message(text.warning_no_server_selected);
 		return;
 	}
 	
@@ -760,7 +760,7 @@ void cl_send_game_packet(void)
 			set_gamestate_EDITOR();
 			return;
 		}
-		printf("sending ping\n");
+		DEBUG(printf("sending ping\n"));
 		udp_out_p->data[byte_writed++] = NET_PING;
 	}
 

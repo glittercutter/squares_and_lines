@@ -17,15 +17,15 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 ===========================================================================
 */
-// main.h - 
+// parser_public.h - 
 
-#ifndef __INIT_H__
-#define __INIT_H__
+#ifndef PARSER_PUBLIC_H
+#define PARSER_PUBLIC_H
 
 #include "shared.h"
 
+void load_config(void);
+void save_config(void);
+void load_lang(void);
 
-int init(void);
-
-
-#endif
+#endif // PARSER_PUBLIC_H

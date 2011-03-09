@@ -67,6 +67,11 @@ typedef struct text_s {
 
 	char cl_connected[ STRING_LENGTH ];
 	char srv_full[ STRING_LENGTH ];
+	char warning_select_square[ STRING_LENGTH ];
+	char warning_option[ STRING_LENGTH ];
+	char warning_no_client[ STRING_LENGTH ];
+	char warning_no_server_selected[ STRING_LENGTH ];
+	char warning_only_server[ STRING_LENGTH ];
 
 } text_s;
 text_s text;
@@ -88,6 +93,7 @@ typedef struct font_s {
 	int w, h;
 	char name[ STRING_LENGTH ];
 } font_s;
+font_s button_font;
 
 typedef struct message_s {
 	bool active;
@@ -172,8 +178,6 @@ char ui_language[ SMALL_STRING_LENGTH ];
 
 button_s *ui_pressed_button;
 button_s *ui_highlight_button;
-
-font_s button_font;
 
 button_s *button_editor;
 button_s *button_game;

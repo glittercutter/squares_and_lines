@@ -17,53 +17,28 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 ===========================================================================
 */
-// parse_local.h - 
+// parser_local.h - 
 
-#ifndef __PARSE_LOCAL_H__
-#define __PARSE_LOACL_H__
+#ifndef PARSER_LOCAL_H
+#define PARSER_LOCAL_H
 
 #include "shared.h"
-#include "parse_public.h"
+#include "parser_public.h"
 
 #include "editor.h"
 #include "game.h"
 #include "ui.h"
 
+// =========================================================================
+// Config
+// =========================================================================
 
-// type parsed
-enum {
-	INT_T,
-	FLOAT_T,
-	DOUBLE_T,
-	COLOR_T,
-	STRING_T,
-	DSTRING
-};
-
-// position in var_info_s.str array
+// string position for varible name and default value in array
 enum {
 	VAR_NAME_POS = 0,
 	DEFAULT_VALUE_POS = 1
 };
 
-//
-// configurable variable
-//
-// varname, 
-// pointer to the var, 
-// parsing type, 
-// is the value readed from the file? load default otherwise
-struct var_info_s {
-	const char** str;
-	const void* ptr;
-	const int type;
-	bool init;
-};
-
-
-// Config
-// =========================================================================
-//
 //	{"name", "default value"}
 
 static const char* display_width_str[] =
@@ -113,15 +88,34 @@ static const char* color_txt_current_player_str[] =
 
 static const char* color_topbar_str[] = 
 	{"color_gui", "99, 101, 99"};
-// 	{"color_gui", "100, 3, 0"};
 static const char* color_gui_3d_dark_str[] = 
 	{"color_gui_3d_dark", "0, 0, 0"};
-// 	{"color_gui", "90, 101, 115"};
 static const char* color_gui_3d_light_str[] = 
 	{"color_gui_3d_light", "200, 200, 200"};
 
 
+// type
+enum {
+	INT_T,
+	FLOAT_T,
+	DOUBLE_T,
+	COLOR_T,
+	STRING_T,
+	DSTRING
+};
 
+/*
+str: varname, 
+ptr: pointer to the var, 
+type: type, 
+init: value assigned by the parser, load default otherwise
+*/
+struct var_info_s {
+	const char** str;
+	const void* ptr;
+	const int type;
+	bool init;
+};
 
 static struct var_info_s global_config_info[] = {
 	
@@ -135,7 +129,6 @@ static struct var_info_s global_config_info[] = {
 	{ g_line_thickness_str,			&g_line_thickness,					INT_T		},
 
 	{ button_font_name_str,			&button_font.name,					STRING_T	},
-	{ button_font_size_str,			&button_font.size,					INT_T		},
 	{ color_button_highlight_str,	&color.button_highlight,			COLOR_T		},
 
 	{ ui_language_str,				&ui_language,						STRING_T	},
@@ -156,14 +149,15 @@ static struct var_info_s global_config_info[] = {
 	{ color_gui_3d_dark_str,		&color.gui_3d_dark,					COLOR_T		},
 	{ color_gui_3d_light_str,		&color.gui_3d_light,				COLOR_T		},
 
+	{ button_font_size_str,			&button_font.size,					INT_T		},
+
 
 };
+
 // =========================================================================
-
-
 // Language
 // =========================================================================
-//
+
 static const char* lang_play_str[]				= {"play", "Play"};
 static const char* lang_quit_str[]				= {"quit", "Quit"};
 static const char* lang_main_menu_str[]			= {"main_menu", "Menu"};
@@ -192,6 +186,12 @@ static const char* lang_join_str[]				= {"join", "Join"};
 static const char* lang_update_str[]			= {"update", "Update"};
 static const char* lang_cl_connected_str[]		= {"cl_connected", "Joined game"};
 static const char* lang_srv_full_str[]			= {"srv_full", "Server is full"};
+
+static const char* lang_warning_select_square_str[]		= {"warning_select_squares", "Select more square"};
+static const char* lang_warning_option_str[]			= {"warning_option", "Open the file game.conf with a text editor"};
+static const char* lang_warning_no_client_str[]			= {"warning_no_client", "No client connected!"};
+static const char* lang_warning_no_server_selected_str[]= {"warning_no_server_selected", "No server selected!"};
+static const char* lang_warning_only_server_str[]		= {"warning_only_server", "Only the server can do this"};
 
 
 static struct var_info_s lang_info[] = {
@@ -225,9 +225,14 @@ static struct var_info_s lang_info[] = {
 	{	lang_update_str,			&text.update,				STRING_T		},
 	{	lang_cl_connected_str,		&text.cl_connected,			STRING_T		},
 	{	lang_srv_full_str,			&text.srv_full,				STRING_T		},
-
+	
+	{	lang_warning_select_square_str,		&text.warning_select_square,	STRING_T},
+	{	lang_warning_option_str,			&text.warning_option,			STRING_T},
+	{	lang_warning_no_client_str,			&text.warning_no_client,		STRING_T},
+	{	lang_warning_no_server_selected_str,&text.warning_no_server_selected,	STRING_T},
+	{	lang_warning_only_server_str,		&text.warning_only_server,		STRING_T},
 
 };
 
 
-#endif
+#endif // PARSER_LOCAL_H

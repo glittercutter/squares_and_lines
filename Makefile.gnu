@@ -1,4 +1,4 @@
-OBJDIR = ./o/gnu/
+TOP_OBJ_DIR = ./o/gnu
 SRCDIR = ./src
 
 # Automatic dependency
@@ -13,11 +13,12 @@ LIBS = `sdl-config --cflags --libs` -lSDL -lSDL_gfx -lSDL_ttf -lSDL_net -lpthrea
 DEBUG_INFO =
 
 ifeq ($(build_type), debug)
+	OBJDIR = ${TOP_OBJ_DIR}/debug
 	CFLAGS += -g -pg
 	LFLAGS += -g -pg
 	BUILD_INFO += @echo "build_type=debug"
 else
-	#OBJDIR += release
+	OBJDIR = ${TOP_OBJ_DIR}/release
 	CFLAGS += -D DNDEBUG -Os
 	LFLAGS += -s
 	BUILD_INFO += @echo "build_type=release"
@@ -44,12 +45,10 @@ OBJ = \
 	$(OBJDIR)/fx.o \
 	$(OBJDIR)/game.o \
 	$(OBJDIR)/input.o \
-	$(OBJDIR)/init.o \
 	$(OBJDIR)/main.o \
 	$(OBJDIR)/menu.o \
 	$(OBJDIR)/net.o \
-	$(OBJDIR)/net_z.o \
-	$(OBJDIR)/parse.o \
+	$(OBJDIR)/parser.o \
 	$(OBJDIR)/server.o \
 	$(OBJDIR)/ui.o \
 
@@ -61,12 +60,10 @@ $(OBJDIR)/draw.o : $(SRCDIR)/draw.c; $(DO_CC)
 $(OBJDIR)/fx.o : $(SRCDIR)/fx.c; $(DO_CC)
 $(OBJDIR)/game.o : $(SRCDIR)/game.c; $(DO_CC)
 $(OBJDIR)/input.o : $(SRCDIR)/input.c; $(DO_CC)
-$(OBJDIR)/init.o : $(SRCDIR)/init.c; $(DO_CC)
 $(OBJDIR)/main.o : $(SRCDIR)/main.c; $(DO_CC)
 $(OBJDIR)/menu.o : $(SRCDIR)/menu.c; $(DO_CC)
 $(OBJDIR)/net.o : $(SRCDIR)/net.c; $(DO_CC)
-$(OBJDIR)/net_z.o : $(SRCDIR)/net_z.c; $(DO_CC)
-$(OBJDIR)/parse.o : $(SRCDIR)/parse.c; $(DO_CC)
+$(OBJDIR)/parser.o : $(SRCDIR)/parser.c; $(DO_CC)
 $(OBJDIR)/server.o : $(SRCDIR)/server.c; $(DO_CC)
 $(OBJDIR)/ui.o : $(SRCDIR)/ui.c; $(DO_CC)
 

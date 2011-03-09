@@ -258,7 +258,7 @@ void game_main()
 	fx_game();
 
 	if (net_is_server && !client && gamestate == GAME) {
-		ui_new_message("No client connected!");
+		ui_new_message(text.warning_no_client);
 		set_gamestate_EDITOR();
 	}
 }
@@ -266,16 +266,6 @@ void game_main()
 
 void g_init_ui()
 {
-// 	int min_w = 70;
-// 	int max_w = 100;
-// 	int w;
-// 	int h = button_font.size + UI_BAR_PADDING;
-// 	int x, y;
-// 	
-// 	x = 0; y = 0;
-// 	w = strlen(text.edit) * button_font.w + UI_BAR_PADDING;
-// 	ui_new_button(x, y, w, h, min_w, max_w, ALIGN_CENTER, text.edit,
-// 			*set_gamestate_EDITOR, &button_game);
 }
 
 
@@ -326,7 +316,7 @@ static int g_init_square()
 	
 	// not enough active square
 	if ((g_max_x - g_min_x <= 1) || (g_max_y - g_min_y <= 1)) {
-		ui_new_message("select more square!");
+		ui_new_message(text.warning_select_square);
 		return 1;
 	}
 
