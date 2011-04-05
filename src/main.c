@@ -42,6 +42,15 @@ void do_at_exit()
 
 static void sdl_init()
 {
+	if (SDL_Init(SDL_INIT_VIDEO) < 0 )
+		eprint("Unable to initialize SDL: %s\n", SDL_GetError());
+
+	// set icon
+	SDL_Surface *image = SDL_LoadBMP("icon.bmp");
+	Uint32 colorkey = SDL_MapRGB(image->format, 0, 0, 0);
+	SDL_SetColorKey(image, SDL_SRCCOLORKEY, colorkey);
+	SDL_WM_SetIcon(image,NULL);
+
 	if (display_fullscreen) {
 		screen = SDL_SetVideoMode(display_width, display_height, 0, //
 				SDL_ANYFORMAT | SDL_SWSURFACE | SDL_FULLSCREEN);
@@ -49,9 +58,6 @@ static void sdl_init()
 		screen = SDL_SetVideoMode(display_width, display_height, 0, //
 				SDL_ANYFORMAT | SDL_SWSURFACE);
 	}
-
-	if (SDL_Init(SDL_INIT_VIDEO) < 0 )
-		eprint("Unable to initialize SDL: %s\n", SDL_GetError());
 
 	SDL_WM_SetCaption(WINDOW_TITLE, 0 ); // set window name
 }
