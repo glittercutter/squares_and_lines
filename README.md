@@ -7,10 +7,10 @@ The configuration is done by editing the file 'game.conf'.
 Should run on all platforms supported by SDL. 
 
 Dependencies: 
-* SDL
-* SDL_ttf
-* SDL_net
-* SDL_gfx
+ * SDL 
+ * SDL_ttf 
+ * SDL_net 
+ * SDL_gfx 
 
 SCREENSHOTS
 ===
