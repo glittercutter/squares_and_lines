@@ -1,12 +1,12 @@
 README
 ===
 
-A point and line game written in C and use SDL.  
-Multiplayer game on the local network (LAN) or on the same computer.  
-The configuration is done by editing the file 'game.conf'.  
-Should run on all platforms supported by SDL.  
+A point and line game written in C and use SDL, it should run on all platforms supported by SDL.  
+Multiplayer game on thre same compputer or on the local network (LAN) is supported.  
+Configuration use a simple text file 'game.conf'.  
 
-Dependencies  
+Dependencies:  
+
     SDL  
     SDL_ttf  
     SDL_net  
