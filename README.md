@@ -17,7 +17,7 @@ SCREENSHOTS
 
 The square editor 
 ---
-![Screenie-1](https://github.com/downloads/glittercutter/squares_and_lines/screenie-1.png)
+![Screenie-1](https://github.com/downloads/glittercutter/squares_and_lines/screenie-1.png)[The square editor]
 
 In game 
 ---
