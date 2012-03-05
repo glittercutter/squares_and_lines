@@ -3,9 +3,8 @@
 *.out
 *.swp
 *~
-c_square*
+squares_and_lines*
 *.dll
 *.exe
 stderr.txt
 stdout.txt
-win/*

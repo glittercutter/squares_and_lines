@@ -54,7 +54,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 typedef unsigned char byte;
 
 #define WINDOW_TITLE "crucially square"
-#define CONFIG_FILENAME "game.conf"
+#define CONFIG_FILENAME "./game.conf"
 
 #define MAX_FPS 40 //milliseconds
 #define LIMIT_FPS 1

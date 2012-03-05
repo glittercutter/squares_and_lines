@@ -4,11 +4,11 @@ SRCDIR = ./src
 # Automatic dependency
 DEPS := $(wildcard $(OBJDIR)/*.d)
 
-BIN = c_square 
+BIN = squares_and_lines 
 
 CFLAGS = -Wall -pedantic -Werror -std=c99 -pipe -D WINDOWS
 LFLAGS =
-LIBS = `sdl-config --cflags --libs` SDL.dll SDL_gfx.dll SDL_ttf.dll SDL_net.dll pthreadGCE2.dll zlib1.dll
+LIBS = `sdl-config --cflags --libs` SDL.dll SDL_gfx.dll SDL_ttf.dll SDL_net.dll pthreadGCE2.dll zlib1.dll -lm
 
 DEBUG_INFO =
 

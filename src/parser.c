@@ -34,13 +34,13 @@ void parser_get_default(struct var_info_s* var_table, int tab_length)
 {
 	for (int i = 0; i < tab_length; i++) {
 		if (!var_table[i].init) {
-			if (var_table[i].str[ DEFAULT_VALUE_POS ] == NULL) {
+			if (var_table[i].str[ DEFAULT_VALUE_IDX ] == NULL) {
 				continue;
 			}
 
 			switch (var_table[i].type) {
 			case COLOR_T:
-				sscanf(var_table[i].str[ DEFAULT_VALUE_POS ], 
+				sscanf(var_table[i].str[ DEFAULT_VALUE_IDX ], 
 					"%d, %d, %d", 
 					&(((colorRGB_t*)(var_table[i].ptr))->r), 
 					&(((colorRGB_t*)(var_table[i].ptr))->g),
@@ -49,22 +49,22 @@ void parser_get_default(struct var_info_s* var_table, int tab_length)
 
 			case INT_T:
 				*(int*)(var_table[i].ptr) =
-					(int)strtod(var_table[i].str[ DEFAULT_VALUE_POS ], NULL);
+					(int)strtod(var_table[i].str[ DEFAULT_VALUE_IDX ], NULL);
 				break;
 			
 			case FLOAT_T:
 				*(float*)(var_table[i].ptr) =
-					(float)strtof(var_table[i].str[ DEFAULT_VALUE_POS ], NULL);
+					(float)strtof(var_table[i].str[ DEFAULT_VALUE_IDX ], NULL);
 				break;
 
 			case DOUBLE_T:
 				*(double*)(var_table[i].ptr) =
-					strtod(var_table[i].str[ DEFAULT_VALUE_POS ], NULL);
+					strtod(var_table[i].str[ DEFAULT_VALUE_IDX ], NULL);
 				break;
 
 			case STRING_T:
 				strcpy((char*)(var_table[i].ptr),
-					(char*)var_table[i].str[DEFAULT_VALUE_POS]);
+					(char*)var_table[i].str[ DEFAULT_VALUE_IDX ]);
 				break;
 			}
 		}
@@ -78,22 +78,19 @@ void parser_read(struct var_info_s* var_table, int tab_length, char* filename)
 	double num_value;
 	char str_value[ STRING_LENGTH ];
 	char line_buffer[ STRING_LENGTH * 2 ], name_buffer[ STRING_LENGTH ];
-
-	FILE* file;
-	file = fopen(filename, "r");
-	if (file == NULL) {
-		printf("parser: cannot read file; %s\n", filename);
+	
+    FILE* file = fopen(filename, "r");
+	if (!file) {
+		printf("parser: cannot read file: %s  \n", filename);
 		return;
 	}
 
-	while (fgets(line_buffer, sizeof line_buffer, file) != NULL) {
-		
+	while (fgets(line_buffer, sizeof line_buffer, file)) {
+
 		// color
-		if (sscanf(line_buffer, "%s = %d, %d, %d", name_buffer, 
-				&r, &g, &b) == 4) {
+		if (sscanf(line_buffer, "%s = %d, %d, %d", name_buffer, &r, &g, &b) == 4) {
 			for (int i = 0; i < tab_length; i++) {
-				if (strncmp(name_buffer, var_table[i].str[ VAR_NAME_POS ],
-						strlen(name_buffer)) == 0) {
+				if (!strncmp(name_buffer, var_table[i].str[ VAR_NAME_IDX ], strlen(name_buffer))) {
 					if (var_table[i].type == COLOR_T) {
 						((colorRGB_t*)(var_table[i].ptr))->r = r;
 						((colorRGB_t*)(var_table[i].ptr))->g = g;
@@ -108,8 +105,7 @@ void parser_read(struct var_info_s* var_table, int tab_length, char* filename)
 		} else if (sscanf(line_buffer, "%s = %lf", name_buffer, &num_value) == 2) {
 			for (int i = 0; i < tab_length; i++) {
 				// search matching variable
-				if (strncmp(name_buffer, var_table[i].str[ VAR_NAME_POS ],
-						strlen(*var_table[i].str)) == 0) {
+				if (!strncmp(name_buffer, var_table[i].str[ VAR_NAME_IDX ], strlen(*var_table[i].str))) {
 					var_table[i].init = true;
 					switch (var_table[i].type) {
 					case INT_T:
@@ -132,12 +128,11 @@ void parser_read(struct var_info_s* var_table, int tab_length, char* filename)
 			}
 		
 		// string
-		} else if (sscanf(line_buffer, "%s = %[^\n]s", name_buffer, str_value) == 2) {
+		} else if (sscanf(line_buffer, "%s = %[^\t\n\r]", name_buffer, str_value) == 2) {
 			for (int i = 0; i < tab_length; i++) {
-				if (strncmp(name_buffer, var_table[i].str[ VAR_NAME_POS ],
-						strlen(name_buffer)) == 0) {
+				if (!strncmp(name_buffer, var_table[i].str[ VAR_NAME_IDX ], strlen(name_buffer))) {
 					if (var_table[i].type == STRING_T) {
-						strncpy((char*)(var_table[i].ptr), str_value, STRING_LENGTH -1);
+                        strncpy((char*)(var_table[i].ptr), str_value, STRING_LENGTH -1);
 						var_table[i].init = true;
 					}
 					break;

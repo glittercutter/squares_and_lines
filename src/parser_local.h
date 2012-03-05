@@ -33,65 +33,43 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // Config
 // =========================================================================
 
-// string position for varible name and default value in array
+
+// index for varible name and default value in array
+// {"var name", "default value"}
 enum {
-	VAR_NAME_POS = 0,
-	DEFAULT_VALUE_POS = 1
+	VAR_NAME_IDX      = 0,
+	DEFAULT_VALUE_IDX = 1
 };
 
-//	{"name", "default value"}
+static const char* display_width_str[]          = {"display_width", "640"};
+static const char* display_height_str[]         = {"display_height", "480"};
+static const char* display_fullscreen_str[]	    = {"display_fullscreen", "0"};
+static const char* display_allow_idle_str[]	    = {"display_allow_idle", "1"};
 
-static const char* display_width_str[] =
-	{"display_width", "640"};
-static const char* display_height_str[] =
-	{"display_height", "480"};
-static const char* display_fullscreen_str[]	=
-	{"display_fullscreen", "0"};
-static const char* display_allow_idle_str[]	=
-	{"display_allow_idle", "1"};
+static const char* button_font_name_str[]       = {"button_font_name", "./font/EnvyCodeR.ttf"};
+static const char* button_font_size_str[]       = {"button_font_size", "12"};
+static const char* color_button_highlight_str[] = {"button_highlight_color", "20, 67, 76"};
 
-static const char* button_font_name_str[] =
-	{"button_font_name", "font/EnvyCodeR.ttf"};
-static const char* button_font_size_str[] =
-	{"button_font_size", "12"};
-static const char* color_button_highlight_str[]	= 
-	{"button_highlight_color", "50, 51, 50"};
+static const char* ui_language_str[]            = {"language", "./lang/en"};
 
-static const char* ui_language_str[] =
-	{"language", "lang/en"};
+static const char* ed_square_size_str[]         = {"editor_square_size", "20"};
+static const char* g_line_thickness_str[]       = {"game_line_thickness", "1"};
 
-static const char* ed_square_size_str[] =
-	{"editor_square_size", "20"};
-static const char* g_line_thickness_str[] =
-	{"game_line_thickness", "1"};
+static const char* color_own_player0_str[]      = {"color_game_player0", "255, 90, 64"};
+static const char* color_own_player1_str[]      = {"color_game_player1", "164, 244, 61"};
+static const char* color_own_outline_str[]      = {"color_game_outline", "96, 189, 206"};
+static const char* color_own_none_str[]	        = {"color_game_none", "1, 86, 102"};
+static const char* color_square_background_str[]= {"color_game_square_background", "32, 104, 118"};
 
-static const char* color_own_player0_str[] =
-	{"color_game_player0", "66, 162, 206"};
-static const char* color_own_player1_str[] =
-	{"color_game_player1", "206, 49, 0"};
-static const char* color_own_outline_str[] =
-	{"color_game_outline", "145, 150, 145"};
-static const char* color_own_none_str[]	=
-	{"color_game_none", "50, 51, 50"};
-static const char* color_square_background_str[]	=
-	{"color_game_square_background", "99, 101, 99"};
+static const char* color_ed_outline_str[]       = {"color_editor_outline", "95, 189, 206"};
+static const char* color_ed_grid_str[]          = {"color_editor_grid", "1, 86, 102"};
 
-static const char* color_ed_outline_str[] =
-	{"color_editor_outline", "145, 155, 145"};
-static const char* color_ed_grid_str[] =
-	{"color_editor_grid", "99, 101, 99"};
+static const char* color_text_str[]	            = {"color_txt_normal", "180, 220, 250"};
+static const char* color_txt_current_player_str[]={"color_txt_current_player", "0, 0, 0"};
 
-static const char* color_text_str[]	=
-	{"color_txt_normal", "200, 200, 200"};
-static const char* color_txt_current_player_str[] = 
-	{"color_txt_current_player", "0, 0, 0"};
-
-static const char* color_topbar_str[] = 
-	{"color_gui", "99, 101, 99"};
-static const char* color_gui_3d_dark_str[] = 
-	{"color_gui_3d_dark", "0, 0, 0"};
-static const char* color_gui_3d_light_str[] = 
-	{"color_gui_3d_light", "200, 200, 200"};
+static const char* color_topbar_str[]           = {"color_gui", "4, 133, 157"};
+static const char* color_gui_3d_dark_str[]      = {"color_gui_3d_dark", "1, 86, 102"};
+static const char* color_gui_3d_light_str[]     = {"color_gui_3d_light", "95, 189, 206"};
 
 
 // type
@@ -130,6 +108,7 @@ static struct var_info_s global_config_info[] = {
 
 	{ button_font_name_str,			&button_font.name,					STRING_T	},
 	{ color_button_highlight_str,	&color.button_highlight,			COLOR_T		},
+	{ button_font_size_str,			&button_font.size,					INT_T		},
 
 	{ ui_language_str,				&ui_language,						STRING_T	},
 
@@ -148,10 +127,6 @@ static struct var_info_s global_config_info[] = {
 	{ color_topbar_str,				&color.topbar,						COLOR_T		},
 	{ color_gui_3d_dark_str,		&color.gui_3d_dark,					COLOR_T		},
 	{ color_gui_3d_light_str,		&color.gui_3d_light,				COLOR_T		},
-
-	{ button_font_size_str,			&button_font.size,					INT_T		},
-
-
 };
 
 // =========================================================================

@@ -56,35 +56,9 @@ Client send it to the server "0000".
 */
 void disconnect()
 {
-	byte buffer[HEADER_SIZE];
-	int byte_writed = 0;
-// 	client_s *tmp_cl;
-	
-	buffer[byte_writed++] = NET_GLOBAL_HEADER;
-	
-	if (net_is_server) {
-		srv_close();
-// 		buffer[byte_writed++] = NET_SRV_DISCONNECT;
-// 		buffer[byte_writed++] = NET_NULL;
-// 		
-// 		tmp_cl = client;
-// 		while (tmp_cl)	{
-// 			if (SDLNet_TCP_Send(tmp_cl->tcp_socket, (void *)buffer, byte_writed) < byte_writed)
-// 				fprintf(stderr, "SDLNet_TCP_Send: %s\n", SDLNet_GetError());
-// 			tmp_cl = tmp_cl->next;
-// 		}
-
-	} else if (net_is_client) {
-		cl_close();
-// 		buffer[byte_writed++] = NET_CL_DISCONNECT;
-// 		buffer[byte_writed++] = NET_NULL;
-// 
-// 		if (SDLNet_TCP_Send(main_tcp_socket, (void *)buffer, byte_writed) < byte_writed)
-// 			fprintf(stderr, "SDLNet_TCP_Send: %s\n", SDLNet_GetError());
-	} else {
-		// wasn't connected
-		return;
-	}
+	if (net_is_server) srv_close();
+	else if (net_is_client) cl_close();
+	else return; // wasn't connected 
 	
 	local_player.connected = false;
 	net_is_server = false;

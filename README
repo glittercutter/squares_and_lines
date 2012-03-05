@@ -1,3 +1,0 @@
-A simple point and line game. Cross-platform and released under the GNU General Public Licence.
-Configuration (color, screen resolution, etc.) is done by editing the file 'game.conf' using a text editor.
-New languages can be added using the files in './lang' as a guide.
