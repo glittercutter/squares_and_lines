@@ -15,6 +15,11 @@ Dependencies:
 SCREENSHOTS
 ===
 
+The square editor
 ![Screenie-1](https://github.com/downloads/glittercutter/squares_and_lines/screenie-1.png)
-![Screenie-2](https://github.com/downloads/glittercutter/squares_and_lines/screenie-2.png)
+
+In game
 ![Screenie-3](https://github.com/downloads/glittercutter/squares_and_lines/screenie-3.png)
+
+Multiplayer lobby
+![server](https://github.com/downloads/glittercutter/squares_and_lines/server.png)
