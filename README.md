@@ -16,10 +16,13 @@ SCREENSHOTS
 ===
 
 The square editor 
+---
 ![Screenie-1](https://github.com/downloads/glittercutter/squares_and_lines/screenie-1.png)
 
 In game 
+---
 ![Screenie-3](https://github.com/downloads/glittercutter/squares_and_lines/screenie-3.png)
 
-Multiplayer lobby 
+Multiplayer lobby  
+---
 ![server](https://github.com/downloads/glittercutter/squares_and_lines/server.png)
